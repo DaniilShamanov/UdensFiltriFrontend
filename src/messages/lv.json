@@ -1,0 +1,38 @@
+{
+  "nav": {
+    "home": "Sākums",
+    "products": "Produkti",
+    "services": "Pakalpojumi",
+    "contact": "Kontakti",
+    "cart": "Grozs",
+    "account": "Konts",
+    "orders": "Pasūtījumi",
+    "signIn": "Ienākt",
+    "signUp": "Reģistrēties",
+    "signOut": "Iziet"
+  },
+  "footer": {
+    "company": "Uzņēmums",
+    "help": "Palīdzība",
+    "legal": "Juridiski",
+    "privacy": "Privātuma politika",
+    "terms": "Lietošanas noteikumi",
+    "cookies": "Sīkdatņu politika",
+    "faq": "BUJ",
+    "shipping": "Piegāde",
+    "returns": "Atgriešana",
+    "warranty": "Garantija"
+  },
+  "seo": {
+    "siteName": "UdensFiltri",
+    "defaultTitle": "UdensFiltri — kvalitatīvi santehnikas risinājumi",
+    "defaultDescription": "Santehnikas pakalpojumi, materiāli un aprīkojums. Pasūti tiešsaistē, saņem konsultāciju un ātru piegādi."
+  },
+  "common": {
+    "language": "Valoda",
+    "loading": "Ielādē...",
+    "continue": "Turpināt",
+    "save": "Saglabāt",
+    "cancel": "Atcelt"
+  }
+}

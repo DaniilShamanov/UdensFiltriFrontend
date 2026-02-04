@@ -1,0 +1,210 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { useRouter } from "@/navigation";
+import { CheckCircle, Home, Loader2, XCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { fetchJson } from "@/lib/api";
+
+type OrderItem = {
+  id: number;
+  title: string;
+  quantity: number;
+  unit_price: string | number;
+};
+
+type Order = {
+  id: number;
+  status: "pending" | "paid" | "canceled" | "failed" | string;
+  currency: string;
+  total: string | number;
+  created_at: string;
+  email: string;
+  customer_name: string;
+  address_line1: string;
+  address_line2: string;
+  city: string;
+  postcode: string;
+  country: string;
+  items: OrderItem[];
+};
+
+interface PaymentStatusPageProps {
+  orderId: string;
+}
+
+const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ orderId }) => {
+  const router = useRouter();
+  const [order, setOrder] = useState<Order | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    let pollId: any = null;
+
+    async function load() {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await fetchJson<Order>(`/api/orders/${encodeURIComponent(orderId)}/`);
+        if (isMounted) setOrder(data);
+      } catch (e: any) {
+        if (isMounted) setError(e?.message || "Unable to load order");
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+
+    load();
+
+    // Poll a few times while the order is pending (webhook may be delayed).
+    pollId = setInterval(async () => {
+      if (!isMounted) return;
+      try {
+        const data = await fetchJson<Order>(`/api/orders/${encodeURIComponent(orderId)}/`);
+        if (!isMounted) return;
+        setOrder(data);
+        if (data.status === "paid" || data.status === "failed" || data.status === "canceled") {
+          clearInterval(pollId);
+          pollId = null;
+        }
+      } catch {
+        // ignore polling errors
+      }
+    }, 2500);
+
+    return () => {
+      isMounted = false;
+      if (pollId) clearInterval(pollId);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orderId]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Loader2 className="h-5 w-5 animate-spin" /> Loading order…
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !order) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="container mx-auto px-4 text-center max-w-lg">
+          <h2 className="text-2xl font-bold mb-3">Order not found</h2>
+          <p className="text-muted-foreground mb-6">{error || "We couldn't load your order."}</p>
+          <Button onClick={() => router.push("/")}>Return Home</Button>
+        </div>
+      </div>
+    );
+  }
+
+  const isPaid = order.status === "paid";
+  const isFailed = order.status === "failed";
+
+  return (
+    <div className="min-h-screen bg-background py-12">
+      <div className="container mx-auto px-4 max-w-2xl">
+        <div className="text-center mb-8">
+          <div className={`inline-flex items-center justify-center w-20 h-20 rounded-full mb-6 ${isPaid ? "bg-green-100" : isFailed ? "bg-red-100" : "bg-muted"}`}>
+            {isPaid ? (
+              <CheckCircle className="h-12 w-12 text-green-600" />
+            ) : isFailed ? (
+              <XCircle className="h-12 w-12 text-red-600" />
+            ) : (
+              <Loader2 className="h-12 w-12 animate-spin" />
+            )}
+          </div>
+          <h1 className="text-3xl font-bold mb-2">
+            {isPaid ? "Payment Successful!" : isFailed ? "Payment Failed" : "Payment Processing"}
+          </h1>
+          <p className="text-muted-foreground">
+            {isPaid
+              ? "Thank you for your order. Your payment has been processed successfully."
+              : isFailed
+              ? "Your payment was not completed. You can try again from checkout."
+              : "We are confirming your payment. This can take a few seconds."}
+          </p>
+        </div>
+
+        <Card className="mb-6">
+          <CardContent className="p-6 space-y-4">
+            <div className="flex items-start justify-between">
+              <div>
+                <h2 className="font-semibold mb-1">Order Number</h2>
+                <p className="text-2xl font-mono font-bold text-primary">{order.id}</p>
+              </div>
+              <div className={`px-3 py-1 rounded-full text-sm font-medium ${isPaid ? "bg-green-100 text-green-700" : isFailed ? "bg-red-100 text-red-700" : "bg-muted text-muted-foreground"}`}>
+                {order.status}
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <h3 className="font-semibold mb-2">Order Date</h3>
+                <p className="text-muted-foreground">
+                  {new Date(order.created_at).toLocaleDateString(undefined, {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </p>
+              </div>
+              <div>
+                <h3 className="font-semibold mb-2">Order Total</h3>
+                <p className="text-2xl font-bold text-primary">€{Number(order.total).toFixed(2)}</p>
+              </div>
+            </div>
+
+            <Separator />
+
+            <div>
+              <h3 className="font-semibold mb-2">Shipping Address</h3>
+              <p className="text-muted-foreground">
+                {order.customer_name ? <>{order.customer_name}<br /></> : null}
+                {order.address_line1}<br />
+                {order.city}, {order.postcode}<br />
+                {order.country}
+              </p>
+            </div>
+
+            <Separator />
+
+            <div>
+              <h3 className="font-semibold mb-3">Order Items ({order.items.length})</h3>
+              <div className="space-y-3">
+                {order.items.map((it) => (
+                  <div key={it.id} className="flex justify-between">
+                    <div>
+                      <p className="font-medium">{it.title}</p>
+                      <p className="text-sm text-muted-foreground">Quantity: {it.quantity}</p>
+                    </div>
+                    <p className="font-medium">€{(Number(it.unit_price) * it.quantity).toFixed(2)}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="space-y-3">
+          {!isPaid && (
+            <Button size="lg" className="w-full bg-accent hover:bg-accent/90" onClick={() => router.push("/checkout")}>Try Again</Button>
+          )}
+          <Button size="lg" variant="outline" className="w-full" onClick={() => router.push("/")}> <Home className="mr-2 h-5 w-5" /> Return to Home</Button>
+          <Button size="lg" variant="outline" className="w-full" onClick={() => router.push("/products")}>Continue Shopping</Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PaymentStatusPage;

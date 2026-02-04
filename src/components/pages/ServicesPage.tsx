@@ -1,0 +1,174 @@
+"use client";
+
+import React, { useState } from 'react';
+import { Wrench, Search } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { services } from '@/lib/mockData';
+import { useRouter } from '@/navigation';
+
+const ServicesPage: React.FC = () => {
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredServices = services.filter(service =>
+    service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    service.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  return (
+    <div className="min-h-screen bg-background py-8">
+      <div className="container mx-auto px-4">
+        {/* Hero Section */}
+        <div className="bg-gradient-to-r from-secondary to-primary rounded-2xl p-8 md:p-12 mb-12 text-white">
+          <div className="max-w-3xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="bg-white/20 p-3 rounded-lg">
+                <Wrench className="h-8 w-8" />
+              </div>
+              <h1 className="text-4xl font-bold">Professional Plumbing Services</h1>
+            </div>
+            <p className="text-lg text-white/90 mb-6">
+              Expert installation, maintenance, and repair services for all your water treatment needs. 
+              Our certified technicians provide quality service across Latvia.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Button
+                size="lg"
+                className="bg-white text-secondary hover:bg-white/90"
+              onClick={() => router.push('/contact')}
+              >
+                Schedule Service
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="bg-white/10 text-white border-white/30 hover:bg-white/20"
+              >
+                Get Free Quote
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Services Table */}
+        <Card>
+          <CardHeader>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <CardTitle className="text-2xl">Our Services & Pricing</CardTitle>
+              <div className="relative w-full md:w-80">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search services..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {/* Mobile View */}
+            <div className="md:hidden space-y-4">
+              {filteredServices.map((service) => (
+                <Card key={service.id} className="border-2">
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-semibold">{service.name}</h3>
+                      <Badge className="bg-primary">€{service.price.toFixed(2)}</Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">{service.description}</p>
+                    <Button size="sm" className="w-full bg-accent hover:bg-accent/90" onClick={() => router.push('/contact')}>
+                      Book Now
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Desktop View */}
+            <div className="hidden md:block overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/30">
+                    <TableHead className="font-semibold">Service Name</TableHead>
+                    <TableHead className="font-semibold">Description</TableHead>
+                    <TableHead className="font-semibold text-right">Price</TableHead>
+                    <TableHead className="font-semibold text-center">Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredServices.map((service) => (
+                    <TableRow key={service.id} className="hover:bg-muted/20">
+                      <TableCell className="font-medium">{service.name}</TableCell>
+                      <TableCell className="text-muted-foreground max-w-md">
+                        {service.description}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Badge className="bg-primary">€{service.price.toFixed(2)}</Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Button size="sm" className="bg-accent hover:bg-accent/90" onClick={() => router.push('/contact')}>
+                          Book Now
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {filteredServices.length === 0 && (
+              <div className="text-center py-12 text-muted-foreground">
+                No services found matching your search.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Additional Info */}
+        <div className="grid md:grid-cols-3 gap-6 mt-12">
+          <Card className="bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
+            <CardContent className="p-6 text-center">
+              <div className="text-3xl mb-2">⚡</div>
+              <h3 className="font-semibold mb-2">Same-Day Service</h3>
+              <p className="text-sm text-muted-foreground">
+                Emergency repairs available with same-day response
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
+            <CardContent className="p-6 text-center">
+              <div className="text-3xl mb-2">✅</div>
+              <h3 className="font-semibold mb-2">Certified Technicians</h3>
+              <p className="text-sm text-muted-foreground">
+                All our technicians are fully licensed and certified
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
+            <CardContent className="p-6 text-center">
+              <div className="text-3xl mb-2">🛡️</div>
+              <h3 className="font-semibold mb-2">Satisfaction Guarantee</h3>
+              <p className="text-sm text-muted-foreground">
+                100% satisfaction guarantee on all our services
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ServicesPage;

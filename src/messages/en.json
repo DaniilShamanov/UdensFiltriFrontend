@@ -1,0 +1,38 @@
+{
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "services": "Services",
+    "contact": "Contact",
+    "cart": "Cart",
+    "account": "Account",
+    "orders": "Orders",
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "signOut": "Sign out"
+  },
+  "footer": {
+    "company": "Company",
+    "help": "Help",
+    "legal": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "cookies": "Cookie Policy",
+    "faq": "FAQ",
+    "shipping": "Shipping",
+    "returns": "Returns",
+    "warranty": "Warranty"
+  },
+  "seo": {
+    "siteName": "Plumbing",
+    "defaultTitle": "Plumbing — quality plumbing solutions",
+    "defaultDescription": "Plumbing services, materials and equipment. Order online, get advice and fast delivery."
+  },
+  "common": {
+    "language": "Language",
+    "loading": "Loading...",
+    "continue": "Continue",
+    "save": "Save",
+    "cancel": "Cancel"
+  }
+}
