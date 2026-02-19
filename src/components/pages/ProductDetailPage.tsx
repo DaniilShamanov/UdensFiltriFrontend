@@ -12,6 +12,7 @@ import { useApp } from '@/contexts/AppContext';
 import { Link, useRouter } from '@/navigation';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 interface ProductDetailPageProps {
   productId: string;
@@ -21,26 +22,27 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
   const router = useRouter();
   const { user, addToCart } = useApp();
   const [quantity, setQuantity] = useState(1);
+  const t = useTranslations('productDetail');
 
   const product = products.find(p => p.id === productId);
 
   if (!product) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
-        <h2 className="text-2xl font-bold mb-4">Product not found</h2>
-        <Button onClick={() => router.push('/products')}>Back to Products</Button>
+        <h2 className="text-2xl font-bold mb-4">{t('notFound.title')}</h2>
+        <Button onClick={() => router.push('/products')}>{t('backToProducts')}</Button>
       </div>
     );
   }
 
   const handleAddToCart = () => {
     addToCart(product.id, quantity);
-    toast.success(`Added ${quantity} item(s) to cart!`, {
+    toast.success(t('toast.added', { count: quantity, name: product.name }), {
       description: product.name,
     });
   };
 
-  const displayPrice = user?.isWholesale && product.wholesalePrice 
+  const displayPrice = user?.is_company && product.wholesalePrice 
     ? product.wholesalePrice 
     : product.price;
 
@@ -62,7 +64,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
           onClick={() => router.push('/products')}
         >
           <ChevronLeft className="h-4 w-4 mr-2" />
-          Back to Products
+          {t('backToProducts')}
         </Button>
 
         {/* Product Details */}
@@ -95,9 +97,9 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
               <div className="flex items-center gap-2 mb-2">
                 <Badge variant="outline">{product.brand}</Badge>
                 {product.inStock ? (
-                  <Badge className="bg-green-500">In Stock</Badge>
+                  <Badge className="bg-green-500">{t('inStock')}</Badge>
                 ) : (
-                  <Badge variant="destructive">Out of Stock</Badge>
+                  <Badge variant="destructive">{t('outOfStock')}</Badge>
                 )}
               </div>
               <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
@@ -115,7 +117,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
                   ))}
                 </div>
                 <span className="text-muted-foreground">
-                  {product.rating} ({product.reviews} reviews)
+                  {t('ratingLabel', { rating: product.rating, count: product.reviews })}
                 </span>
               </div>
             </div>
@@ -126,14 +128,14 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
             <div>
               <div className="flex items-baseline gap-3 mb-2">
                 <span className="text-4xl font-bold text-primary">€{displayPrice.toFixed(2)}</span>
-                {user?.isWholesale && product.wholesalePrice && product.wholesalePrice < product.price && (
+                {user?.is_company && product.wholesalePrice && product.wholesalePrice < product.price && (
                   <span className="text-xl text-muted-foreground line-through">
                     €{product.price.toFixed(2)}
                   </span>
                 )}
               </div>
-              {user?.isWholesale && product.wholesalePrice && (
-                <Badge className="bg-accent">Wholesale Price Applied</Badge>
+              {user?.is_company && product.wholesalePrice && (
+                <Badge className="bg-accent">{t('wholesaleBadge')}</Badge>
               )}
             </div>
 
@@ -141,7 +143,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
 
             {/* Quantity */}
             <div>
-              <label className="block font-semibold mb-3">Quantity</label>
+              <label className="block font-semibold mb-3">{t('quantityLabel')}</label>
               <div className="flex items-center gap-4">
                 <div className="flex items-center border rounded-lg">
                   <Button
@@ -167,7 +169,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
                   disabled={!product.inStock}
                 >
                   <ShoppingCart className="h-5 w-5 mr-2" />
-                  Add to Cart
+                  {t('addToCart')}
                 </Button>
               </div>
             </div>
@@ -180,8 +182,8 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
                     <Truck className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <div className="font-semibold">Free Shipping</div>
-                    <div className="text-sm text-muted-foreground">On orders over €100</div>
+                    <div className="font-semibold">{t('features.freeShipping.title')}</div>
+                    <div className="text-sm text-muted-foreground">{t('features.freeShipping.description')}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -189,8 +191,8 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
                     <Shield className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <div className="font-semibold">2 Year Warranty</div>
-                    <div className="text-sm text-muted-foreground">Full manufacturer warranty</div>
+                    <div className="font-semibold">{t('features.warranty.title')}</div>
+                    <div className="text-sm text-muted-foreground">{t('features.warranty.description')}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -198,8 +200,8 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
                     <Package className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <div className="font-semibold">Easy Returns</div>
-                    <div className="text-sm text-muted-foreground">30-day return policy</div>
+                    <div className="font-semibold">{t('features.returns.title')}</div>
+                    <div className="text-sm text-muted-foreground">{t('features.returns.description')}</div>
                   </div>
                 </div>
               </CardContent>
@@ -210,35 +212,25 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
         {/* Product Details Tabs */}
         <Tabs defaultValue="description" className="mb-16">
           <TabsList className="grid w-full max-w-md grid-cols-3">
-            <TabsTrigger value="description">Description</TabsTrigger>
-            <TabsTrigger value="specifications">Specifications</TabsTrigger>
-            <TabsTrigger value="reviews">Reviews</TabsTrigger>
+            <TabsTrigger value="description">{t('tabs.description')}</TabsTrigger>
+            <TabsTrigger value="specifications">{t('tabs.specifications')}</TabsTrigger>
+            <TabsTrigger value="reviews">{t('tabs.reviews')}</TabsTrigger>
           </TabsList>
           <TabsContent value="description" className="mt-6">
             <Card>
               <CardContent className="p-6">
-                <h3 className="font-semibold text-lg mb-4">Product Description</h3>
+                <h3 className="font-semibold text-lg mb-4">{t('description.title')}</h3>
                 <p className="text-muted-foreground leading-relaxed mb-4">
                   {product.description}
                 </p>
-                <h4 className="font-semibold mb-3">Key Features:</h4>
+                <h4 className="font-semibold mb-3">{t('description.featuresTitle')}</h4>
                 <ul className="space-y-2">
-                  <li className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span>High-quality construction with durable materials</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span>Easy installation with included mounting hardware</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span>NSF certified for safety and quality</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span>Reduces chlorine, sediment, and other contaminants</span>
-                  </li>
+                  {t.raw('description.features').map((feature: string, idx: number) => (
+                    <li key={idx} className="flex items-start gap-2">
+                      <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
                 </ul>
               </CardContent>
             </Card>
@@ -246,23 +238,23 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
           <TabsContent value="specifications" className="mt-6">
             <Card>
               <CardContent className="p-6">
-                <h3 className="font-semibold text-lg mb-4">Technical Specifications</h3>
+                <h3 className="font-semibold text-lg mb-4">{t('specifications.title')}</h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="flex justify-between py-2 border-b">
-                    <span className="text-muted-foreground">Brand</span>
+                    <span className="text-muted-foreground">{t('specifications.brand')}</span>
                     <span className="font-medium">{product.brand}</span>
                   </div>
                   <div className="flex justify-between py-2 border-b">
-                    <span className="text-muted-foreground">Model</span>
+                    <span className="text-muted-foreground">{t('specifications.model')}</span>
                     <span className="font-medium">{product.id}</span>
                   </div>
                   <div className="flex justify-between py-2 border-b">
-                    <span className="text-muted-foreground">Category</span>
+                    <span className="text-muted-foreground">{t('specifications.category')}</span>
                     <span className="font-medium capitalize">{product.category.replace('-', ' ')}</span>
                   </div>
                   <div className="flex justify-between py-2 border-b">
-                    <span className="text-muted-foreground">Warranty</span>
-                    <span className="font-medium">2 Years</span>
+                    <span className="text-muted-foreground">{t('specifications.warranty')}</span>
+                    <span className="font-medium">{t('specifications.warrantyValue')}</span>
                   </div>
                 </div>
               </CardContent>
@@ -271,7 +263,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
           <TabsContent value="reviews" className="mt-6">
             <Card>
               <CardContent className="p-6">
-                <h3 className="font-semibold text-lg mb-4">Customer Reviews</h3>
+                <h3 className="font-semibold text-lg mb-4">{t('reviews.title')}</h3>
                 <div className="space-y-4">
                   {[1, 2, 3].map((i) => (
                     <div key={i} className="border-b pb-4">
@@ -281,12 +273,14 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
                             <Star key={j} className="h-4 w-4 fill-accent text-accent" />
                           ))}
                         </div>
-                        <span className="font-semibold">Great Product!</span>
+                        <span className="font-semibold">{t('reviews.sampleTitle')}</span>
                       </div>
                       <p className="text-sm text-muted-foreground mb-1">
-                        This product exceeded my expectations. Installation was easy and the water quality has improved significantly.
+                        {t('reviews.sampleText')}
                       </p>
-                      <p className="text-xs text-muted-foreground">- Customer {i}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {t('reviews.customerLabel', { number: i })}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -298,7 +292,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
         {/* Related Products */}
         {relatedProducts.length > 0 && (
           <div>
-            <h2 className="text-2xl font-bold mb-6">Related Products</h2>
+            <h2 className="text-2xl font-bold mb-6">{t('relatedTitle')}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {relatedProducts.map((p) => {
                 const relatedImageUrl = `https://source.unsplash.com/300x300/?${encodeURIComponent(p.image)}`;

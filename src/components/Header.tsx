@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import React, { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { ShoppingCart, User, Droplet, LogOut, Package, Settings, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,14 +16,13 @@ import {
 import { useApp } from "@/contexts/AppContext";
 import CategoryNav from "@/components/CategoryNav";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
-import { Link, useRouter } from "@/navigation";
-import type { AppLocale } from "@/i18n/routing";
+import { Link, usePathname, useRouter } from "@/navigation";
 
 export default function Header() {
   const t = useTranslations();
-  const locale = useLocale() as AppLocale;
+  const pathname = usePathname();
   const router = useRouter();
-  const { user, cart, signOut } = useApp();
+  const { user, cart, authLoading, signOut } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const cartItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -75,7 +74,7 @@ export default function Header() {
 
           {/* Actions */}
           <div className="flex items-center gap-2">
-            <LocaleSwitcher currentLocale={locale} />
+            <LocaleSwitcher />
 
             {/* Mobile menu */}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -153,40 +152,62 @@ export default function Header() {
               </Link>
             </Button>
 
-            {/* User menu */}
-            {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" aria-label="User menu">
-                    <User className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-52">
-                  <DropdownMenuItem onClick={() => router.push("/account")}>
-                    <Settings className="mr-2 h-4 w-4" />
-                    {t("nav.account")}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push("/orders")}>
-                    <Package className="mr-2 h-4 w-4" />
-                    {t("nav.orders")}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    {t("nav.signOut")}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Button asChild size="sm">
-                <Link href="/auth/sign-in">{t("nav.signIn")}</Link>
-              </Button>
-            )}
+            {/* User menu – always shows the icon, behavior depends on state */}
+            <div className="relative">
+              {authLoading ? (
+                <div
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                  aria-label={t("nav.account")}
+                  aria-disabled="true"
+                >
+                  <User className="h-5 w-5" />
+                </div>
+              ) : user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" aria-label={t("nav.account")}>
+                      <User className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-52">
+                    <DropdownMenuItem onSelect={() => router.push("/account")}>
+                      <Settings className="mr-2 h-4 w-4" />
+                      {t("nav.account")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => router.push("/orders")}>
+                      <Package className="mr-2 h-4 w-4" />
+                      {t("nav.orders")}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onSelect={handleLogout}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      {t("nav.signOut")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <div
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 cursor-pointer"
+                  aria-label={t("nav.account")}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => router.push("/auth/sign-in")}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      router.push("/auth/sign-in");
+                    }
+                  }}
+                >
+                  <User className="h-5 w-5" />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      <CategoryNav />
+      {pathname == "/products" ? <CategoryNav /> : null}
     </header>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Package, Search, Calendar, DollarSign, TrendingUp, ChevronDown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,26 +10,34 @@ import {
   Select,
   SelectContent,
   SelectItem,
-  SelectTrigger,
-  SelectValue,
+  SelectTrigger
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { useApp } from '@/contexts/AppContext';
-import { useRouter } from '@/navigation';
+import { usePathname, useRouter } from '@/navigation';
 import { Order } from '@/lib/types';
+import { useTranslations } from 'next-intl';
 
 const OrdersPage: React.FC = () => {
   const router = useRouter();
-  const { user, orders } = useApp();
+  const pathname = usePathname();
+  const { user, orders, authLoading } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [sortBy, setSortBy] = useState('date-desc');
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
-  if (!user) {
-    router.replace('/auth/sign-in?next=/orders');
-    return null;
-  }
+  const t = useTranslations('orders');
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      const next = encodeURIComponent(pathname);
+      router.replace(`/auth/sign-in?next=${next}`);
+    }
+  }, [user, authLoading, router, pathname]);
+
+  if (authLoading) return <p>Loading</p>;
+  if (!user) return null; // will redirect via effect
 
   const filteredOrders = useMemo(() => {
     let result = [...orders];
@@ -88,16 +96,24 @@ const OrdersPage: React.FC = () => {
     }
   };
 
+  // Status labels are now taken from translations (filter keys)
   const getStatusLabel = (status: Order['status']) => {
-    return status.charAt(0).toUpperCase() + status.slice(1);
+    switch (status) {
+      case 'pending': return t('filter.pending');
+      case 'processing': return t('filter.processing');
+      case 'shipped': return t('filter.shipped');
+      case 'delivered': return t('filter.delivered');
+      case 'cancelled': return t('filter.cancelled');
+      default: return status;
+    }
   };
 
   return (
     <div className="min-h-screen bg-background py-8">
       <div className="container mx-auto px-4">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Order History</h1>
-          <p className="text-muted-foreground">View and track all your orders</p>
+          <h1 className="text-3xl font-bold mb-2">{t('pageTitle')}</h1>
+          <p className="text-muted-foreground">{t('pageDescription')}</p>
         </div>
 
         {/* Statistics */}
@@ -106,7 +122,7 @@ const OrdersPage: React.FC = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Total Orders</p>
+                  <p className="text-sm text-muted-foreground mb-1">{t('stats.totalOrders')}</p>
                   <p className="text-3xl font-bold">{orderCount}</p>
                 </div>
                 <div className="bg-primary/10 p-3 rounded-lg">
@@ -120,7 +136,7 @@ const OrdersPage: React.FC = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Total Spent</p>
+                  <p className="text-sm text-muted-foreground mb-1">{t('stats.totalSpent')}</p>
                   <p className="text-3xl font-bold">€{totalSpent.toFixed(2)}</p>
                 </div>
                 <div className="bg-accent/10 p-3 rounded-lg">
@@ -134,7 +150,7 @@ const OrdersPage: React.FC = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Average Order</p>
+                  <p className="text-sm text-muted-foreground mb-1">{t('stats.averageOrder')}</p>
                   <p className="text-3xl font-bold">
                     €{orderCount > 0 ? (totalSpent / orderCount).toFixed(2) : '0.00'}
                   </p>
@@ -154,34 +170,30 @@ const OrdersPage: React.FC = () => {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search orders..."
+                  placeholder={t('searchPlaceholder')}
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   className="pl-10"
                 />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full md:w-[200px]">
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
+                <SelectTrigger className="w-full md:w-[200px]"/>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="processing">Processing</SelectItem>
-                  <SelectItem value="shipped">Shipped</SelectItem>
-                  <SelectItem value="delivered">Delivered</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                  <SelectItem value="all">{t('filter.allStatus')}</SelectItem>
+                  <SelectItem value="pending">{t('filter.pending')}</SelectItem>
+                  <SelectItem value="processing">{t('filter.processing')}</SelectItem>
+                  <SelectItem value="shipped">{t('filter.shipped')}</SelectItem>
+                  <SelectItem value="delivered">{t('filter.delivered')}</SelectItem>
+                  <SelectItem value="cancelled">{t('filter.cancelled')}</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-full md:w-[200px]">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
+                <SelectTrigger className="w-full md:w-[200px]"/>
                 <SelectContent>
-                  <SelectItem value="date-desc">Newest First</SelectItem>
-                  <SelectItem value="date-asc">Oldest First</SelectItem>
-                  <SelectItem value="total-desc">Highest Total</SelectItem>
-                  <SelectItem value="total-asc">Lowest Total</SelectItem>
+                  <SelectItem value="date-desc">{t('sort.newest')}</SelectItem>
+                  <SelectItem value="date-asc">{t('sort.oldest')}</SelectItem>
+                  <SelectItem value="total-desc">{t('sort.highestTotal')}</SelectItem>
+                  <SelectItem value="total-asc">{t('sort.lowestTotal')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -193,15 +205,15 @@ const OrdersPage: React.FC = () => {
           <Card>
             <CardContent className="p-12 text-center">
               <Package className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">No orders found</h3>
+              <h3 className="text-xl font-semibold mb-2">{t('empty.title')}</h3>
               <p className="text-muted-foreground mb-6">
                 {orders.length === 0
-                  ? "You haven't placed any orders yet."
-                  : 'Try adjusting your filters.'}
+                  ? t('empty.noOrdersYet')
+                  : t('empty.adjustFilters')}
               </p>
               {orders.length === 0 && (
                 <Button onClick={() => router.push('/products')} className="bg-accent hover:bg-accent/90">
-                  Start Shopping
+                  {t('empty.startShopping')}
                 </Button>
               )}
             </CardContent>
@@ -235,7 +247,7 @@ const OrdersPage: React.FC = () => {
                           </div>
                           <div className="flex items-center gap-1">
                             <Package className="h-4 w-4" />
-                            {order.items.length} item{order.items.length !== 1 ? 's' : ''}
+                            {t('orderCard.itemsCount', { count: order.items.length })}
                           </div>
                           <div className="flex items-center gap-1">
                             <DollarSign className="h-4 w-4" />
@@ -257,35 +269,36 @@ const OrdersPage: React.FC = () => {
                       
                       {/* Order Items */}
                       <div className="space-y-3 mb-4">
-                        <h4 className="font-semibold">Order Items</h4>
-                        {order.items.map(item => (
-                          <div key={item.product.id} className="flex items-center gap-4 p-3 bg-muted/30 rounded-lg">
-                            <div className="w-16 h-16 bg-muted rounded-md"></div>
-                            <div className="flex-1">
-                              <p className="font-medium">{item.product.name}</p>
-                              <p className="text-sm text-muted-foreground">
-                                Quantity: {item.quantity} × €
-                                {(user?.isWholesale && item.product.wholesalePrice 
-                                  ? item.product.wholesalePrice 
-                                  : item.product.price
-                                ).toFixed(2)}
+                        <h4 className="font-semibold">{t('orderCard.orderItems')}</h4>
+                        {order.items.map(item => {
+                          const price = user?.is_company && item.product.wholesalePrice
+                            ? item.product.wholesalePrice
+                            : item.product.price;
+                          return (
+                            <div key={item.product.id} className="flex items-center gap-4 p-3 bg-muted/30 rounded-lg">
+                              <div className="w-16 h-16 bg-muted rounded-md"></div>
+                              <div className="flex-1">
+                                <p className="font-medium">{item.product.name}</p>
+                                <p className="text-sm text-muted-foreground">
+                                  {t('orderCard.quantityLabel', { 
+                                    quantity: item.quantity, 
+                                    price: price.toFixed(2) 
+                                  })}
+                                </p>
+                              </div>
+                              <p className="font-semibold">
+                                €{(price * item.quantity).toFixed(2)}
                               </p>
                             </div>
-                            <p className="font-semibold">
-                              €{((user?.isWholesale && item.product.wholesalePrice 
-                                ? item.product.wholesalePrice 
-                                : item.product.price) * item.quantity
-                              ).toFixed(2)}
-                            </p>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
 
                       <Separator className="my-4" />
 
                       {/* Shipping Address */}
                       <div>
-                        <h4 className="font-semibold mb-2">Shipping Address</h4>
+                        <h4 className="font-semibold mb-2">{t('orderCard.shippingAddress')}</h4>
                         <p className="text-sm text-muted-foreground">
                           {order.shippingAddress.street}<br />
                           {order.shippingAddress.city}, {order.shippingAddress.postalCode}<br />

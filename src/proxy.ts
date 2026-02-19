@@ -1,0 +1,125 @@
+import { NextResponse, type NextRequest } from 'next/server';
+import createMiddleware from 'next-intl/middleware';
+import { jwtVerify } from 'jose';
+import { defaultLocale, locales } from './i18n/routing';
+
+const localeArray = locales as readonly string[];
+const isDevelopment = process.env.NODE_ENV === 'development';
+const SKIP_AUTH_IN_DEV = isDevelopment && process.env.SKIP_AUTH === 'true';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+const JWT_SECRET = process.env.JWT_SECRET!;
+
+const PUBLIC_PREFIXES = ['/home', '/about', '/services', '/auth'];
+const PROTECTED_PREFIXES = ['/account', '/orders', '/checkout', '/payment'];
+
+const intlMiddleware = createMiddleware({ locales, defaultLocale, localePrefix: 'as-needed' });
+
+async function verifyToken(token: string): Promise<boolean> {
+  try {
+    console.log('Verifying token with secret:', JWT_SECRET ? 'set' : 'MISSING');
+    await jwtVerify(token, new TextEncoder().encode(JWT_SECRET));
+    console.log('Token verified successfully');
+    return true;
+  } catch (error: any) {
+    console.error('Token verification failed:', error.message);
+    return false;
+  }
+}
+
+async function refreshAccessToken(request: NextRequest, response: NextResponse): Promise<boolean> {
+  const refreshToken = request.cookies.get('refresh')?.value; // adjust cookie name if needed
+  if (!refreshToken) return false;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/refresh/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh: refreshToken }), // adjust payload to match your Django endpoint
+      credentials: 'include', // sends cookies (if any)
+    });
+
+    if (!res.ok) return false;
+
+    const { access } = await res.json(); // adjust based on your response shape
+
+    // Set the new access token as an HTTP-only cookie
+    response.cookies.set('access', access, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+    });
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function isAuthenticated(request: NextRequest, response: NextResponse): Promise<boolean> {
+  const accessToken = request.cookies.get('access')?.value;
+
+  // 1. If access token exists and is valid → authenticated
+  if (accessToken && (await verifyToken(accessToken))) {
+    return true;
+  }
+
+  // 2. Otherwise try to refresh
+  const refreshed = await refreshAccessToken(request, response);
+  return refreshed;
+}
+
+export default async function middleware(request: NextRequest) {
+  const response = intlMiddleware(request);
+
+  if (SKIP_AUTH_IN_DEV) {
+    return response;
+  }
+
+  const { pathname } = request.nextUrl;
+  const { locale, pathWithoutLocale } = extractLocaleFromPath(pathname);
+
+  // Skip public routes
+  if (PUBLIC_PREFIXES.some(p => pathWithoutLocale.startsWith(p))) {
+    return response;
+  }
+
+  // Only check protected routes
+  if (!PROTECTED_PREFIXES.some(p => pathWithoutLocale.startsWith(p))) {
+    return response;
+  }
+
+  const authenticated = await isAuthenticated(request, response);
+  if (authenticated) {
+    return response;
+  }
+
+  // Redirect to login
+  const next = encodeURIComponent(pathWithoutLocale + request.nextUrl.search);
+  const redirectUrl = new URL(`/${locale || defaultLocale}/auth/sign-in?next=${next}`, request.url);
+  return NextResponse.redirect(redirectUrl, { status: 303 });
+}
+
+export const config = {
+  matcher: ['/((?!api/trpc|_next/static|_next/image|favicon.ico).*)'],
+};
+
+function extractLocaleFromPath(pathname: string): {
+  locale: string | null;
+  pathWithoutLocale: string;
+} {
+  const parts = pathname.split('/').filter(Boolean);
+  
+  if (parts.length === 0) return { locale: null, pathWithoutLocale: '/' };
+  
+  const maybeLocale = parts[0];
+  
+  if (localeArray.includes(maybeLocale)) {
+    return {
+      locale: maybeLocale,
+      pathWithoutLocale: `/${parts.slice(1).join('/')}` || '/',
+    };
+  }
+  
+  return { locale: null, pathWithoutLocale: pathname };
+}

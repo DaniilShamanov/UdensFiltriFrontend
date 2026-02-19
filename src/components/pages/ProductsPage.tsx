@@ -11,14 +11,13 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import RangeSlider from '@/components/ui/slider';
 import {
   Select,
   SelectContent,
   SelectItem,
-  SelectTrigger,
-  SelectValue,
+  SelectTrigger
 } from '@/components/ui/select';
 import {
   Tooltip,
@@ -31,6 +30,7 @@ import { products, categories } from '@/lib/mockData';
 import { Product } from '@/lib/types';
 import { useApp } from '@/contexts/AppContext';
 import ProductCard from '../ProductCard';
+import { useTranslations } from 'next-intl';
 
 const ProductsPage: React.FC = () => {
   const searchParams = useSearchParams();
@@ -39,10 +39,12 @@ const ProductsPage: React.FC = () => {
   const { user } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('featured');
-  const [priceRange, setPriceRange] = useState([0, 1500]);
+  const [range, setRange] = React.useState({ min: 0, max: 1500 });
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [inStockOnly, setInStockOnly] = useState(false);
   const [minRating, setMinRating] = useState('0');
+
+  const t = useTranslations('products');
 
   // Get unique brands
   const brands = useMemo(() => {
@@ -75,7 +77,7 @@ const ProductsPage: React.FC = () => {
     }
 
     // Price filter
-    result = result.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
+    result = result.filter(p => p.price >= range.min && p.price <= range.max);
 
     // Brand filter
     if (selectedBrands.length > 0) {
@@ -112,7 +114,7 @@ const ProductsPage: React.FC = () => {
     }
 
     return result;
-  }, [searchQuery, sortBy, priceRange, selectedBrands, inStockOnly, minRating, categoryId, subCategoryId]);
+  }, [searchQuery, sortBy, range, selectedBrands, inStockOnly, minRating, categoryId, subCategoryId]);
 
   const toggleBrand = (brand: string) => {
     setSelectedBrands(prev =>
@@ -126,49 +128,32 @@ const ProductsPage: React.FC = () => {
   const FilterSection = () => (
     <div className="space-y-6">
       {/* Price Range */}
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <Label className="font-semibold">Price Range</Label>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <Info className="h-4 w-4 text-muted-foreground" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Filter products by price range</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-        <Slider
-          defaultValue={[0, 1500]}
-          value={priceRange}
-          onValueChange={setPriceRange}
+      <div className="space-y-2 scrollbar-hide">
+        <Label className="font-semibold">{t('filters.priceRange')}</Label>
+        <RangeSlider
           min={0}
           max={1500}
-          step={10}
-          className="mb-2"
+          step={1}
+          value={range}
+          onChange={(vals) => setRange({ min: vals.min, max: vals.max })}
+          className="w-full"
         />
-        <div className="flex justify-between text-sm text-muted-foreground">
-          <span>€{priceRange[0]}</span>
-          <span>€{priceRange[1]}</span>
-        </div>
       </div>
 
       {/* Brands */}
       <div>
         <div className="flex items-center gap-2 mb-3">
-          <Label className="font-semibold">Brands</Label>
-          <TooltipProvider>
+          <Label className="font-semibold">{t('filters.brands')}</Label>
+          {/*<TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
                 <Info className="h-4 w-4 text-muted-foreground" />
               </TooltipTrigger>
               <TooltipContent>
-                <p>Select one or more brands</p>
+                <p>{t('tooltips.brands')}</p>
               </TooltipContent>
             </Tooltip>
-          </TooltipProvider>
+          </TooltipProvider>*/}
         </div>
         <div className="space-y-2">
           {brands.map(brand => (
@@ -189,30 +174,30 @@ const ProductsPage: React.FC = () => {
       {/* Rating */}
       <div>
         <div className="flex items-center gap-2 mb-3">
-          <Label className="font-semibold">Minimum Rating</Label>
-          <TooltipProvider>
+          <Label className="font-semibold">{t('filters.minRating')}</Label>
+          {/*<TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
                 <Info className="h-4 w-4 text-muted-foreground" />
               </TooltipTrigger>
               <TooltipContent>
-                <p>Show products with at least this rating</p>
+                <p>{t('tooltips.minRating')}</p>
               </TooltipContent>
             </Tooltip>
-          </TooltipProvider>
+          </TooltipProvider>*/}
         </div>
         <RadioGroup value={minRating} onValueChange={setMinRating}>
           <div className="flex items-center gap-2">
             <RadioGroupItem value="0" id="rating-all" />
-            <Label htmlFor="rating-all" className="cursor-pointer font-normal">All Ratings</Label>
+            <Label htmlFor="rating-all" className="cursor-pointer font-normal">{t('ratings.all')}</Label>
           </div>
           <div className="flex items-center gap-2">
             <RadioGroupItem value="4" id="rating-4" />
-            <Label htmlFor="rating-4" className="cursor-pointer font-normal">4+ Stars</Label>
+            <Label htmlFor="rating-4" className="cursor-pointer font-normal">{t('ratings.4plus')}</Label>
           </div>
           <div className="flex items-center gap-2">
             <RadioGroupItem value="4.5" id="rating-45" />
-            <Label htmlFor="rating-45" className="cursor-pointer font-normal">4.5+ Stars</Label>
+            <Label htmlFor="rating-45" className="cursor-pointer font-normal">{t('ratings.45plus')}</Label>
           </div>
         </RadioGroup>
       </div>
@@ -220,17 +205,17 @@ const ProductsPage: React.FC = () => {
       {/* Availability */}
       <div>
         <div className="flex items-center gap-2 mb-3">
-          <Label className="font-semibold">Availability</Label>
-          <TooltipProvider>
+          <Label className="font-semibold">{t('filters.availability')}</Label>
+          {/*<TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
                 <Info className="h-4 w-4 text-muted-foreground" />
               </TooltipTrigger>
               <TooltipContent>
-                <p>Show only products in stock</p>
+                <p>{t('tooltips.availability')}</p>
               </TooltipContent>
             </Tooltip>
-          </TooltipProvider>
+          </TooltipProvider>*/}
         </div>
         <div className="flex items-center gap-2">
           <Checkbox
@@ -239,7 +224,7 @@ const ProductsPage: React.FC = () => {
             onCheckedChange={(checked) => setInStockOnly(checked as boolean)}
           />
           <Label htmlFor="in-stock" className="cursor-pointer font-normal">
-            In Stock Only
+            {t('filters.inStockOnly')}
           </Label>
         </div>
       </div>
@@ -249,28 +234,28 @@ const ProductsPage: React.FC = () => {
         variant="outline"
         className="w-full"
         onClick={() => {
-          setPriceRange([0, 1500]);
+          setRange({ min: 0, max: 1500 });
           setSelectedBrands([]);
           setInStockOnly(false);
           setMinRating('0');
         }}
       >
-        Reset Filters
+        {t('resetFilters')}
       </Button>
     </div>
   );
 
   return (
     <div className="min-h-screen bg-background py-8">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 scrollbar-hide">
         {/* Breadcrumb */}
         <div className="mb-6 text-sm text-muted-foreground">
           <Link href="/" className="hover:text-primary">
-            Home
+            {t('breadcrumb.home')}
           </Link>
           {' / '}
           <Link href="/products" className="hover:text-primary">
-            Products
+            {t('breadcrumb.products')}
           </Link>
           {currentCategory && (
             <>
@@ -293,13 +278,13 @@ const ProductsPage: React.FC = () => {
               ? currentSubCategory.name
               : currentCategory
               ? currentCategory.name
-              : 'All Products'}
+              : t('allProducts')}
           </h1>
           <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
             <div className="relative flex-1 w-full md:max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search products..."
+                placeholder={t('searchPlaceholder')}
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -311,12 +296,12 @@ const ProductsPage: React.FC = () => {
                 <SheetTrigger asChild>
                   <Button variant="outline" className="md:hidden flex-1">
                     <SlidersHorizontal className="h-4 w-4 mr-2" />
-                    Filters
+                    {t('filtersButton')}
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="w-[300px]">
                   <SheetHeader>
-                    <SheetTitle>Filters</SheetTitle>
+                    <SheetTitle>{t('filtersTitle')}</SheetTitle>
                   </SheetHeader>
                   <ScrollArea className="h-[calc(100vh-8rem)] mt-6 pr-4">
                     <FilterSection />
@@ -325,18 +310,29 @@ const ProductsPage: React.FC = () => {
               </Sheet>
 
               {/* Sort */}
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-full md:w-[200px]">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="featured">Featured</SelectItem>
-                  <SelectItem value="price-low">Price: Low to High</SelectItem>
-                  <SelectItem value="price-high">Price: High to Low</SelectItem>
-                  <SelectItem value="rating">Highest Rated</SelectItem>
-                  <SelectItem value="name">Name: A to Z</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                {/* Item count - on mobile it appears below sort controls (order-2), on desktop on the left (order-1) */}
+                <p className="text-muted-foreground order-2 md:order-1">
+                  {t('showingCount', { count: filteredProducts.length })}
+                </p>
+
+                {/* Sort controls container - on mobile appears above count (order-1), on desktop on the right (order-2) */}
+                <div className="flex items-center gap-2 order-1 md:order-2">
+                  <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
+                    {t('sort.placeholder')} {/* e.g., "Sort by:" */}
+                  </span>
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="w-full md:w-[200px]" />
+                    <SelectContent>
+                      <SelectItem value="featured">{t('sort.featured')}</SelectItem>
+                      <SelectItem value="price-low">{t('sort.priceLowHigh')}</SelectItem>
+                      <SelectItem value="price-high">{t('sort.priceHighLow')}</SelectItem>
+                      <SelectItem value="rating">{t('sort.highestRated')}</SelectItem>
+                      <SelectItem value="name">{t('sort.nameAZ')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -347,7 +343,7 @@ const ProductsPage: React.FC = () => {
           <aside className="hidden lg:block">
             <Card className="sticky top-24">
               <CardContent className="p-6">
-                <h2 className="font-semibold text-lg mb-4">Filters</h2>
+                <h2 className="font-semibold text-lg mb-4">{t('filtersTitle')}</h2>
                 <ScrollArea className="h-[calc(100vh-16rem)] pr-4">
                   <FilterSection />
                 </ScrollArea>
@@ -356,27 +352,21 @@ const ProductsPage: React.FC = () => {
           </aside>
 
           {/* Products Grid */}
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <p className="text-muted-foreground">
-                Showing {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
-              </p>
-            </div>
-
+          <div>           
             {filteredProducts.length === 0 ? (
               <Card className="p-12 text-center">
-                <p className="text-muted-foreground mb-4">No products found matching your criteria.</p>
+                <p className="text-muted-foreground mb-4">{t('noProductsFound')}</p>
                 <Button
                   variant="outline"
                   onClick={() => {
                     setSearchQuery('');
-                    setPriceRange([0, 1500]);
+                    setRange({ min: 0, max: 1500 });
                     setSelectedBrands([]);
                     setInStockOnly(false);
                     setMinRating('0');
                   }}
                 >
-                  Clear All Filters
+                  {t('clearAllFilters')}
                 </Button>
               </Card>
             ) : (
@@ -385,7 +375,7 @@ const ProductsPage: React.FC = () => {
                   <ProductCard
                     key={product.id}
                     product={product}
-                    showWholesalePrice={user?.isWholesale}
+                    showWholesalePrice={user?.is_company}
                   />
                 ))}
               </div>

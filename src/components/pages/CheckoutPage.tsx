@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { useRouter } from '@/navigation';
+import { useLocale } from "next-intl";
 import { ArrowRight, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,16 +12,18 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { useApp } from '@/contexts/AppContext';
 import { fetchJson } from '@/lib/api';
+import { useTranslations } from 'next-intl';
 
 const CheckoutPage: React.FC = () => {
   const router = useRouter();
+  const locale = useLocale();
   const { user, cart } = useApp();
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     email: user?.email || '',
-    firstName: user?.name?.split(' ')[0] || '',
-    lastName: user?.name?.split(' ')[1] || '',
+    firstName: user?.first_name?.split(' ')[0] || '',
+    lastName: user?.last_name?.split(' ')[1] || '',
     phone: user?.phone || '',
     street: user?.address?.street || '',
     city: user?.address?.city || '',
@@ -28,6 +31,8 @@ const CheckoutPage: React.FC = () => {
     country: user?.address?.country || 'Latvia',
     notes: '',
   });
+
+  const t = useTranslations('checkout');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -38,7 +43,7 @@ const CheckoutPage: React.FC = () => {
 
   const subtotal = useMemo(() => {
     return cart.reduce((sum, item) => {
-      const price = user?.isWholesale && item.product.wholesalePrice
+      const price = user?.is_company && item.product.wholesalePrice
         ? item.product.wholesalePrice
         : item.product.price;
       return sum + price * item.quantity;
@@ -61,7 +66,7 @@ const CheckoutPage: React.FC = () => {
       setSubmitting(true);
 
       const items: Array<any> = cart.map((ci) => {
-        const unit = user?.isWholesale && ci.product.wholesalePrice
+        const unit = user?.is_company && ci.product.wholesalePrice
           ? ci.product.wholesalePrice
           : ci.product.price;
         return {
@@ -103,7 +108,7 @@ const CheckoutPage: React.FC = () => {
           csrf: true,
           body: {
             order: orderPayload,
-            localePrefix: `/${router.locale}`,
+            localePrefix: `/${locale}`,
             successPath: '/payment/status',
             cancelPath: '/checkout',
           },
@@ -112,7 +117,7 @@ const CheckoutPage: React.FC = () => {
 
       window.location.assign(res.checkoutUrl);
     } catch (err: any) {
-      setSubmitError(err?.message || 'Payment initialization failed');
+      setSubmitError(err?.message || t('paymentInitFailed'));
       setSubmitting(false);
     }
   };
@@ -127,10 +132,10 @@ const CheckoutPage: React.FC = () => {
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="flex items-center gap-2 mb-8">
           <Lock className="h-5 w-5 text-green-600" />
-          <span className="text-sm text-muted-foreground">Secure Checkout</span>
+          <span className="text-sm text-muted-foreground">{t('secureCheckout')}</span>
         </div>
 
-        <h1 className="text-3xl font-bold mb-8">Checkout</h1>
+        <h1 className="text-3xl font-bold mb-8">{t('title')}</h1>
 
         <form onSubmit={handleSubmit}>
           <div className="grid lg:grid-cols-3 gap-8">
@@ -139,11 +144,11 @@ const CheckoutPage: React.FC = () => {
               {/* Contact Information */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Contact Information</CardTitle>
+                  <CardTitle>{t('contact.title')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor="email">Email Address *</Label>
+                    <Label htmlFor="email">{t('contact.email')} *</Label>
                     <Input
                       id="email"
                       name="email"
@@ -151,12 +156,12 @@ const CheckoutPage: React.FC = () => {
                       required
                       value={formData.email}
                       onChange={handleChange}
-                      placeholder="your.email@example.com"
+                      placeholder={t('contact.emailPlaceholder')}
                     />
                   </div>
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="firstName">First Name *</Label>
+                      <Label htmlFor="firstName">{t('contact.firstName')} *</Label>
                       <Input
                         id="firstName"
                         name="firstName"
@@ -166,7 +171,7 @@ const CheckoutPage: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="lastName">Last Name *</Label>
+                      <Label htmlFor="lastName">{t('contact.lastName')} *</Label>
                       <Input
                         id="lastName"
                         name="lastName"
@@ -177,7 +182,7 @@ const CheckoutPage: React.FC = () => {
                     </div>
                   </div>
                   <div>
-                    <Label htmlFor="phone">Phone Number *</Label>
+                    <Label htmlFor="phone">{t('contact.phone')} *</Label>
                     <Input
                       id="phone"
                       name="phone"
@@ -185,7 +190,7 @@ const CheckoutPage: React.FC = () => {
                       required
                       value={formData.phone}
                       onChange={handleChange}
-                      placeholder="+371 12345678"
+                      placeholder={t('contact.phonePlaceholder')}
                     />
                   </div>
                 </CardContent>
@@ -194,23 +199,23 @@ const CheckoutPage: React.FC = () => {
               {/* Shipping Address */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Shipping Address</CardTitle>
+                  <CardTitle>{t('address.title')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor="street">Street Address *</Label>
+                    <Label htmlFor="street">{t('address.street')} *</Label>
                     <Input
                       id="street"
                       name="street"
                       required
                       value={formData.street}
                       onChange={handleChange}
-                      placeholder="123 Main Street, Apt 4B"
+                      placeholder={t('address.streetPlaceholder')}
                     />
                   </div>
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="city">City *</Label>
+                      <Label htmlFor="city">{t('address.city')} *</Label>
                       <Input
                         id="city"
                         name="city"
@@ -220,19 +225,19 @@ const CheckoutPage: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="postalCode">Postal Code *</Label>
+                      <Label htmlFor="postalCode">{t('address.postalCode')} *</Label>
                       <Input
                         id="postalCode"
                         name="postalCode"
                         required
                         value={formData.postalCode}
                         onChange={handleChange}
-                        placeholder="LV-1234"
+                        placeholder={t('address.postalCodePlaceholder')}
                       />
                     </div>
                   </div>
                   <div>
-                    <Label htmlFor="country">Country *</Label>
+                    <Label htmlFor="country">{t('address.country')} *</Label>
                     <Input
                       id="country"
                       name="country"
@@ -242,13 +247,13 @@ const CheckoutPage: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="notes">Delivery Notes (Optional)</Label>
+                    <Label htmlFor="notes">{t('address.notes')}</Label>
                     <Textarea
                       id="notes"
                       name="notes"
                       value={formData.notes}
                       onChange={handleChange}
-                      placeholder="Any special instructions for delivery..."
+                      placeholder={t('address.notesPlaceholder')}
                       rows={3}
                     />
                   </div>
@@ -260,13 +265,13 @@ const CheckoutPage: React.FC = () => {
             <div>
               <Card className="sticky top-24">
                 <CardHeader>
-                  <CardTitle>Order Summary</CardTitle>
+                  <CardTitle>{t('summary.title')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {/* Cart Items */}
                   <div className="space-y-3 max-h-[300px] overflow-y-auto">
                     {cart.map((item) => {
-                      const displayPrice = user?.isWholesale && item.product.wholesalePrice
+                      const displayPrice = user?.is_company && item.product.wholesalePrice
                         ? item.product.wholesalePrice
                         : item.product.price;
                       return (
@@ -280,7 +285,7 @@ const CheckoutPage: React.FC = () => {
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium line-clamp-2">{item.product.name}</p>
                             <p className="text-sm text-muted-foreground">
-                              €{displayPrice.toFixed(2)} × {item.quantity}
+                              {t('summary.itemLine', { price: displayPrice.toFixed(2), quantity: item.quantity })}
                             </p>
                           </div>
                           <div className="text-sm font-medium">
@@ -296,18 +301,18 @@ const CheckoutPage: React.FC = () => {
                   {/* Totals */}
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Subtotal</span>
+                      <span className="text-muted-foreground">{t('summary.subtotal')}</span>
                       <span>€{subtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Shipping</span>
+                      <span className="text-muted-foreground">{t('summary.shipping')}</span>
                       <span className={shipping === 0 ? 'text-green-600' : ''}>
-                        {shipping === 0 ? 'FREE' : `€${shipping.toFixed(2)}`}
+                        {shipping === 0 ? t('summary.free') : `€${shipping.toFixed(2)}`}
                       </span>
                     </div>
                     <Separator />
                     <div className="flex justify-between font-bold text-lg">
-                      <span>Total</span>
+                      <span>{t('summary.total')}</span>
                       <span className="text-primary">€{total.toFixed(2)}</span>
                     </div>
                   </div>
@@ -318,7 +323,7 @@ const CheckoutPage: React.FC = () => {
                     className="w-full bg-accent hover:bg-accent/90"
                     disabled={submitting}
                   >
-                    {submitting ? 'Redirecting to Stripe…' : 'Pay securely with Stripe'}
+                    {submitting ? t('summary.redirecting') : t('summary.payButton')}
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
 
@@ -328,12 +333,8 @@ const CheckoutPage: React.FC = () => {
                     </div>
                   )}
 
-                  {submitError && (
-                    <p className="text-sm text-red-600 text-center">{submitError}</p>
-                  )}
-
                   <p className="text-xs text-muted-foreground text-center">
-                    By placing your order, you agree to our Terms and Conditions
+                    {t('termsNote')}
                   </p>
                 </CardContent>
               </Card>

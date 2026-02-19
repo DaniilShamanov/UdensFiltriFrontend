@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { ChevronDown } from "lucide-react";
 import { categories } from "@/lib/mockData";
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Link } from "@/navigation";
+import { IntlLink } from "@/components/IntlLink";
 
 function buildProductsUrl(categoryId?: string, subCategoryId?: string) {
   const params = new URLSearchParams();
@@ -24,7 +23,7 @@ export default function CategoryNav() {
   return (
     <div className="border-t bg-white">
       <div className="container mx-auto px-4">
-        <div className="flex items-center gap-2 overflow-x-auto py-2 scrollbar-hide">
+        <div className="flex items-center justify-between overflow-x-auto py-2 scrollbar-hide">
           {categories.map((category) => (
             <DropdownMenu key={category.id}>
               <DropdownMenuTrigger asChild>
@@ -35,11 +34,11 @@ export default function CategoryNav() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-56">
                 <DropdownMenuItem asChild>
-                  <Link href={buildProductsUrl(category.id)}>{`All ${category.name}`}</Link>
+                  <IntlLink href={buildProductsUrl(category.id)}>{`All ${category.name}`}</IntlLink>
                 </DropdownMenuItem>
                 {category.subCategories?.map((subCat) => (
                   <DropdownMenuItem key={subCat.id} asChild>
-                    <Link href={buildProductsUrl(category.id, subCat.id)}>{subCat.name}</Link>
+                    <IntlLink href={buildProductsUrl(category.id, subCat.id)}>{subCat.name}</IntlLink>
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>

@@ -1,22 +1,30 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
-@import 'tailwindcss' source(none);
+/* Tailwind v4 imports */
+@import 'tailwindcss';
 @source '../**/*.{js,ts,jsx,tsx}';
 
+/* Third-party animation styles */
 @import 'tw-animate-css';
 
-/* Custom utilities */
-@layer utilities {
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-  
-  /* Ensure smooth scrolling */
-  html {
-    scroll-behavior: smooth;
-  }
+@utility no-scrollbar {
+  @apply [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
+}
+
+.range-slider {
+  @apply relative w-full h-6 flex items-center;
+}
+.range-slider .range-slider__track {
+  @apply bg-gray-200 rounded-full h-2;
+}
+.range-slider .range-slider__range {
+  @apply bg-blue-700 rounded-full h-2;
+}
+.range-slider .range-slider__thumb {
+  @apply w-5 h-5 bg-white border-2 border-blue-700 rounded-full;
+  @apply top-1/2 -translate-y-1/2;
+  @apply cursor-pointer transition-transform hover:scale-110;
+}
+.range-slider .range-slider__thumb[data-active] {
+  @apply scale-110 ring-2 ring-blue-300;
 }

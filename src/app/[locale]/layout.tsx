@@ -53,11 +53,11 @@ export default async function LocaleLayout({
   const locale = (await params).locale;
   if (!(locales as readonly string[]).includes(locale)) notFound();
 
-  const messages = await getMessages();
+  const messages = await getMessages({ locale });
 
   return (
     <ThemeProvider>
-      <NextIntlClientProvider messages={messages}>
+      <NextIntlClientProvider locale={locale} messages={messages}>
         <Providers>
           <div className="min-h-dvh flex flex-col">
             <Header />

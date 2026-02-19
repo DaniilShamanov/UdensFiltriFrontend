@@ -1,16 +1,18 @@
 "use client";
 
 import React from 'react';
-import { Link, useRouter } from '@/navigation';
+import { useRouter } from '@/navigation';
 import { Star, Shield, Truck, Headphones, ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { categories, products } from '@/lib/mockData';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
+import { useTranslations } from 'next-intl';
 
 const HomePage: React.FC = () => {
   const router = useRouter();
   const featuredProducts = products.slice(0, 4);
+  const t = useTranslations('home');
 
   return (
     <div className="min-h-screen">
@@ -23,11 +25,12 @@ const HomePage: React.FC = () => {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-                Pure Water for <span className="text-accent">Healthy Living</span>
+                {t.rich('heroTitle', {
+                  highlight: (chunks) => <span className="text-accent">{chunks}</span>
+                })}
               </h1>
               <p className="text-lg md:text-xl text-white/90">
-                Professional water filtration solutions for your home and business. 
-                Expert installation and maintenance services in Latvia.
+                {t('heroDescription')}
               </p>
               <div className="flex flex-wrap gap-4">
                 <Button
@@ -35,7 +38,7 @@ const HomePage: React.FC = () => {
                   onClick={() => router.push('/products')}
                   className="bg-accent hover:bg-accent/90 text-white"
                 >
-                  Shop Now
+                  {t('shopNow')}
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
                 <Button
@@ -44,28 +47,28 @@ const HomePage: React.FC = () => {
                   onClick={() => router.push('/services')}
                   className="bg-white/10 text-white border-white/30 hover:bg-white/20"
                 >
-                  Our Services
+                  {t('ourServices')}
                 </Button>
               </div>
               <div className="flex flex-wrap gap-8 pt-4">
                 <div className="flex items-center gap-2">
                   <CheckCircle className="h-5 w-5 text-accent" />
-                  <span>Free Shipping</span>
+                  <span>{t('freeShipping')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle className="h-5 w-5 text-accent" />
-                  <span>Expert Support</span>
+                  <span>{t('expertSupport')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle className="h-5 w-5 text-accent" />
-                  <span>Quality Guaranteed</span>
+                  <span>{t('qualityGuaranteed')}</span>
                 </div>
               </div>
             </div>
             <div className="hidden md:block">
               <ImageWithFallback
                 src="https://images.unsplash.com/photo-1511994501413-7752c87af739?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjbGVhbiUyMHdhdGVyJTIwZ2xhc3N8ZW58MXx8fHwxNzY4MzgyNjExfDA&ixlib=rb-4.1.0&q=80&w=1080"
-                alt="Clean Water"
+                alt={t('heroImageAlt')}
                 className="rounded-2xl shadow-2xl w-full h-[400px] object-cover"
               />
             </div>
@@ -82,8 +85,8 @@ const HomePage: React.FC = () => {
                 <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Shield className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="font-semibold mb-2">Quality Assured</h3>
-                <p className="text-sm text-muted-foreground">Certified products</p>
+                <h3 className="font-semibold mb-2">{t('features.quality.title')}</h3>
+                <p className="text-sm text-muted-foreground">{t('features.quality.description')}</p>
               </CardContent>
             </Card>
             <Card className="text-center border-none shadow-lg hover:shadow-xl transition-shadow">
@@ -91,8 +94,8 @@ const HomePage: React.FC = () => {
                 <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Truck className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="font-semibold mb-2">Free Shipping</h3>
-                <p className="text-sm text-muted-foreground">Orders over €100</p>
+                <h3 className="font-semibold mb-2">{t('features.shipping.title')}</h3>
+                <p className="text-sm text-muted-foreground">{t('features.shipping.description')}</p>
               </CardContent>
             </Card>
             <Card className="text-center border-none shadow-lg hover:shadow-xl transition-shadow">
@@ -100,8 +103,8 @@ const HomePage: React.FC = () => {
                 <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Headphones className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="font-semibold mb-2">24/7 Support</h3>
-                <p className="text-sm text-muted-foreground">Always here to help</p>
+                <h3 className="font-semibold mb-2">{t('features.support.title')}</h3>
+                <p className="text-sm text-muted-foreground">{t('features.support.description')}</p>
               </CardContent>
             </Card>
             <Card className="text-center border-none shadow-lg hover:shadow-xl transition-shadow">
@@ -109,8 +112,8 @@ const HomePage: React.FC = () => {
                 <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Star className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="font-semibold mb-2">Top Rated</h3>
-                <p className="text-sm text-muted-foreground">1000+ reviews</p>
+                <h3 className="font-semibold mb-2">{t('features.rating.title')}</h3>
+                <p className="text-sm text-muted-foreground">{t('features.rating.description')}</p>
               </CardContent>
             </Card>
           </div>
@@ -122,15 +125,15 @@ const HomePage: React.FC = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="text-white text-center md:text-left">
-              <h2 className="text-3xl font-bold mb-2">Discover Our Full Range</h2>
-              <p className="text-white/90 text-lg">Over 100+ premium water treatment products</p>
+              <h2 className="text-3xl font-bold mb-2">{t('banner.title')}</h2>
+              <p className="text-white/90 text-lg">{t('banner.description')}</p>
             </div>
             <Button
               size="lg"
               onClick={() => router.push('/products')}
               className="bg-white text-secondary hover:bg-white/90"
             >
-              View All Products
+              {t('banner.button')}
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </div>
@@ -141,9 +144,9 @@ const HomePage: React.FC = () => {
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Shop by Category</h2>
+            <h2 className="text-3xl font-bold mb-4">{t('categories.title')}</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Find the perfect water treatment solution for your needs
+              {t('categories.description')}
             </p>
           </div>
           
@@ -158,14 +161,16 @@ const HomePage: React.FC = () => {
                 >
                   <CardContent className="p-6 text-center">
                     <div className="bg-gradient-to-br from-primary to-secondary w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <span className="text-3xl text-white">{category.icon === 'droplet' ? '💧' : category.icon === 'cog' ? '⚙️' : category.icon === 'waves' ? '🌊' : category.icon === 'filter' ? '🔧' : category.icon === 'wrench' ? '🔨' : '🧪'}</span>
+                      <span className="text-3xl text-white">
+                        {category.icon === 'droplet' ? '💧' : category.icon === 'cog' ? '⚙️' : category.icon === 'waves' ? '🌊' : category.icon === 'filter' ? '🔧' : category.icon === 'wrench' ? '🔨' : '🧪'}
+                      </span>
                     </div>
                     <h3 className="font-semibold mb-2">{category.name}</h3>
                     <p className="text-sm text-muted-foreground mb-3">
-                      {category.subCategories.length} subcategories
+                      {t('categories.subcategoriesCount', { count: category.subCategories.length })}
                     </p>
                     <Button variant="outline" size="sm" className="w-full">
-                      Browse
+                      {t('categories.browse')}
                     </Button>
                   </CardContent>
                 </Card>
@@ -183,14 +188,16 @@ const HomePage: React.FC = () => {
               >
                 <CardContent className="p-6 text-center">
                   <div className="bg-gradient-to-br from-primary to-secondary w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-3xl text-white">{category.icon === 'droplet' ? '💧' : category.icon === 'cog' ? '⚙️' : category.icon === 'waves' ? '🌊' : category.icon === 'filter' ? '🔧' : category.icon === 'wrench' ? '🔨' : '🧪'}</span>
+                    <span className="text-3xl text-white">
+                      {category.icon === 'droplet' ? '💧' : category.icon === 'cog' ? '⚙️' : category.icon === 'waves' ? '🌊' : category.icon === 'filter' ? '🔧' : category.icon === 'wrench' ? '🔨' : '🧪'}
+                    </span>
                   </div>
                   <h3 className="font-semibold mb-2">{category.name}</h3>
                   <p className="text-sm text-muted-foreground mb-3">
-                    {category.subCategories.length} subcategories
+                    {t('categories.subcategoriesCount', { count: category.subCategories.length })}
                   </p>
                   <Button variant="outline" size="sm" className="w-full">
-                    Browse
+                    {t('categories.browse')}
                   </Button>
                 </CardContent>
               </Card>
@@ -203,9 +210,9 @@ const HomePage: React.FC = () => {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Featured Products</h2>
+            <h2 className="text-3xl font-bold mb-4">{t('featured.title')}</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Top-rated water filtration systems chosen by our customers
+              {t('featured.description')}
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -265,15 +272,15 @@ const HomePage: React.FC = () => {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold mb-6">Why Choose WaterFilters.lv?</h2>
+              <h2 className="text-3xl font-bold mb-6">{t('about.title')}</h2>
               <div className="space-y-4">
                 <div className="flex gap-4">
                   <div className="bg-primary/10 p-3 rounded-lg h-fit">
                     <CheckCircle className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold mb-1">Premium Quality Products</h3>
-                    <p className="text-muted-foreground">All our products are certified and tested for quality assurance.</p>
+                    <h3 className="font-semibold mb-1">{t('about.quality.title')}</h3>
+                    <p className="text-muted-foreground">{t('about.quality.description')}</p>
                   </div>
                 </div>
                 <div className="flex gap-4">
@@ -281,8 +288,8 @@ const HomePage: React.FC = () => {
                     <CheckCircle className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold mb-1">Expert Installation</h3>
-                    <p className="text-muted-foreground">Professional installation services by certified technicians.</p>
+                    <h3 className="font-semibold mb-1">{t('about.installation.title')}</h3>
+                    <p className="text-muted-foreground">{t('about.installation.description')}</p>
                   </div>
                 </div>
                 <div className="flex gap-4">
@@ -290,8 +297,8 @@ const HomePage: React.FC = () => {
                     <CheckCircle className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold mb-1">Lifetime Support</h3>
-                    <p className="text-muted-foreground">Ongoing maintenance and customer support for all our systems.</p>
+                    <h3 className="font-semibold mb-1">{t('about.support.title')}</h3>
+                    <p className="text-muted-foreground">{t('about.support.description')}</p>
                   </div>
                 </div>
               </div>
@@ -299,7 +306,7 @@ const HomePage: React.FC = () => {
             <div>
               <ImageWithFallback
                 src="https://images.unsplash.com/photo-1676210134188-4c05dd172f89?w=600&h=400&fit=crop"
-                alt="Professional Services"
+                alt={t('about.imageAlt')}
                 className="rounded-xl shadow-xl w-full h-[400px] object-cover"
               />
             </div>

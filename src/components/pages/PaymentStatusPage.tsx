@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { fetchJson } from "@/lib/api";
+import { useTranslations } from "next-intl";
 
 type OrderItem = {
   id: number;
@@ -37,6 +38,7 @@ interface PaymentStatusPageProps {
 
 const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ orderId }) => {
   const router = useRouter();
+  const t = useTranslations('paymentStatus');
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +54,7 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ orderId }) => {
         const data = await fetchJson<Order>(`/api/orders/${encodeURIComponent(orderId)}/`);
         if (isMounted) setOrder(data);
       } catch (e: any) {
-        if (isMounted) setError(e?.message || "Unable to load order");
+        if (isMounted) setError(e?.message || t('errors.loadFailed'));
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -87,7 +89,7 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ orderId }) => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex items-center gap-2 text-muted-foreground">
-          <Loader2 className="h-5 w-5 animate-spin" /> Loading order…
+          <Loader2 className="h-5 w-5 animate-spin" /> {t('loading')}
         </div>
       </div>
     );
@@ -97,9 +99,9 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ orderId }) => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="container mx-auto px-4 text-center max-w-lg">
-          <h2 className="text-2xl font-bold mb-3">Order not found</h2>
-          <p className="text-muted-foreground mb-6">{error || "We couldn't load your order."}</p>
-          <Button onClick={() => router.push("/")}>Return Home</Button>
+          <h2 className="text-2xl font-bold mb-3">{t('orderNotFound.title')}</h2>
+          <p className="text-muted-foreground mb-6">{error || t('orderNotFound.description')}</p>
+          <Button onClick={() => router.push("/")}>{t('orderNotFound.returnHome')}</Button>
         </div>
       </div>
     );
@@ -122,14 +124,14 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ orderId }) => {
             )}
           </div>
           <h1 className="text-3xl font-bold mb-2">
-            {isPaid ? "Payment Successful!" : isFailed ? "Payment Failed" : "Payment Processing"}
+            {isPaid ? t('status.paid') : isFailed ? t('status.failed') : t('status.processing')}
           </h1>
           <p className="text-muted-foreground">
             {isPaid
-              ? "Thank you for your order. Your payment has been processed successfully."
+              ? t('status.paidDescription')
               : isFailed
-              ? "Your payment was not completed. You can try again from checkout."
-              : "We are confirming your payment. This can take a few seconds."}
+              ? t('status.failedDescription')
+              : t('status.processingDescription')}
           </p>
         </div>
 
@@ -137,7 +139,7 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ orderId }) => {
           <CardContent className="p-6 space-y-4">
             <div className="flex items-start justify-between">
               <div>
-                <h2 className="font-semibold mb-1">Order Number</h2>
+                <h2 className="font-semibold mb-1">{t('orderNumber')}</h2>
                 <p className="text-2xl font-mono font-bold text-primary">{order.id}</p>
               </div>
               <div className={`px-3 py-1 rounded-full text-sm font-medium ${isPaid ? "bg-green-100 text-green-700" : isFailed ? "bg-red-100 text-red-700" : "bg-muted text-muted-foreground"}`}>
@@ -149,7 +151,7 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ orderId }) => {
 
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <h3 className="font-semibold mb-2">Order Date</h3>
+                <h3 className="font-semibold mb-2">{t('orderDate')}</h3>
                 <p className="text-muted-foreground">
                   {new Date(order.created_at).toLocaleDateString(undefined, {
                     year: "numeric",
@@ -159,7 +161,7 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ orderId }) => {
                 </p>
               </div>
               <div>
-                <h3 className="font-semibold mb-2">Order Total</h3>
+                <h3 className="font-semibold mb-2">{t('orderTotal')}</h3>
                 <p className="text-2xl font-bold text-primary">€{Number(order.total).toFixed(2)}</p>
               </div>
             </div>
@@ -167,7 +169,7 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ orderId }) => {
             <Separator />
 
             <div>
-              <h3 className="font-semibold mb-2">Shipping Address</h3>
+              <h3 className="font-semibold mb-2">{t('shippingAddress')}</h3>
               <p className="text-muted-foreground">
                 {order.customer_name ? <>{order.customer_name}<br /></> : null}
                 {order.address_line1}<br />
@@ -179,13 +181,15 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ orderId }) => {
             <Separator />
 
             <div>
-              <h3 className="font-semibold mb-3">Order Items ({order.items.length})</h3>
+              <h3 className="font-semibold mb-3">{t('orderItems', { count: order.items.length })}</h3>
               <div className="space-y-3">
                 {order.items.map((it) => (
                   <div key={it.id} className="flex justify-between">
                     <div>
                       <p className="font-medium">{it.title}</p>
-                      <p className="text-sm text-muted-foreground">Quantity: {it.quantity}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {t('quantityLabel', { quantity: it.quantity })}
+                      </p>
                     </div>
                     <p className="font-medium">€{(Number(it.unit_price) * it.quantity).toFixed(2)}</p>
                   </div>
@@ -197,10 +201,16 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ orderId }) => {
 
         <div className="space-y-3">
           {!isPaid && (
-            <Button size="lg" className="w-full bg-accent hover:bg-accent/90" onClick={() => router.push("/checkout")}>Try Again</Button>
+            <Button size="lg" className="w-full bg-accent hover:bg-accent/90" onClick={() => router.push("/checkout")}>
+              {t('tryAgain')}
+            </Button>
           )}
-          <Button size="lg" variant="outline" className="w-full" onClick={() => router.push("/")}> <Home className="mr-2 h-5 w-5" /> Return to Home</Button>
-          <Button size="lg" variant="outline" className="w-full" onClick={() => router.push("/products")}>Continue Shopping</Button>
+          <Button size="lg" variant="outline" className="w-full" onClick={() => router.push("/")}>
+            <Home className="mr-2 h-5 w-5" /> {t('returnHome')}
+          </Button>
+          <Button size="lg" variant="outline" className="w-full" onClick={() => router.push("/products")}>
+            {t('continueShopping')}
+          </Button>
         </div>
       </div>
     </div>

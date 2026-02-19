@@ -40,6 +40,8 @@ export interface User {
   email?: string | null;
   first_name?: string;
   last_name?: string;
+  address: Address;
+  is_company: boolean;
   is_superuser?: boolean;
 }
 

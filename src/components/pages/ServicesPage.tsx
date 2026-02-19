@@ -16,10 +16,12 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { services } from '@/lib/mockData';
 import { useRouter } from '@/navigation';
+import { useTranslations } from 'next-intl';
 
 const ServicesPage: React.FC = () => {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
+  const t = useTranslations('services');
 
   const filteredServices = services.filter(service =>
     service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -36,26 +38,25 @@ const ServicesPage: React.FC = () => {
               <div className="bg-white/20 p-3 rounded-lg">
                 <Wrench className="h-8 w-8" />
               </div>
-              <h1 className="text-4xl font-bold">Professional Plumbing Services</h1>
+              <h1 className="text-4xl font-bold">{t('hero.title')}</h1>
             </div>
             <p className="text-lg text-white/90 mb-6">
-              Expert installation, maintenance, and repair services for all your water treatment needs. 
-              Our certified technicians provide quality service across Latvia.
+              {t('hero.description')}
             </p>
             <div className="flex flex-wrap gap-4">
               <Button
                 size="lg"
                 className="bg-white text-secondary hover:bg-white/90"
-              onClick={() => router.push('/contact')}
+                onClick={() => router.push('/contact')}
               >
-                Schedule Service
+                {t('hero.scheduleButton')}
               </Button>
               <Button
                 size="lg"
                 variant="outline"
                 className="bg-white/10 text-white border-white/30 hover:bg-white/20"
               >
-                Get Free Quote
+                {t('hero.quoteButton')}
               </Button>
             </div>
           </div>
@@ -65,11 +66,11 @@ const ServicesPage: React.FC = () => {
         <Card>
           <CardHeader>
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <CardTitle className="text-2xl">Our Services & Pricing</CardTitle>
+              <CardTitle className="text-2xl">{t('table.title')}</CardTitle>
               <div className="relative w-full md:w-80">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search services..."
+                  placeholder={t('table.searchPlaceholder')}
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -89,7 +90,7 @@ const ServicesPage: React.FC = () => {
                     </div>
                     <p className="text-sm text-muted-foreground mb-3">{service.description}</p>
                     <Button size="sm" className="w-full bg-accent hover:bg-accent/90" onClick={() => router.push('/contact')}>
-                      Book Now
+                      {t('table.bookButton')}
                     </Button>
                   </CardContent>
                 </Card>
@@ -101,10 +102,9 @@ const ServicesPage: React.FC = () => {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-muted/30">
-                    <TableHead className="font-semibold">Service Name</TableHead>
-                    <TableHead className="font-semibold">Description</TableHead>
-                    <TableHead className="font-semibold text-right">Price</TableHead>
-                    <TableHead className="font-semibold text-center">Action</TableHead>
+                    <TableHead className="font-semibold">{t('table.serviceName')}</TableHead>
+                    <TableHead className="font-semibold">{t('table.description')}</TableHead>
+                    <TableHead className="font-semibold text-right">{t('table.price')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -117,11 +117,6 @@ const ServicesPage: React.FC = () => {
                       <TableCell className="text-right">
                         <Badge className="bg-primary">€{service.price.toFixed(2)}</Badge>
                       </TableCell>
-                      <TableCell className="text-center">
-                        <Button size="sm" className="bg-accent hover:bg-accent/90" onClick={() => router.push('/contact')}>
-                          Book Now
-                        </Button>
-                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -130,7 +125,7 @@ const ServicesPage: React.FC = () => {
 
             {filteredServices.length === 0 && (
               <div className="text-center py-12 text-muted-foreground">
-                No services found matching your search.
+                {t('table.empty')}
               </div>
             )}
           </CardContent>
@@ -141,28 +136,22 @@ const ServicesPage: React.FC = () => {
           <Card className="bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
             <CardContent className="p-6 text-center">
               <div className="text-3xl mb-2">⚡</div>
-              <h3 className="font-semibold mb-2">Same-Day Service</h3>
-              <p className="text-sm text-muted-foreground">
-                Emergency repairs available with same-day response
-              </p>
+              <h3 className="font-semibold mb-2">{t('info.sameDay.title')}</h3>
+              <p className="text-sm text-muted-foreground">{t('info.sameDay.description')}</p>
             </CardContent>
           </Card>
           <Card className="bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
             <CardContent className="p-6 text-center">
               <div className="text-3xl mb-2">✅</div>
-              <h3 className="font-semibold mb-2">Certified Technicians</h3>
-              <p className="text-sm text-muted-foreground">
-                All our technicians are fully licensed and certified
-              </p>
+              <h3 className="font-semibold mb-2">{t('info.certified.title')}</h3>
+              <p className="text-sm text-muted-foreground">{t('info.certified.description')}</p>
             </CardContent>
           </Card>
           <Card className="bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
             <CardContent className="p-6 text-center">
               <div className="text-3xl mb-2">🛡️</div>
-              <h3 className="font-semibold mb-2">Satisfaction Guarantee</h3>
-              <p className="text-sm text-muted-foreground">
-                100% satisfaction guarantee on all our services
-              </p>
+              <h3 className="font-semibold mb-2">{t('info.guarantee.title')}</h3>
+              <p className="text-sm text-muted-foreground">{t('info.guarantee.description')}</p>
             </CardContent>
           </Card>
         </div>

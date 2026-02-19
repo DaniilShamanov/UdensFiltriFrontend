@@ -5,11 +5,13 @@ import { useRouter } from "@/navigation";
 import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTranslations } from "next-intl";
 
 // Payment is handled by Stripe Checkout from the Checkout page.
 // This route stays for backwards compatibility (old navigation) and simply redirects.
 const PaymentPage: React.FC = () => {
   const router = useRouter();
+  const t = useTranslations('payment');
 
   useEffect(() => {
     // Redirect users to checkout where Stripe Checkout is started.
@@ -22,14 +24,16 @@ const PaymentPage: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Lock className="h-5 w-5" /> Redirecting to secure checkout
+              <Lock className="h-5 w-5" /> {t('title')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Payments are processed securely via Stripe. If you are not redirected automatically, click the button below.
+              {t('description')}
             </p>
-            <Button className="w-full" onClick={() => router.push("/checkout")}>Go to Checkout</Button>
+            <Button className="w-full" onClick={() => router.push("/checkout")}>
+              {t('button')}
+            </Button>
           </CardContent>
         </Card>
       </div>

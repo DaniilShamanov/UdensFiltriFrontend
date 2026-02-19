@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Mail, Phone, Lock, Save, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -12,10 +12,14 @@ import { useApp } from "@/contexts/AppContext";
 import { useRouter } from "@/navigation";
 import { toast } from "sonner";
 import { OtpInput } from "@/components/auth/OtpInput";
+import { useTranslations } from "next-intl";
+import { usePathname } from "next/navigation";
 
 const AccountPage: React.FC = () => {
   const router = useRouter();
-  const { user, updateProfile, requestSmsCode, changeEmail, changePhone, changePassword, signOut } = useApp();
+  const pathname = usePathname();
+  const { user, authLoading, updateProfile, requestSmsCode, changeEmail, changePhone, changePassword, signOut } = useApp();
+  const t = useTranslations('account');
 
   const displayName = useMemo(() => {
     const fn = user?.first_name?.trim() || "";
@@ -36,18 +40,23 @@ const AccountPage: React.FC = () => {
   const [newPhone, setNewPhone] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
-  if (!user) {
-    router.replace("/auth/sign-in?next=/account");
-    return null;
-  }
+  useEffect(() => {
+      if (!authLoading && !user) {
+        const next = encodeURIComponent(pathname);
+        router.replace(`/auth/sign-in?next=${next}`);
+      }
+    }, [user, authLoading, router, pathname]);
+  
+    if (authLoading) return <p>Loading</p>;
+    if (!user) return null; // will redirect via effect
 
   const sendSensitiveCode = async () => {
     try {
       await requestSmsCode({ purpose: "sensitive" });
       setSmsSent(true);
-      toast.success("Code sent", { description: `We sent a code to ${user.phone}` });
+      toast.success(t('toast.codeSent'), { description: t('toast.codeSentDescription', { phone: user.phone }) });
     } catch {
-      toast.error("Could not send code");
+      toast.error(t('toast.codeFailed'));
     }
   };
 
@@ -60,9 +69,9 @@ const AccountPage: React.FC = () => {
     e.preventDefault();
     try {
       await updateProfile({ first_name: profile.first_name, last_name: profile.last_name });
-      toast.success("Profile updated");
+      toast.success(t('toast.profileUpdated'));
     } catch {
-      toast.error("Could not update profile");
+      toast.error(t('toast.profileUpdateFailed'));
     }
   };
 
@@ -72,10 +81,10 @@ const AccountPage: React.FC = () => {
     if (!code) return;
     try {
       await changeEmail({ email: newEmail?.trim() || undefined, code });
-      toast.success("Email updated");
+      toast.success(t('toast.emailUpdated'));
       resetCode();
     } catch {
-      toast.error("Could not update email", { description: "Check the code and try again." });
+      toast.error(t('toast.emailUpdateFailed'), { description: t('toast.checkCode') });
     }
   };
 
@@ -85,11 +94,11 @@ const AccountPage: React.FC = () => {
     if (!code) return;
     try {
       await changePhone({ new_phone: newPhone, code });
-      toast.success("Phone updated");
+      toast.success(t('toast.phoneUpdated'));
       resetCode();
       setNewPhone("");
     } catch {
-      toast.error("Could not update phone", { description: "Check the code and phone format (+371...)." });
+      toast.error(t('toast.phoneUpdateFailed'), { description: t('toast.checkPhoneFormat') });
     }
   };
 
@@ -99,13 +108,13 @@ const AccountPage: React.FC = () => {
     if (!code) return;
     try {
       await changePassword({ new_password: newPassword, code });
-      toast.success("Password updated", { description: "Please sign in again." });
+      toast.success(t('toast.passwordUpdated'), { description: t('toast.signInAgain') });
       resetCode();
       setNewPassword("");
       await signOut();
       router.replace("/auth/sign-in");
     } catch {
-      toast.error("Could not update password");
+      toast.error(t('toast.passwordUpdateFailed'));
     }
   };
 
@@ -113,27 +122,29 @@ const AccountPage: React.FC = () => {
     <div className="min-h-screen bg-background py-6 sm:py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-1">Account Settings</h1>
-          <p className="text-muted-foreground">Signed in as <span className="font-medium">{displayName}</span></p>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-1">{t('title')}</h1>
+          <p className="text-muted-foreground">
+            {t('signedInAs', { name: displayName })}
+          </p>
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="security">Security</TabsTrigger>
+            <TabsTrigger value="profile">{t('tabs.profile')}</TabsTrigger>
+            <TabsTrigger value="security">{t('tabs.security')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile">
             <Card>
               <CardHeader>
-                <CardTitle>Personal information</CardTitle>
-                <CardDescription>Name can be changed instantly. Phone/email require SMS code.</CardDescription>
+                <CardTitle>{t('profile.title')}</CardTitle>
+                <CardDescription>{t('profile.description')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <form onSubmit={saveProfile} className="space-y-4">
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="first_name">First name</Label>
+                      <Label htmlFor="first_name">{t('profile.firstName')}</Label>
                       <Input
                         id="first_name"
                         value={profile.first_name}
@@ -141,7 +152,7 @@ const AccountPage: React.FC = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="last_name">Last name</Label>
+                      <Label htmlFor="last_name">{t('profile.lastName')}</Label>
                       <Input
                         id="last_name"
                         value={profile.last_name}
@@ -150,7 +161,7 @@ const AccountPage: React.FC = () => {
                     </div>
                   </div>
                   <Button type="submit" className="bg-accent hover:bg-accent/90 w-full sm:w-auto">
-                    <Save className="mr-2 h-4 w-4" /> Save name
+                    <Save className="mr-2 h-4 w-4" /> {t('profile.saveName')}
                   </Button>
                 </form>
 
@@ -160,40 +171,40 @@ const AccountPage: React.FC = () => {
                   <div className="rounded-lg border p-4">
                     <div className="flex items-center justify-between gap-4 flex-wrap">
                       <div>
-                        <div className="flex items-center gap-2 font-medium"><Phone className="h-4 w-4" /> Phone</div>
+                        <div className="flex items-center gap-2 font-medium"><Phone className="h-4 w-4" /> {t('profile.phone')}</div>
                         <div className="text-sm text-muted-foreground">{user.phone}</div>
                       </div>
                       <Button variant="outline" onClick={sendSensitiveCode} className="w-full sm:w-auto">
-                        <ShieldCheck className="mr-2 h-4 w-4" /> Send code
+                        <ShieldCheck className="mr-2 h-4 w-4" /> {t('profile.sendCode')}
                       </Button>
                     </div>
                     <form onSubmit={doChangePhone} className="mt-4 grid gap-3">
-                      <Label htmlFor="new_phone">New phone</Label>
-                      <Input id="new_phone" value={newPhone} onChange={(e) => setNewPhone(e.target.value)} placeholder="+37112345678" />
-                      <Label>SMS code</Label>
+                      <Label htmlFor="new_phone">{t('profile.newPhone')}</Label>
+                      <Input id="new_phone" value={newPhone} onChange={(e) => setNewPhone(e.target.value)} placeholder={t('profile.phonePlaceholder')} />
+                      <Label>{t('profile.smsCode')}</Label>
                       <OtpInput value={code} onChange={setCode} />
-                      <Button type="submit" className="bg-accent hover:bg-accent/90">Update phone</Button>
-                      <p className="text-xs text-muted-foreground">Code is sent to your current phone number.</p>
+                      <Button type="submit" className="bg-accent hover:bg-accent/90">{t('profile.updatePhone')}</Button>
+                      <p className="text-xs text-muted-foreground">{t('profile.phoneHelp')}</p>
                     </form>
                   </div>
 
                   <div className="rounded-lg border p-4">
                     <div className="flex items-center justify-between gap-4 flex-wrap">
                       <div>
-                        <div className="flex items-center gap-2 font-medium"><Mail className="h-4 w-4" /> Email (optional)</div>
-                        <div className="text-sm text-muted-foreground">{user.email || "Not set"}</div>
+                        <div className="flex items-center gap-2 font-medium"><Mail className="h-4 w-4" /> {t('profile.email')}</div>
+                        <div className="text-sm text-muted-foreground">{user.email || t('profile.notSet')}</div>
                       </div>
                       <Button variant="outline" onClick={sendSensitiveCode} className="w-full sm:w-auto">
-                        <ShieldCheck className="mr-2 h-4 w-4" /> Send code
+                        <ShieldCheck className="mr-2 h-4 w-4" /> {t('profile.sendCode')}
                       </Button>
                     </div>
                     <form onSubmit={doChangeEmail} className="mt-4 grid gap-3">
-                      <Label htmlFor="email">Email</Label>
-                      <Input id="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="(optional)" />
-                      <Label>SMS code</Label>
+                      <Label htmlFor="email">{t('profile.email')}</Label>
+                      <Input id="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder={t('profile.emailPlaceholder')} />
+                      <Label>{t('profile.smsCode')}</Label>
                       <OtpInput value={code} onChange={setCode} />
-                      <Button type="submit" className="bg-accent hover:bg-accent/90">Update email</Button>
-                      <p className="text-xs text-muted-foreground">If email is empty, receipts will only be stored in your account.</p>
+                      <Button type="submit" className="bg-accent hover:bg-accent/90">{t('profile.updateEmail')}</Button>
+                      <p className="text-xs text-muted-foreground">{t('profile.emailHelp')}</p>
                     </form>
                   </div>
                 </div>
@@ -204,23 +215,29 @@ const AccountPage: React.FC = () => {
           <TabsContent value="security">
             <Card>
               <CardHeader>
-                <CardTitle>Password</CardTitle>
-                <CardDescription>Changing password requires an SMS code.</CardDescription>
+                <CardTitle>{t('security.title')}</CardTitle>
+                <CardDescription>{t('security.description')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Button variant="outline" onClick={sendSensitiveCode} className="w-full sm:w-auto">
-                  <ShieldCheck className="mr-2 h-4 w-4" /> Send code
+                  <ShieldCheck className="mr-2 h-4 w-4" /> {t('security.sendCode')}
                 </Button>
 
                 <form onSubmit={doChangePassword} className="grid gap-3">
-                  <Label htmlFor="new_password">New password</Label>
+                  <Label htmlFor="new_password">{t('security.newPassword')}</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input id="new_password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="pl-10" />
+                    <Input
+                      id="new_password"
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="pl-10"
+                    />
                   </div>
-                  <Label>SMS code</Label>
+                  <Label>{t('security.smsCode')}</Label>
                   <OtpInput value={code} onChange={setCode} />
-                  <Button type="submit" className="bg-accent hover:bg-accent/90">Update password</Button>
+                  <Button type="submit" className="bg-accent hover:bg-accent/90">{t('security.updatePassword')}</Button>
                 </form>
               </CardContent>
             </Card>

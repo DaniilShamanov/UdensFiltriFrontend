@@ -8,13 +8,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useApp } from '@/contexts/AppContext';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
+import { useTranslations } from 'next-intl';
 
 const CartPage: React.FC = () => {
   const router = useRouter();
   const { user, cart, removeFromCart, updateCartQuantity } = useApp();
+  const t = useTranslations('cart');
 
   const subtotal = cart.reduce((sum, item) => {
-    const price = user?.isWholesale && item.product.wholesalePrice
+    const price = user?.is_company && item.product.wholesalePrice
       ? item.product.wholesalePrice
       : item.product.price;
     return sum + price * item.quantity;
@@ -28,10 +30,10 @@ const CartPage: React.FC = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="container mx-auto px-4 py-16 text-center">
           <ShoppingBag className="h-24 w-24 text-muted-foreground mx-auto mb-6" />
-          <h2 className="text-3xl font-bold mb-4">Your cart is empty</h2>
-          <p className="text-muted-foreground mb-8">Add some products to get started!</p>
+          <h2 className="text-3xl font-bold mb-4">{t('empty.title')}</h2>
+          <p className="text-muted-foreground mb-8">{t('empty.description')}</p>
           <Button size="lg" onClick={() => router.push('/products')} className="bg-accent hover:bg-accent/90">
-            Browse Products
+            {t('empty.browseButton')}
           </Button>
         </div>
       </div>
@@ -41,13 +43,13 @@ const CartPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background py-8">
       <div className="container mx-auto px-4">
-        <h1 className="text-3xl font-bold mb-8">Shopping Cart</h1>
+        <h1 className="text-3xl font-bold mb-8">{t('title')}</h1>
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
             {cart.map(item => {
-              const displayPrice = user?.isWholesale && item.product.wholesalePrice
+              const displayPrice = user?.is_company && item.product.wholesalePrice
                 ? item.product.wholesalePrice
                 : item.product.price;
 
@@ -114,7 +116,7 @@ const CartPage: React.FC = () => {
                               €{(displayPrice * item.quantity).toFixed(2)}
                             </div>
                             <div className="text-sm text-muted-foreground">
-                              €{displayPrice.toFixed(2)} each
+                              {t('item.eachPrice', { price: displayPrice.toFixed(2) })}
                             </div>
                           </div>
                         </div>
@@ -130,17 +132,19 @@ const CartPage: React.FC = () => {
           <div>
             <Card className="sticky top-24">
               <CardContent className="p-6">
-                <h2 className="text-xl font-bold mb-6">Order Summary</h2>
+                <h2 className="text-xl font-bold mb-6">{t('summary.title')}</h2>
                 <div className="space-y-4">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Subtotal ({cart.reduce((sum, item) => sum + item.quantity, 0)} items)</span>
+                    <span className="text-muted-foreground">
+                      {t('summary.subtotal', { count: cart.reduce((sum, item) => sum + item.quantity, 0) })}
+                    </span>
                     <span className="font-medium">€{subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Shipping</span>
+                    <span className="text-muted-foreground">{t('summary.shipping')}</span>
                     <span className="font-medium">
                       {shipping === 0 ? (
-                        <span className="text-green-600">FREE</span>
+                        <span className="text-green-600">{t('summary.free')}</span>
                       ) : (
                         `€${shipping.toFixed(2)}`
                       )}
@@ -148,12 +152,12 @@ const CartPage: React.FC = () => {
                   </div>
                   {shipping > 0 && subtotal < 100 && (
                     <div className="text-sm text-muted-foreground bg-muted/30 p-3 rounded-lg">
-                      Add €{(100 - subtotal).toFixed(2)} more for free shipping!
+                      {t('summary.freeShippingMessage', { amount: (100 - subtotal).toFixed(2) })}
                     </div>
                   )}
                   <Separator />
                   <div className="flex justify-between text-lg font-bold">
-                    <span>Total</span>
+                    <span>{t('summary.total')}</span>
                     <span className="text-primary">€{total.toFixed(2)}</span>
                   </div>
                   <Button
@@ -161,7 +165,7 @@ const CartPage: React.FC = () => {
                     className="w-full bg-accent hover:bg-accent/90"
                     onClick={() => router.push('/checkout')}
                   >
-                    Proceed to Checkout
+                    {t('summary.checkoutButton')}
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                   <Button
@@ -169,7 +173,7 @@ const CartPage: React.FC = () => {
                     className="w-full"
                     onClick={() => router.push('/products')}
                   >
-                    Continue Shopping
+                    {t('summary.continueShopping')}
                   </Button>
                 </div>
               </CardContent>

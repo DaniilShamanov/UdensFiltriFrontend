@@ -1,19 +1,16 @@
 "use client";
 
 import { useMemo } from "react";
-import { usePathname } from "@/navigation";
+import { usePathnameWithoutLocale } from "@/hooks/locale";
 import { Link } from "@/navigation";
 import { locales, type AppLocale } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
+import { useLocale } from "next-intl";
 
-export default function LocaleSwitcher({
-  currentLocale,
-}: {
-  currentLocale: AppLocale;
-}) {
-  const pathname = usePathname();
+export default function LocaleSwitcher() {
+  const currentLocale = useLocale() as AppLocale;
+  const pathname = usePathnameWithoutLocale();
 
-  // Keep current path, change locale prefix.
   const items = useMemo(() => {
     return (locales as readonly AppLocale[]).map((l) => ({
       locale: l,

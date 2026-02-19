@@ -7,8 +7,8 @@ import { cn } from "./utils";
 
 type Ctx = {
   open: boolean;
-  setOpen: (v: boolean) => void;
-  triggerRef: React.RefObject<HTMLElement>;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  triggerRef: React.RefObject<HTMLElement | null>;
 };
 
 const DropdownContext = React.createContext<Ctx | null>(null);
@@ -41,7 +41,7 @@ function DropdownMenuTrigger({
   const ctx = React.useContext(DropdownContext);
   if (!ctx) throw new Error("DropdownMenuTrigger must be used within DropdownMenu");
 
-  const onClick = () => ctx.setOpen(!ctx.open);
+  const onClick = () => ctx.setOpen((prev) => !prev);
 
   if (asChild && React.isValidElement(children)) {
     return React.cloneElement(children as any, {
@@ -125,15 +125,19 @@ function DropdownMenuContent({
   );
 }
 
+interface DropdownMenuItemProps {
+  children: React.ReactNode;
+  className?: string;
+  onSelect?: () => void;
+  asChild?: boolean;
+}
+
 function DropdownMenuItem({
   children,
   className,
   onSelect,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  onSelect?: () => void;
-}) {
+  asChild = false
+}: DropdownMenuItemProps) {
   const ctx = React.useContext(DropdownContext);
   return (
     <button
