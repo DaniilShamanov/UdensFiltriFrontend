@@ -22,7 +22,8 @@
 
 # production
 next-env.d.ts   # (auto-generated, but may be committed if you want to track changes)
-!.env.example   # allow committing example env file
+# allow committing example env file
+!.env.example
 .env
 .env.*
 !.env.*.example
