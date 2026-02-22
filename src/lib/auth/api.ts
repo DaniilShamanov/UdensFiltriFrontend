@@ -18,6 +18,7 @@ export const AUTH_ENDPOINTS = {
   changeEmail: "/api/auth/change-email/",
   changePhone: "/api/auth/change-phone/",
   changePassword: "/api/auth/change-password/",
+  requestPasswordReset: "/api/auth/request-password-reset/",
 } as const;
 
 export type SmsPurpose = "register" | "sensitive";
@@ -115,8 +116,13 @@ export const authApi = {
     return res.user;
   },
 
-  async requestPasswordReset(input: { email: string }) {
-    // TODO: implement
+  async requestPasswordReset(input: { email: string }): Promise<void> {
+    await fetchJson<OkEnvelope>(apiUrl(AUTH_ENDPOINTS.requestPasswordReset), {
+      method: "POST",
+      body: input,
+      csrf: true,
+      credentials: "include",
+    });
   },
 
   async changePassword(input: { new_password: string; code?: string }): Promise<OkEnvelope> {

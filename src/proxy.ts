@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
 import { jwtVerify } from 'jose';
-import { defaultLocale, locales } from './i18n/routing';
+import { defaultLocale, localePrefix, locales } from './i18n/routing';
 
 const localeArray = locales as readonly string[];
 const isDevelopment = process.env.NODE_ENV === 'development';
@@ -12,16 +12,13 @@ const JWT_SECRET = process.env.JWT_SECRET!;
 const PUBLIC_PREFIXES = ['/home', '/about', '/services', '/auth'];
 const PROTECTED_PREFIXES = ['/account', '/orders', '/checkout', '/payment'];
 
-const intlMiddleware = createMiddleware({ locales, defaultLocale, localePrefix: 'as-needed' });
+const intlMiddleware = createMiddleware({ locales, defaultLocale, localePrefix });
 
 async function verifyToken(token: string): Promise<boolean> {
   try {
-    console.log('Verifying token with secret:', JWT_SECRET ? 'set' : 'MISSING');
     await jwtVerify(token, new TextEncoder().encode(JWT_SECRET));
-    console.log('Token verified successfully');
     return true;
-  } catch (error: any) {
-    console.error('Token verification failed:', error.message);
+  } catch {
     return false;
   }
 }
