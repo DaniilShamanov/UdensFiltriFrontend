@@ -31,6 +31,13 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+const GUEST_CART_KEY = "cart:guest";
+const GUEST_ORDERS_KEY = "orders:guest";
+
+function getScopedStorageKey(prefix: "cart" | "orders", userId?: string | number | null) {
+  return userId ? `${prefix}:${userId}` : `${prefix}:guest`;
+}
+
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -38,10 +45,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [orders, setOrders] = useState<Order[]>([]);
 
   useEffect(() => {
-    const savedCart = localStorage.getItem("cart");
+    const savedCart = localStorage.getItem(GUEST_CART_KEY) ?? localStorage.getItem("cart");
     if (savedCart) setCart(JSON.parse(savedCart));
 
-    const savedOrders = localStorage.getItem("orders");
+    const savedOrders = localStorage.getItem(GUEST_ORDERS_KEY) ?? localStorage.getItem("orders");
     if (savedOrders) setOrders(JSON.parse(savedOrders));
   }, []);
 
@@ -63,12 +70,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }, [cart]);
+    const key = getScopedStorageKey("cart", user?.id ?? null);
+    localStorage.setItem(key, JSON.stringify(cart));
+  }, [cart, user?.id]);
 
   useEffect(() => {
-    localStorage.setItem("orders", JSON.stringify(orders));
-  }, [orders]);
+    const key = getScopedStorageKey("orders", user?.id ?? null);
+    localStorage.setItem(key, JSON.stringify(orders));
+  }, [orders, user?.id]);
+
+  useEffect(() => {
+    const userId = user?.id ?? null;
+    const cartKey = getScopedStorageKey("cart", userId);
+    const ordersKey = getScopedStorageKey("orders", userId);
+
+    const savedCart = localStorage.getItem(cartKey);
+    setCart(savedCart ? JSON.parse(savedCart) : []);
+
+    const savedOrders = localStorage.getItem(ordersKey);
+    setOrders(savedOrders ? JSON.parse(savedOrders) : []);
+  }, [user?.id]);
 
   const addToCart = (productId: string, quantity: number = 1) => {
     const product = products.find((p) => p.id === productId);

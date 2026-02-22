@@ -12,6 +12,7 @@ import { Link, useRouter } from "@/navigation";
 import { toast } from "sonner";
 import { useApp } from "@/contexts/AppContext";
 import { useTranslations } from "next-intl";
+import { sanitizeNextPath } from "@/lib/safeRedirect";
 
 const SignInPage: React.FC = () => {
   const { signIn } = useApp();
@@ -28,7 +29,7 @@ const SignInPage: React.FC = () => {
     try {
       await signIn({ phone: form.phone, password: form.password });
       toast.success(t('toast.success'));
-      const next = searchParams.get("next") || "/";
+      const next = sanitizeNextPath(searchParams.get("next"), "/");
       router.replace(next);
     } catch (err: any) {
       toast.error(t('toast.error'), {

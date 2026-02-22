@@ -12,6 +12,7 @@ import { useApp } from "@/contexts/AppContext";
 import { Link, useRouter } from "@/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { sanitizeNextPath } from "@/lib/safeRedirect";
 
 const SignUpPage: React.FC = () => {
   const { signUp } = useApp();
@@ -61,7 +62,7 @@ const SignUpPage: React.FC = () => {
         last_name: formData.last_name || undefined,
       });
       toast.success(t('toast.accountCreated'));
-      const next = searchParams.get("next") || "/";
+      const next = sanitizeNextPath(searchParams.get("next"), "/");
       router.replace(next);
     } catch (e: any) {
       toast.error(t('toast.signUpFailed'), {

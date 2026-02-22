@@ -23,7 +23,7 @@ const CheckoutPage: React.FC = () => {
   const [formData, setFormData] = useState({
     email: user?.email || '',
     firstName: user?.first_name?.split(' ')[0] || '',
-    lastName: user?.last_name?.split(' ')[1] || '',
+    lastName: user?.last_name || '',
     phone: user?.phone || '',
     street: user?.address?.street || '',
     city: user?.address?.city || '',
@@ -65,7 +65,7 @@ const CheckoutPage: React.FC = () => {
     try {
       setSubmitting(true);
 
-      const items: Array<any> = cart.map((ci) => {
+      const items: Array<{ product_id: string | null; title: string; quantity: number; unit_price: number }> = cart.map((ci) => {
         const unit = user?.is_company && ci.product.wholesalePrice
           ? ci.product.wholesalePrice
           : ci.product.price;
@@ -116,8 +116,8 @@ const CheckoutPage: React.FC = () => {
       );
 
       window.location.assign(res.checkoutUrl);
-    } catch (err: any) {
-      setSubmitError(err?.message || t('paymentInitFailed'));
+    } catch (err: unknown) {
+      setSubmitError(err instanceof Error ? err.message : t('paymentInitFailed'));
       setSubmitting(false);
     }
   };
