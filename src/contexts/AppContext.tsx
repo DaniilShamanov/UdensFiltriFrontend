@@ -12,13 +12,13 @@ interface AppContextType {
 
   requestSmsCode: (input: { purpose: SmsPurpose; phone?: string }) => Promise<void>
   signIn: (input: { phone: string; password: string }) => Promise<void>;
-  signUp: (input: { phone: string; password: string; code: string; email?: string; first_name?: string; last_name?: string }) => Promise<void>;
+  signUp: (input: { phone?: string; password: string; email?: string; first_name?: string; last_name?: string }) => Promise<void>;
   signOut: () => Promise<void>;
   refreshSession: () => Promise<void>;
   updateProfile: (input: { first_name?: string; last_name?: string }) => Promise<void>;
-  changeEmail: (input: { email?: string; code: string }) => Promise<void>;
-  changePhone: (input: { new_phone: string; code: string }) => Promise<void>;
-  changePassword: (input: { new_password: string; code: string }) => Promise<void>;
+  changeEmail: (input: { email?: string; code?: string }) => Promise<void>;
+  changePhone: (input: { new_phone: string; code?: string }) => Promise<void>;
+  changePassword: (input: { new_password: string; code?: string }) => Promise<void>;
 
   cart: CartItem[];
   addToCart: (productId: string, quantity?: number) => void;
@@ -114,7 +114,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  const signUp = async (input: { phone: string; password: string; code: string; email?: string; first_name?: string; last_name?: string }) => {
+  const signUp = async (input: { phone?: string; password: string; email?: string; first_name?: string; last_name?: string }) => {
     setAuthLoading(true);
     try {
       await authApi.signUp(input);
@@ -150,17 +150,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setUser(updated);
   };
 
-  const changeEmail = async (input: { email?: string; code: string }) => {
+  const changeEmail = async (input: { email?: string; code?: string }) => {
     const updated = await authApi.changeEmail(input);
     setUser(updated);
   };
 
-  const changePhone = async (input: { new_phone: string; code: string }) => {
+  const changePhone = async (input: { new_phone: string; code?: string }) => {
     const updated = await authApi.changePhone(input);
     setUser(updated);
   };
 
-  const changePassword = async (input: { new_password: string; code: string }) => {
+  const changePassword = async (input: { new_password: string; code?: string }) => {
     await authApi.changePassword(input);
     setUser(null);
   };

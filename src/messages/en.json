@@ -345,13 +345,12 @@
   },
   "signUp": {
     "title": "Create Account",
-    "descriptionForm": "Register with your phone number",
-    "descriptionVerify": "Enter the code we sent to {phone}",
+    "descriptionForm": "Create your account details.",
     "firstNameLabel": "First name",
     "firstNamePlaceholder": "Raksha",
     "lastNameLabel": "Last name",
     "lastNamePlaceholder": "",
-    "phoneLabel": "Phone number",
+    "phoneLabel": "Phone number (optional)",
     "phonePlaceholder": "+37112345678",
     "phoneHint": "Use international format (e.g. +371...).",
     "emailLabel": "Email (optional)",
@@ -362,25 +361,16 @@
     "confirmPasswordLabel": "Confirm password",
     "confirmPasswordPlaceholder": "••••••••",
     "agreeToTerms": "I agree to the <termsLink>Terms and Conditions</termsLink>",
-    "sendCodeButton": "Send verification code",
     "alreadyHaveAccount": "Already have an account?",
     "signInLink": "Sign In",
-    "smsCodeLabel": "SMS code",
-    "verifyButton": "Verify & create account",
-    "resendCode": "Resend code",
-    "editPhone": "Edit phone",
-    "footerWithName": "Creating account for {fullName}.",
-    "footerWithoutName": "You can add your name later in account settings.",
     "toast": {
       "passwordsMismatch": "Passwords do not match",
       "termsNotAgreed": "Please agree to the terms and conditions",
-      "codeSent": "Code sent",
-      "codeSentDescription": "Check SMS for the verification code.",
-      "failedToSendCode": "Failed to send code",
       "tryAgain": "Please try again.",
       "accountCreated": "Account created successfully!",
       "signUpFailed": "Sign up failed"
-    }
+    },
+    "createAccountButton": "Create account"
   },
   "account": {
     "title": "Account Settings",
@@ -391,7 +381,7 @@
     },
     "profile": {
       "title": "Personal information",
-      "description": "Name can be changed instantly. Phone/email require SMS code.",
+      "description": "Update your personal details and contact information.",
       "firstName": "First name",
       "lastName": "Last name",
       "saveName": "Save name",
@@ -410,7 +400,7 @@
     },
     "security": {
       "title": "Password",
-      "description": "Changing password requires an SMS code.",
+      "description": "Change your password anytime.",
       "sendCode": "Send code",
       "newPassword": "New password",
       "smsCode": "SMS code",

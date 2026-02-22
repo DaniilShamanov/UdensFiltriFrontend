@@ -36,7 +36,7 @@ export interface Address {
 
 export interface User {
   id: string | number;
-  phone: string;
+  phone?: string | null;
   email?: string | null;
   first_name?: string;
   last_name?: string;

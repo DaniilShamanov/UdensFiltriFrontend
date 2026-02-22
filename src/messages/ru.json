@@ -326,7 +326,7 @@
       }
     }
   },
-   "signIn": {
+  "signIn": {
     "title": "Вход",
     "description": "Используйте свой номер телефона для входа в аккаунт",
     "phoneLabel": "Номер телефона",
@@ -345,13 +345,12 @@
   },
   "signUp": {
     "title": "Создать аккаунт",
-    "descriptionForm": "Зарегистрируйтесь по номеру телефона",
-    "descriptionVerify": "Введите код, отправленный на {phone}",
+    "descriptionForm": "Заполните данные для создания аккаунта.",
     "firstNameLabel": "Имя",
     "firstNamePlaceholder": "Иван",
     "lastNameLabel": "Фамилия",
     "lastNamePlaceholder": "Иванов",
-    "phoneLabel": "Номер телефона",
+    "phoneLabel": "Номер телефона (необязательно)",
     "phonePlaceholder": "+37112345678",
     "phoneHint": "Используйте международный формат (например +371...).",
     "emailLabel": "Электронная почта (необязательно)",
@@ -362,25 +361,16 @@
     "confirmPasswordLabel": "Подтвердите пароль",
     "confirmPasswordPlaceholder": "••••••••",
     "agreeToTerms": "Я согласен с <termsLink>Условиями использования</termsLink>",
-    "sendCodeButton": "Отправить код",
     "alreadyHaveAccount": "Уже есть аккаунт?",
     "signInLink": "Войти",
-    "smsCodeLabel": "Код из SMS",
-    "verifyButton": "Подтвердить и создать",
-    "resendCode": "Отправить код повторно",
-    "editPhone": "Изменить номер",
-    "footerWithName": "Создание аккаунта для {fullName}.",
-    "footerWithoutName": "Вы сможете добавить имя позже в настройках.",
     "toast": {
       "passwordsMismatch": "Пароли не совпадают",
       "termsNotAgreed": "Пожалуйста, примите условия использования",
-      "codeSent": "Код отправлен",
-      "codeSentDescription": "Проверьте SMS с кодом подтверждения.",
-      "failedToSendCode": "Не удалось отправить код",
       "tryAgain": "Пожалуйста, попробуйте снова.",
       "accountCreated": "Аккаунт успешно создан!",
       "signUpFailed": "Ошибка регистрации"
-    }
+    },
+    "createAccountButton": "Создать аккаунт"
   },
   "account": {
     "title": "Настройки аккаунта",
@@ -391,7 +381,7 @@
     },
     "profile": {
       "title": "Личная информация",
-      "description": "Имя можно изменить сразу. Для смены телефона/email требуется SMS-код.",
+      "description": "Обновляйте личные и контактные данные.",
       "firstName": "Имя",
       "lastName": "Фамилия",
       "saveName": "Сохранить имя",
@@ -410,7 +400,7 @@
     },
     "security": {
       "title": "Пароль",
-      "description": "Смена пароля требует SMS-код.",
+      "description": "Вы можете изменить пароль в любое время.",
       "sendCode": "Отправить код",
       "newPassword": "Новый пароль",
       "smsCode": "SMS-код",
@@ -490,7 +480,7 @@
     "termsNote": "Оформляя заказ, вы соглашаетесь с нашими Условиями предоставления услуг",
     "paymentInitFailed": "Не удалось инициализировать платёж"
   },
-   "footer": {
+  "footer": {
     "brand": "WaterFilters",
     "description": "Современные сантехнические решения и системы фильтрации воды. Разработано с приоритетом мобильных устройств и готово к интеграции с Django.",
     "company": "Компания",

@@ -345,13 +345,12 @@
   },
   "signUp": {
     "title": "Izveidot kontu",
-    "descriptionForm": "Reģistrējieties ar savu tālruņa numuru",
-    "descriptionVerify": "Ievadiet kodu, ko nosūtījām uz {phone}",
+    "descriptionForm": "Aizpildiet datus konta izveidei.",
     "firstNameLabel": "Vārds",
     "firstNamePlaceholder": "Jānis",
     "lastNameLabel": "Uzvārds",
     "lastNamePlaceholder": "Bērziņš",
-    "phoneLabel": "Tālruņa numurs",
+    "phoneLabel": "Tālruņa numurs (neobligāti)",
     "phonePlaceholder": "+37112345678",
     "phoneHint": "Izmantojiet starptautisko formātu (piemēram +371...).",
     "emailLabel": "E-pasts (neobligāti)",
@@ -362,25 +361,16 @@
     "confirmPasswordLabel": "Apstipriniet paroli",
     "confirmPasswordPlaceholder": "••••••••",
     "agreeToTerms": "Piekrītu <termsLink>Lietošanas noteikumiem</termsLink>",
-    "sendCodeButton": "Nosūtīt verifikācijas kodu",
     "alreadyHaveAccount": "Jau ir konts?",
     "signInLink": "Pierakstīties",
-    "smsCodeLabel": "SMS kods",
-    "verifyButton": "Apstiprināt un izveidot",
-    "resendCode": "Nosūtīt kodu vēlreiz",
-    "editPhone": "Rediģēt tālruni",
-    "footerWithName": "Tiek izveidots konts lietotājam {fullName}.",
-    "footerWithoutName": "Vārdu varēsiet pievienot vēlāk konta iestatījumos.",
     "toast": {
       "passwordsMismatch": "Paroles nesakrīt",
       "termsNotAgreed": "Lūdzu, piekrītiet lietošanas noteikumiem",
-      "codeSent": "Kods nosūtīts",
-      "codeSentDescription": "Pārbaudiet SMS ar verifikācijas kodu.",
-      "failedToSendCode": "Neizdevās nosūtīt kodu",
       "tryAgain": "Lūdzu, mēģiniet vēlreiz.",
       "accountCreated": "Konts veiksmīgi izveidots!",
       "signUpFailed": "Reģistrācija neizdevās"
-    }
+    },
+    "createAccountButton": "Izveidot kontu"
   },
   "account": {
     "title": "Konta iestatījumi",
@@ -391,7 +381,7 @@
     },
     "profile": {
       "title": "Personiskā informācija",
-      "description": "Vārdu var mainīt uzreiz. Tālrunim/e-pastam nepieciešams SMS kods.",
+      "description": "Atjauniniet personīgo un kontaktinformāciju.",
       "firstName": "Vārds",
       "lastName": "Uzvārds",
       "saveName": "Saglabāt vārdu",
@@ -410,7 +400,7 @@
     },
     "security": {
       "title": "Parole",
-      "description": "Lai mainītu paroli, nepieciešams SMS kods.",
+      "description": "Paroli varat mainīt jebkurā laikā.",
       "sendCode": "Nosūtīt kodu",
       "newPassword": "Jauna parole",
       "smsCode": "SMS kods",

@@ -63,9 +63,8 @@ export const authApi = {
   },
 
   async signUp(input: {
-    phone: string;
+    phone?: string;
     password: string;
-    code: string;
     email?: string;
     first_name?: string;
     last_name?: string;
@@ -96,7 +95,7 @@ export const authApi = {
     });
   },
 
-  async changeEmail(input: { email?: string; code: string }): Promise<User> {
+  async changeEmail(input: { email?: string; code?: string }): Promise<User> {
     const res = await fetchJson<UserEnvelope>(apiUrl(AUTH_ENDPOINTS.changeEmail), {
       method: "POST",
       body: input,
@@ -106,7 +105,7 @@ export const authApi = {
     return res.user;
   },
 
-  async changePhone(input: { new_phone: string; code: string }): Promise<User> {
+  async changePhone(input: { new_phone: string; code?: string }): Promise<User> {
     const res = await fetchJson<UserEnvelope>(apiUrl(AUTH_ENDPOINTS.changePhone), {
       method: "POST",
       body: input,
@@ -120,7 +119,7 @@ export const authApi = {
     // TODO: implement
   },
 
-  async changePassword(input: { new_password: string; code: string }): Promise<OkEnvelope> {
+  async changePassword(input: { new_password: string; code?: string }): Promise<OkEnvelope> {
     return fetchJson<OkEnvelope>(apiUrl(AUTH_ENDPOINTS.changePassword), {
       method: "POST",
       body: input,
