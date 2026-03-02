@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
@@ -71,7 +70,7 @@ export default function RangeSlider({
     }
   }, [min, max, isControlled]);
 
-  const current = isControlled ? value! : internal;
+  const current = isControlled ? value : internal;
 
   const normalized = useMemo(() => {
     let lo = Math.min(current.min, current.max);
@@ -80,7 +79,6 @@ export default function RangeSlider({
     lo = roundToStep(clamp(lo, min, max), step, min);
     hi = roundToStep(clamp(hi, min, max), step, min);
 
-    // enforce minDistance
     if (hi - lo < minDistance) {
       const targetHi = clamp(lo + minDistance, min, max);
       hi = roundToStep(targetHi, step, min);
@@ -96,7 +94,6 @@ export default function RangeSlider({
     return { min: lo, max: hi };
   }, [current.min, current.max, min, max, step, minDistance]);
 
-  // keep latest values in refs for event handlers
   const minRef = useRef(normalized.min);
   const maxRef = useRef(normalized.max);
   useEffect(() => {
@@ -132,7 +129,6 @@ export default function RangeSlider({
     return clamp(snapped, min, max);
   }
 
-  // HARD enforcement: no overdrag, no overlap, clamp again after rounding
   function setThumb(which: 'min' | 'max', nextValue: number, end = false) {
     if (disabled) return;
 
@@ -144,9 +140,7 @@ export default function RangeSlider({
 
     if (which === 'min') {
       const hardMax = currentMax - minDistance;
-
-
-nextMin = clamp(nextValue, min, hardMax);
+      nextMin = clamp(nextValue, min, hardMax);
       nextMin = roundToStep(nextMin, step, min);
       nextMin = clamp(nextMin, min, hardMax);
     } else {
@@ -161,30 +155,24 @@ nextMin = clamp(nextValue, min, hardMax);
     if (end) emitEnd(next);
   }
 
-  // Pointer Events dragging (reliable on iOS + desktop)
   function onThumbPointerDown(which: 'min' | 'max', e: React.PointerEvent<HTMLDivElement>) {
     if (disabled) return;
-    e.preventDefault(); // crucial for iOS (prevents scroll gesture)
+    e.preventDefault();
     e.stopPropagation();
 
     setActiveThumb(which);
-
-    // capture pointer so we keep receiving pointermove even if finger leaves the thumb
     (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
   }
 
   function onThumbPointerMove(which: 'min' | 'max', e: React.PointerEvent<HTMLDivElement>) {
-    if (disabled) return;
-    if (activeThumb !== which) return; // only the active thumb moves
+    if (disabled || activeThumb !== which) return;
     e.preventDefault();
 
-    const v = valueFromClientX(e.clientX);
-    setThumb(which, v, false);
+    setThumb(which, valueFromClientX(e.clientX), false);
   }
 
   function onThumbPointerUp(which: 'min' | 'max', e: React.PointerEvent<HTMLDivElement>) {
-    if (disabled) return;
-    if (activeThumb !== which) return;
+    if (disabled || activeThumb !== which) return;
 
     e.preventDefault();
     emitEnd({ min: minRef.current, max: maxRef.current });
@@ -198,9 +186,7 @@ nextMin = clamp(nextValue, min, hardMax);
   }
 
   function onTrackClick(e: React.MouseEvent<HTMLDivElement>) {
-    if (disabled) return;
-    // If you were dragging, ignore click that can happen after pointerup
-    if (dragging) return;
+    if (disabled || dragging) return;
 
     const v = valueFromClientX(e.clientX);
     const distToMin = Math.abs(v - minRef.current);
@@ -217,8 +203,8 @@ nextMin = clamp(nextValue, min, hardMax);
       key === 'ArrowLeft' || key === 'ArrowDown'
         ? -step
         : key === 'ArrowRight' || key === 'ArrowUp'
-        ? step
-        : 0;
+          ? step
+          : 0;
 
     if (delta !== 0) {
       e.preventDefault();
@@ -247,45 +233,38 @@ nextMin = clamp(nextValue, min, hardMax);
   }
 
   const inputBase =
-    'w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm ' +
-    'focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed';
+    'w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground shadow-sm ' +
+    'focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-50 disabled:cursor-not-allowed';
 
   return (
     <div className={`w-full ${className}`}>
       <div className="mb-2 flex items-center justify-between">
-        <div className="text-sm text-slate-700">
-          <span className="font-medium">{formatValue(normalized.min)}</span>
-          <span className="mx-2 text-slate-400">—</span>
-          <span className="font-medium">{formatValue(normalized.max)}</span>
+        <div className="text-sm text-muted-foreground">
+          <span className="font-semibold text-primary">{formatValue(normalized.min)}</span>
+          <span className="mx-2 text-muted-foreground/50">—</span>
+          <span className="font-semibold text-primary">{formatValue(normalized.max)}</span>
         </div>
       </div>
 
-      {/* Track */}
       <div
         ref={trackRef}
         onClick={onTrackClick}
         className={[
-          'relative h-10 w-full select-none',
+          'relative h-10 w-full select-none rounded-md',
           disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer',
-          // important for touch: prevents page panning while interacting with slider area
           'touch-none',
         ].join(' ')}
       >
-        {/* Base line */}
+        <div className="absolute left-0 right-0 top-1/2 h-2 -translate-y-1/2 rounded-full bg-muted" />
 
-
-<div className="absolute left-0 right-0 top-1/2 h-2 -translate-y-1/2 rounded-full bg-slate-200" />
-
-        {/* Filled range (dark blue) */}
         <div
-          className="absolute top-1/2 h-2 -translate-y-1/2 rounded-full bg-blue-900"
+          className="absolute top-1/2 h-2 -translate-y-1/2 rounded-full bg-gradient-to-r from-secondary to-primary"
           style={{
             left: `${pctMin}%`,
             width: `${Math.max(0, pctMax - pctMin)}%`,
           }}
         />
 
-        {/* Min thumb */}
         <div
           role="slider"
           aria-label={`${label} minimum`}
@@ -301,21 +280,15 @@ nextMin = clamp(nextValue, min, hardMax);
           onKeyDown={(e) => onKeyDown('min', e)}
           onBlur={() => emitEnd({ min: minRef.current, max: maxRef.current })}
           className={[
-            'absolute top-1/2 -translate-y-1/2 -translate-x-1/2',
-            'h-5 w-5 rounded-full bg-white ring-2 ring-blue-900 shadow',
+            'absolute top-1/2 -translate-x-1/2 -translate-y-1/2',
+            'h-5 w-5 rounded-full border-2 border-primary bg-card shadow-sm',
             disabled ? 'cursor-not-allowed' : 'cursor-grab active:cursor-grabbing',
-            'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400',
-            // only one thumb active at a time
-            activeThumb === 'min'
-              ? 'z-20 pointer-events-auto'
-              : dragging
-              ? 'z-10 pointer-events-none'
-              : 'z-10 pointer-events-auto',
+            'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary/50',
+            activeThumb === 'min' ? 'z-20 pointer-events-auto' : dragging ? 'z-10 pointer-events-none' : 'z-10 pointer-events-auto',
           ].join(' ')}
           style={{ left: `${pctMin}%` }}
         />
 
-        {/* Max thumb */}
         <div
           role="slider"
           aria-label={`${label} maximum`}
@@ -331,15 +304,11 @@ nextMin = clamp(nextValue, min, hardMax);
           onKeyDown={(e) => onKeyDown('max', e)}
           onBlur={() => emitEnd({ min: minRef.current, max: maxRef.current })}
           className={[
-            'absolute top-1/2 -translate-y-1/2 -translate-x-1/2',
-            'h-5 w-5 rounded-full bg-white ring-2 ring-blue-900 shadow',
+            'absolute top-1/2 -translate-x-1/2 -translate-y-1/2',
+            'h-5 w-5 rounded-full border-2 border-secondary bg-card shadow-sm',
             disabled ? 'cursor-not-allowed' : 'cursor-grab active:cursor-grabbing',
-            'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400',
-            activeThumb === 'max'
-              ? 'z-20 pointer-events-auto'
-              : dragging
-              ? 'z-10 pointer-events-none'
-              : 'z-10 pointer-events-auto',
+            'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary/50',
+            activeThumb === 'max' ? 'z-20 pointer-events-auto' : dragging ? 'z-10 pointer-events-none' : 'z-10 pointer-events-auto',
           ].join(' ')}
           style={{ left: `${pctMax}%` }}
         />
@@ -348,7 +317,7 @@ nextMin = clamp(nextValue, min, hardMax);
       {showInputs && (
         <div className="mt-3 grid grid-cols-2 gap-3">
           <div>
-            <label htmlFor={`${id}-min`} className="mb-1 block text-xs text-slate-600">
+            <label htmlFor={`${id}-min`} className="mb-1 block text-xs text-muted-foreground">
               Min
             </label>
             <input
@@ -371,7 +340,7 @@ nextMin = clamp(nextValue, min, hardMax);
           </div>
 
           <div>
-            <label htmlFor={`${id}-max`} className="mb-1 block text-xs text-slate-600">
+            <label htmlFor={`${id}-max`} className="mb-1 block text-xs text-muted-foreground">
               Max
             </label>
             <input
@@ -379,9 +348,7 @@ nextMin = clamp(nextValue, min, hardMax);
               type="number"
               inputMode="decimal"
               className={inputBase}
-
-
-disabled={disabled}
+              disabled={disabled}
               min={normalized.min + minDistance}
               max={max}
               step={step}
