@@ -38,13 +38,13 @@ export default function Header() {
   const closeMobile = () => setMobileMenuOpen(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-primary/10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85 shadow-[0_8px_24px_rgba(11,99,206,0.08)]">
+    <header className="sticky top-0 z-50 border-b border-primary/20 bg-gradient-to-r from-background/95 via-primary/5 to-secondary/10 backdrop-blur supports-[backdrop-filter]:bg-background/85 shadow-[0_10px_28px_rgba(11,99,206,0.14)]">
       <div className="container mx-auto px-4 py-3 md:py-4">
         <div className="flex items-center justify-between gap-4">
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2 md:gap-3 hover:opacity-90 transition-opacity"
+            className="flex items-center gap-2 transition-opacity hover:opacity-95 md:gap-3"
             aria-label="Home"
           >
             <div className="bg-gradient-to-br from-secondary via-primary to-accent p-2 rounded-xl shadow-md shadow-primary/25">
@@ -57,17 +57,17 @@ export default function Header() {
           </Link>
 
           {/* Desktop navigation */}
-          <nav className="hidden lg:flex items-center gap-2" aria-label="Primary">
-            <Button asChild variant="ghost">
+          <nav className="hidden items-center gap-2 lg:flex" aria-label="Primary">
+            <Button asChild variant="ghost" className="cursor-pointer rounded-xl text-foreground/90 transition-colors hover:bg-primary hover:text-primary-foreground">
               <Link href="/">{t("nav.home")}</Link>
             </Button>
-            <Button asChild variant="ghost">
+            <Button asChild variant="ghost" className="cursor-pointer rounded-xl text-foreground/90 transition-colors hover:bg-primary hover:text-primary-foreground">
               <Link href="/products">{t("nav.products")}</Link>
             </Button>
-            <Button asChild variant="ghost">
+            <Button asChild variant="ghost" className="cursor-pointer rounded-xl text-foreground/90 transition-colors hover:bg-primary hover:text-primary-foreground">
               <Link href="/services">{t("nav.services")}</Link>
             </Button>
-            <Button asChild variant="ghost">
+            <Button asChild variant="ghost" className="cursor-pointer rounded-xl text-foreground/90 transition-colors hover:bg-primary hover:text-primary-foreground">
               <Link href="/contact">{t("nav.contact")}</Link>
             </Button>
           </nav>
@@ -79,7 +79,7 @@ export default function Header() {
             {/* Mobile menu */}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden h-10 w-10 rounded-xl hover:bg-primary/10" aria-label="Menu">
+                <Button variant="ghost" size="icon" className="h-10 w-10 cursor-pointer rounded-xl hover:bg-primary/15 lg:hidden" aria-label="Menu">
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
@@ -88,29 +88,29 @@ export default function Header() {
                   <SheetTitle>Menu</SheetTitle>
                 </SheetHeader>
                 <nav className="mt-6 flex flex-col gap-2" aria-label="Mobile">
-                  <Button asChild variant="ghost" className="justify-start" onClick={closeMobile}>
+                  <Button asChild variant="ghost" className="cursor-pointer justify-start" onClick={closeMobile}>
                     <Link href="/">{t("nav.home")}</Link>
                   </Button>
-                  <Button asChild variant="ghost" className="justify-start" onClick={closeMobile}>
+                  <Button asChild variant="ghost" className="cursor-pointer justify-start" onClick={closeMobile}>
                     <Link href="/products">{t("nav.products")}</Link>
                   </Button>
-                  <Button asChild variant="ghost" className="justify-start" onClick={closeMobile}>
+                  <Button asChild variant="ghost" className="cursor-pointer justify-start" onClick={closeMobile}>
                     <Link href="/services">{t("nav.services")}</Link>
                   </Button>
-                  <Button asChild variant="ghost" className="justify-start" onClick={closeMobile}>
+                  <Button asChild variant="ghost" className="cursor-pointer justify-start" onClick={closeMobile}>
                     <Link href="/contact">{t("nav.contact")}</Link>
                   </Button>
 
                   {user ? (
                     <>
                       <div className="my-2 border-t" />
-                      <Button asChild variant="ghost" className="justify-start" onClick={closeMobile}>
+                      <Button asChild variant="ghost" className="cursor-pointer justify-start" onClick={closeMobile}>
                         <Link href="/account">
                           <Settings className="mr-2 h-4 w-4" />
                           {t("nav.account")}
                         </Link>
                       </Button>
-                      <Button asChild variant="ghost" className="justify-start" onClick={closeMobile}>
+                      <Button asChild variant="ghost" className="cursor-pointer justify-start" onClick={closeMobile}>
                         <Link href="/orders">
                           <Package className="mr-2 h-4 w-4" />
                           {t("nav.orders")}
@@ -118,7 +118,7 @@ export default function Header() {
                       </Button>
                       <Button
                         variant="ghost"
-                        className="justify-start text-destructive"
+                        className="cursor-pointer justify-start text-destructive"
                         onClick={async () => {
                           await handleLogout();
                           closeMobile();
@@ -131,7 +131,7 @@ export default function Header() {
                   ) : (
                     <>
                       <div className="my-2 border-t" />
-                      <Button asChild onClick={closeMobile}>
+                      <Button asChild className="cursor-pointer" onClick={closeMobile}>
                         <Link href="/auth/sign-in">{t("nav.signIn")}</Link>
                       </Button>
                     </>
@@ -141,7 +141,7 @@ export default function Header() {
             </Sheet>
 
             {/* Cart */}
-            <Button asChild variant="ghost" size="icon" className="relative h-10 w-10 rounded-xl hover:bg-primary/10" aria-label={t("nav.cart")}>
+            <Button asChild variant="ghost" size="icon" className="relative h-10 w-10 cursor-pointer rounded-xl transition-colors hover:bg-primary/15 hover:text-primary" aria-label={t("nav.cart")}>
               <Link href="/cart">
                 <ShoppingCart className="h-5 w-5" />
                 {cartItemsCount > 0 && (
@@ -165,7 +165,7 @@ export default function Header() {
               ) : user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-primary/10" aria-label={t("nav.account")}>
+                    <Button variant="ghost" size="icon" className="h-10 w-10 cursor-pointer rounded-xl transition-colors hover:bg-primary/15 hover:text-primary" aria-label={t("nav.account")}>
                       <User className="h-5 w-5" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -187,7 +187,7 @@ export default function Header() {
                 </DropdownMenu>
               ) : (
                 <div
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-sm font-medium ring-offset-background transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 cursor-pointer"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-sm font-medium ring-offset-background transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 cursor-pointer"
                   aria-label={t("nav.account")}
                   role="button"
                   tabIndex={0}

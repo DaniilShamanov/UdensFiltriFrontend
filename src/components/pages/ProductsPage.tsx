@@ -209,7 +209,7 @@ const ProductsPage: React.FC = () => {
       {/* Reset Filters */}
       <Button
         variant="outline"
-        className="w-full border-accent/35 text-accent hover:bg-accent/10 hover:text-accent"
+        className="w-full cursor-pointer border-accent/35 text-accent hover:bg-accent/10 hover:text-accent"
         onClick={resetFilters}
       >
         {t('resetFilters')}
@@ -223,11 +223,11 @@ const ProductsPage: React.FC = () => {
       <div className="container mx-auto px-4 scrollbar-hide">
         {/* Breadcrumb */}
         <div className="mb-6 text-sm text-muted-foreground">
-          <Link href="/" className="hover:text-primary">
+          <Link href="/" className="cursor-pointer hover:text-primary">
             {t('breadcrumb.home')}
           </Link>
           {' / '}
-          <Link href="/products" className="hover:text-primary">
+          <Link href="/products" className="cursor-pointer hover:text-primary">
             {t('breadcrumb.products')}
           </Link>
           {currentCategory && (
@@ -267,7 +267,7 @@ const ProductsPage: React.FC = () => {
               {/* Mobile Filter Button */}
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="outline" className="md:hidden flex-1">
+                  <Button variant="outline" className="md:hidden flex-1 cursor-pointer">
                     <SlidersHorizontal className="h-4 w-4 mr-2" />
                     {t('filtersButton')}
                   </Button>
@@ -295,7 +295,7 @@ const ProductsPage: React.FC = () => {
                     {t('sort.placeholder')} {/* e.g., "Sort by:" */}
                   </span>
                   <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="w-full md:w-[200px]" />
+                    <SelectTrigger className="w-full cursor-pointer md:w-[200px]" />
                     <SelectContent>
                       <SelectItem value="featured">{t('sort.featured')}</SelectItem>
                       <SelectItem value="price-low">{t('sort.priceLowHigh')}</SelectItem>
@@ -331,7 +331,7 @@ const ProductsPage: React.FC = () => {
                 <p className="text-muted-foreground mb-4">{t('noProductsFound')}</p>
                 <Button
                   variant="outline"
-                  className="border-primary/30 hover:bg-primary/10"
+                  className="cursor-pointer border-primary/30 hover:bg-primary/10"
                   onClick={resetFilters}
                 >
                   {t('clearAllFilters')}
