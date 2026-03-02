@@ -5,11 +5,11 @@ export default async function Footer() {
   const t = await getTranslations('footer');
 
   return (
-    <footer className="border-t bg-white">
-      <div className="container mx-auto px-4 py-10">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8">
-          <div className="col-span-2 sm:col-span-3 lg:col-span-2">
-            <div className="font-semibold text-lg text-secondary">{t('brand')}</div>
+    <footer className="border-t border-primary/10 bg-gradient-to-b from-card to-muted/30">
+      <div className="container mx-auto px-4 py-10 sm:py-12">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="sm:col-span-2 lg:col-span-2">
+            <div className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-lg font-semibold text-secondary">{t('brand')}</div>
             <p className="mt-3 text-sm text-muted-foreground max-w-md">
               {t('description')}
             </p>
@@ -67,7 +67,7 @@ export default async function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 pt-6 border-t text-xs text-muted-foreground flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
+        <div className="mt-10 flex flex-col gap-2 border-t border-primary/10 pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <div>{t('copyright', { year: new Date().getFullYear() })}</div>
           <div>{t('languages')}</div>
         </div>
