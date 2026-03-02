@@ -1,3 +1,10 @@
 @import "../styles/tailwind.css";
 @import "../styles/theme.css";
 @import "../styles/fonts.css";
+
+@layer utilities {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}

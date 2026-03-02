@@ -38,20 +38,20 @@ export default function Header() {
   const closeMobile = () => setMobileMenuOpen(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/70 shadow-sm">
-      <div className="container mx-auto px-4 py-4">
+    <header className="sticky top-0 z-50 border-b border-primary/10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85 shadow-[0_8px_24px_rgba(11,99,206,0.08)]">
+      <div className="container mx-auto px-4 py-3 md:py-4">
         <div className="flex items-center justify-between gap-4">
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            className="flex items-center gap-2 md:gap-3 hover:opacity-90 transition-opacity"
             aria-label="Home"
           >
-            <div className="bg-gradient-to-br from-primary to-secondary p-2 rounded-lg">
+            <div className="bg-gradient-to-br from-secondary via-primary to-accent p-2 rounded-xl shadow-md shadow-primary/25">
               <Droplet className="h-8 w-8 text-white" />
             </div>
-            <div className="hidden md:block">
-              <div className="font-bold text-xl text-secondary tracking-tight">WaterFilters</div>
+            <div className="hidden sm:block">
+              <div className="font-bold text-base sm:text-xl text-secondary tracking-tight">WaterFilters</div>
               <div className="text-xs text-muted-foreground">Pure Water Solutions</div>
             </div>
           </Link>
@@ -73,21 +73,21 @@ export default function Header() {
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <LocaleSwitcher />
 
             {/* Mobile menu */}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Menu">
+                <Button variant="ghost" size="icon" className="lg:hidden h-10 w-10 rounded-xl hover:bg-primary/10" aria-label="Menu">
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-[320px]">
+              <SheetContent side="left" className="w-[320px] bg-background/95">
                 <SheetHeader>
                   <SheetTitle>Menu</SheetTitle>
                 </SheetHeader>
-                <nav className="flex flex-col gap-2 mt-6" aria-label="Mobile">
+                <nav className="mt-6 flex flex-col gap-2" aria-label="Mobile">
                   <Button asChild variant="ghost" className="justify-start" onClick={closeMobile}>
                     <Link href="/">{t("nav.home")}</Link>
                   </Button>
@@ -141,7 +141,7 @@ export default function Header() {
             </Sheet>
 
             {/* Cart */}
-            <Button asChild variant="ghost" size="icon" className="relative" aria-label={t("nav.cart")}>
+            <Button asChild variant="ghost" size="icon" className="relative h-10 w-10 rounded-xl hover:bg-primary/10" aria-label={t("nav.cart")}>
               <Link href="/cart">
                 <ShoppingCart className="h-5 w-5" />
                 {cartItemsCount > 0 && (
@@ -165,7 +165,7 @@ export default function Header() {
               ) : user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" aria-label={t("nav.account")}>
+                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-primary/10" aria-label={t("nav.account")}>
                       <User className="h-5 w-5" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -187,7 +187,7 @@ export default function Header() {
                 </DropdownMenu>
               ) : (
                 <div
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 cursor-pointer"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-sm font-medium ring-offset-background transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 cursor-pointer"
                   aria-label={t("nav.account")}
                   role="button"
                   tabIndex={0}

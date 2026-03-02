@@ -14,9 +14,9 @@
   --secondary-foreground: #ffffff;
   --muted: #e4ecf8;
   --muted-foreground: #55647e;
-  --accent: #ff7a1a;
+  --accent: #f97316;
   --accent-foreground: #ffffff;
-  --destructive: #d7263d;
+  --destructive: #dc2626;
   --destructive-foreground: #ffffff;
   --border: rgba(9, 38, 79, 0.14);
   --input: transparent;
@@ -54,9 +54,9 @@
   --secondary-foreground: #eaf2ff;
   --muted: #102741;
   --muted-foreground: #9ab0cf;
-  --accent: #ff9a4a;
+  --accent: #fb923c;
   --accent-foreground: #2b1300;
-  --destructive: #ff5f73;
+  --destructive: #fb7185;
   --destructive-foreground: #350009;
   --border: rgba(120, 171, 233, 0.28);
   --input: #102741;
@@ -126,7 +126,10 @@
 
   body {
     @apply bg-background text-foreground;
-    background-image: radial-gradient(circle at top right, color-mix(in oklab, var(--primary) 12%, transparent), transparent 40%);
+    background-image:
+      radial-gradient(circle at top right, color-mix(in oklab, var(--primary) 14%, transparent), transparent 42%),
+      radial-gradient(circle at 12% 85%, color-mix(in oklab, var(--accent) 10%, transparent), transparent 32%),
+      radial-gradient(circle at 85% 75%, color-mix(in oklab, var(--destructive) 8%, transparent), transparent 28%);
   }
 
   /**
