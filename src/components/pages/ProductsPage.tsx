@@ -3,11 +3,10 @@
 import React, { useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Link } from '@/navigation';
-import { Search, SlidersHorizontal, Info } from 'lucide-react';
+import { Search, SlidersHorizontal } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
@@ -19,15 +18,8 @@ import {
   SelectItem,
   SelectTrigger
 } from '@/components/ui/select';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { products, categories } from '@/lib/mockData';
-import { Product } from '@/lib/types';
 import { useApp } from '@/contexts/AppContext';
 import ProductCard from '../ProductCard';
 import { useTranslations } from 'next-intl';
@@ -45,6 +37,16 @@ const ProductsPage: React.FC = () => {
   const [minRating, setMinRating] = useState('0');
 
   const t = useTranslations('products');
+
+  const formatCurrency = (value: number) => `€${value.toLocaleString()}`;
+
+  const resetFilters = () => {
+    setRange({ min: 0, max: 1500 });
+    setSelectedBrands([]);
+    setInStockOnly(false);
+    setMinRating('0');
+    setSearchQuery('');
+  };
 
   // Get unique brands
   const brands = useMemo(() => {
@@ -137,23 +139,18 @@ const ProductsPage: React.FC = () => {
           value={range}
           onChange={(vals) => setRange({ min: vals.min, max: vals.max })}
           className="w-full"
+          formatValue={formatCurrency}
+          label={t('filters.priceRange')}
         />
+        <p className="text-xs text-muted-foreground">
+          {formatCurrency(range.min)} - {formatCurrency(range.max)}
+        </p>
       </div>
 
       {/* Brands */}
       <div>
         <div className="flex items-center gap-2 mb-3">
           <Label className="font-semibold">{t('filters.brands')}</Label>
-          {/*<TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <Info className="h-4 w-4 text-muted-foreground" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{t('tooltips.brands')}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>*/}
         </div>
         <div className="space-y-2">
           {brands.map(brand => (
@@ -175,16 +172,6 @@ const ProductsPage: React.FC = () => {
       <div>
         <div className="flex items-center gap-2 mb-3">
           <Label className="font-semibold">{t('filters.minRating')}</Label>
-          {/*<TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <Info className="h-4 w-4 text-muted-foreground" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{t('tooltips.minRating')}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>*/}
         </div>
         <RadioGroup value={minRating} onValueChange={setMinRating}>
           <div className="flex items-center gap-2">
@@ -206,16 +193,6 @@ const ProductsPage: React.FC = () => {
       <div>
         <div className="flex items-center gap-2 mb-3">
           <Label className="font-semibold">{t('filters.availability')}</Label>
-          {/*<TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <Info className="h-4 w-4 text-muted-foreground" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{t('tooltips.availability')}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>*/}
         </div>
         <div className="flex items-center gap-2">
           <Checkbox
@@ -232,13 +209,8 @@ const ProductsPage: React.FC = () => {
       {/* Reset Filters */}
       <Button
         variant="outline"
-        className="w-full"
-        onClick={() => {
-          setRange({ min: 0, max: 1500 });
-          setSelectedBrands([]);
-          setInStockOnly(false);
-          setMinRating('0');
-        }}
+        className="w-full border-accent/35 text-accent hover:bg-accent/10 hover:text-accent"
+        onClick={resetFilters}
       >
         {t('resetFilters')}
       </Button>
@@ -246,7 +218,8 @@ const ProductsPage: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background py-8">
+    <div className="relative min-h-screen bg-background py-8">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-44 bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10" />
       <div className="container mx-auto px-4 scrollbar-hide">
         {/* Breadcrumb */}
         <div className="mb-6 text-sm text-muted-foreground">
@@ -273,7 +246,7 @@ const ProductsPage: React.FC = () => {
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-4">
+          <h1 className="mb-4 text-3xl font-bold text-secondary dark:text-primary">
             {currentSubCategory
               ? currentSubCategory.name
               : currentCategory
@@ -341,7 +314,7 @@ const ProductsPage: React.FC = () => {
         <div className="grid lg:grid-cols-[280px_1fr] gap-8">
           {/* Desktop Filters Sidebar */}
           <aside className="hidden lg:block">
-            <Card className="sticky top-24">
+            <Card className="sticky top-24 border-primary/20 shadow-sm">
               <CardContent className="p-6">
                 <h2 className="font-semibold text-lg mb-4">{t('filtersTitle')}</h2>
                 <ScrollArea className="h-[calc(100vh-16rem)] pr-4">
@@ -354,17 +327,12 @@ const ProductsPage: React.FC = () => {
           {/* Products Grid */}
           <div>           
             {filteredProducts.length === 0 ? (
-              <Card className="p-12 text-center">
+              <Card className="border-destructive/20 bg-card/95 p-12 text-center shadow-sm">
                 <p className="text-muted-foreground mb-4">{t('noProductsFound')}</p>
                 <Button
                   variant="outline"
-                  onClick={() => {
-                    setSearchQuery('');
-                    setRange({ min: 0, max: 1500 });
-                    setSelectedBrands([]);
-                    setInStockOnly(false);
-                    setMinRating('0');
-                  }}
+                  className="border-primary/30 hover:bg-primary/10"
+                  onClick={resetFilters}
                 >
                   {t('clearAllFilters')}
                 </Button>
