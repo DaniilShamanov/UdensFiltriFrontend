@@ -108,6 +108,7 @@ export default function RangeSlider({
   type ActiveThumb = 'min' | 'max' | null;
   const [activeThumb, setActiveThumb] = useState<ActiveThumb>(null);
   const dragging = activeThumb !== null;
+  const pointerIdRef = useRef<number | null>(null);
 
   function emit(next: RangeValue) {
     if (!isControlled) setInternal(next);
@@ -161,6 +162,7 @@ export default function RangeSlider({
     e.stopPropagation();
 
     setActiveThumb(which);
+    pointerIdRef.current = e.pointerId;
     (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
   }
 
@@ -177,6 +179,41 @@ export default function RangeSlider({
     e.preventDefault();
     emitEnd({ min: minRef.current, max: maxRef.current });
     setActiveThumb(null);
+    pointerIdRef.current = null;
+
+    try {
+      (e.currentTarget as HTMLDivElement).releasePointerCapture(e.pointerId);
+    } catch {
+      // no-op
+    }
+  }
+
+
+  function onTrackPointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    if (disabled) return;
+
+    const v = valueFromClientX(e.clientX);
+    const distToMin = Math.abs(v - minRef.current);
+    const distToMax = Math.abs(v - maxRef.current);
+    const target: ActiveThumb = distToMin <= distToMax ? 'min' : 'max';
+
+    setActiveThumb(target);
+    pointerIdRef.current = e.pointerId;
+    (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
+    setThumb(target, v, false);
+  }
+
+  function onTrackPointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    if (disabled || pointerIdRef.current !== e.pointerId || !activeThumb) return;
+    setThumb(activeThumb, valueFromClientX(e.clientX), false);
+  }
+
+  function onTrackPointerUp(e: React.PointerEvent<HTMLDivElement>) {
+    if (disabled || pointerIdRef.current !== e.pointerId || !activeThumb) return;
+
+    emitEnd({ min: minRef.current, max: maxRef.current });
+    setActiveThumb(null);
+    pointerIdRef.current = null;
 
     try {
       (e.currentTarget as HTMLDivElement).releasePointerCapture(e.pointerId);
@@ -249,6 +286,10 @@ export default function RangeSlider({
       <div
         ref={trackRef}
         onClick={onTrackClick}
+        onPointerDown={onTrackPointerDown}
+        onPointerMove={onTrackPointerMove}
+        onPointerUp={onTrackPointerUp}
+        onPointerCancel={onTrackPointerUp}
         className={[
           'relative h-10 w-full select-none rounded-md',
           disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer',

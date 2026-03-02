@@ -91,22 +91,22 @@ const AccountPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background py-6 sm:py-8">
+    <div className="min-h-screen bg-gradient-to-b from-background via-primary/5 to-background py-6 sm:py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-1">{t('title')}</h1>
+          <h1 className="mb-1 text-2xl font-bold text-secondary sm:text-3xl">{t('title')}</h1>
           <p className="text-muted-foreground">{t('signedInAs', { name: displayName })}</p>
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="profile">{t('tabs.profile')}</TabsTrigger>
-            <TabsTrigger value="security">{t('tabs.security')}</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 bg-primary/10">
+            <TabsTrigger value="profile" className="cursor-pointer data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">{t('tabs.profile')}</TabsTrigger>
+            <TabsTrigger value="security" className="cursor-pointer data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">{t('tabs.security')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile">
-            <Card>
-              <CardHeader>
+            <Card className="border-primary/20 bg-card/95 shadow-sm">
+              <CardHeader className="bg-gradient-to-r from-primary/8 to-secondary/8">
                 <CardTitle>{t('profile.title')}</CardTitle>
                 <CardDescription>{t('profile.description')}</CardDescription>
               </CardHeader>
@@ -122,7 +122,7 @@ const AccountPage: React.FC = () => {
                       <Input id="last_name" value={profile.last_name} onChange={(e) => setProfile((p) => ({ ...p, last_name: e.target.value }))} />
                     </div>
                   </div>
-                  <Button type="submit" className="bg-accent hover:bg-accent/90 w-full sm:w-auto">
+                  <Button type="submit" className="w-full cursor-pointer bg-primary hover:bg-primary/90 sm:w-auto">
                     <Save className="mr-2 h-4 w-4" /> {t('profile.saveName')}
                   </Button>
                 </form>
@@ -130,23 +130,23 @@ const AccountPage: React.FC = () => {
                 <Separator />
 
                 <div className="grid gap-6">
-                  <div className="rounded-lg border p-4">
+                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
                     <div className="flex items-center gap-2 font-medium"><Phone className="h-4 w-4" /> {t('profile.phone')}</div>
                     <div className="text-sm text-muted-foreground">{user.phone || t('profile.notSet')}</div>
                     <form onSubmit={doChangePhone} className="mt-4 grid gap-3">
                       <Label htmlFor="new_phone">{t('profile.newPhone')}</Label>
                       <Input id="new_phone" value={newPhone} onChange={(e) => setNewPhone(e.target.value)} placeholder={t('profile.phonePlaceholder')} />
-                      <Button type="submit" className="bg-accent hover:bg-accent/90">{t('profile.updatePhone')}</Button>
+                      <Button type="submit" className="cursor-pointer bg-primary hover:bg-primary/90">{t('profile.updatePhone')}</Button>
                     </form>
                   </div>
 
-                  <div className="rounded-lg border p-4">
+                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
                     <div className="flex items-center gap-2 font-medium"><Mail className="h-4 w-4" /> {t('profile.email')}</div>
                     <div className="text-sm text-muted-foreground">{user.email || t('profile.notSet')}</div>
                     <form onSubmit={doChangeEmail} className="mt-4 grid gap-3">
                       <Label htmlFor="email">{t('profile.email')}</Label>
                       <Input id="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder={t('profile.emailPlaceholder')} />
-                      <Button type="submit" className="bg-accent hover:bg-accent/90">{t('profile.updateEmail')}</Button>
+                      <Button type="submit" className="cursor-pointer bg-primary hover:bg-primary/90">{t('profile.updateEmail')}</Button>
                     </form>
                   </div>
                 </div>
@@ -155,8 +155,8 @@ const AccountPage: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="security">
-            <Card>
-              <CardHeader>
+            <Card className="border-primary/20 bg-card/95 shadow-sm">
+              <CardHeader className="bg-gradient-to-r from-primary/8 to-secondary/8">
                 <CardTitle>{t('security.title')}</CardTitle>
                 <CardDescription>{t('security.description')}</CardDescription>
               </CardHeader>
@@ -167,7 +167,7 @@ const AccountPage: React.FC = () => {
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input id="new_password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="pl-10" />
                   </div>
-                  <Button type="submit" className="bg-accent hover:bg-accent/90">{t('security.updatePassword')}</Button>
+                  <Button type="submit" className="cursor-pointer bg-primary hover:bg-primary/90">{t('security.updatePassword')}</Button>
                 </form>
               </CardContent>
             </Card>
