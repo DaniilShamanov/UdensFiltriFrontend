@@ -22,7 +22,7 @@ export default function Header() {
   const t = useTranslations();
   const pathname = usePathname();
   const router = useRouter();
-  const { user, cart, authLoading, signOut } = useApp();
+  const { user, cart, authLoading, routeLoading, authNotice, clearAuthNotice, signOut } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const cartItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -187,17 +187,10 @@ export default function Header() {
                 </DropdownMenu>
               ) : (
                 <div
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-sm font-medium ring-offset-background transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 cursor-pointer"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-sm font-medium opacity-60"
                   aria-label={t("nav.account")}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => router.push("/auth/sign-in")}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      router.push("/auth/sign-in");
-                    }
-                  }}
+                  aria-disabled="true"
+                  title={t("nav.signIn")}
                 >
                   <User className="h-5 w-5" />
                 </div>
@@ -206,6 +199,21 @@ export default function Header() {
           </div>
         </div>
       </div>
+
+      {routeLoading && (
+        <div className="h-1 w-full overflow-hidden bg-primary/10">
+          <div className="h-full w-1/3 animate-pulse bg-primary" />
+        </div>
+      )}
+
+      {authNotice && (
+        <div className="border-t border-primary/20 bg-amber-100/60 px-4 py-2 text-sm text-amber-900">
+          <div className="container mx-auto flex items-center justify-between gap-3">
+            <span>{authNotice}</span>
+            <button type="button" onClick={clearAuthNotice} className="cursor-pointer font-medium underline">Dismiss</button>
+          </div>
+        </div>
+      )}
 
       {pathname == "/products" ? <CategoryNav /> : null}
     </header>

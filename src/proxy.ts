@@ -10,7 +10,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || '';
 const JWT_SECRET = process.env.JWT_SECRET!;
 
 const PUBLIC_PREFIXES = ['/home', '/about', '/services', '/auth'];
-const PROTECTED_PREFIXES = ['/account', '/orders', '/checkout', '/payment'];
+const PROTECTED_PREFIXES = ['/account', '/orders', '/payment'];
 
 const intlMiddleware = createMiddleware({ locales, defaultLocale, localePrefix });
 
