@@ -60,6 +60,7 @@ export const authApi = {
       body: input,
       csrf: true,
       credentials: "include",
+      retryOn401: false,
     });
   },
 
