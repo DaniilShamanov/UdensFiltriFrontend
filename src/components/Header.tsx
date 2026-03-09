@@ -134,7 +134,7 @@ export default function Header() {
           </div>
         </div>
 
-        {authNotice ? <NotificationBanner title={authNotice.title} description={authNotice.description} onDismiss={clearAuthNotice} /> : null}
+        {authNotice ? <NotificationBanner title={authNotice.title} description={authNotice.description} onDismiss={clearAuthNotice} dismissLabel="Close" variant="warning" /> : null}
         {pathname == "/products" ? <CategoryNav /> : null}
       </header>
     </>

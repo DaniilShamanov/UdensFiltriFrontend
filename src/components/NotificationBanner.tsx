@@ -7,11 +7,24 @@ type NotificationBannerProps = {
   description?: string;
   onDismiss?: () => void;
   className?: string;
+  dismissLabel?: string;
+  variant?: "info" | "warning";
 };
 
-export default function NotificationBanner({ title, description, onDismiss, className = "" }: NotificationBannerProps) {
+export default function NotificationBanner({
+  title,
+  description,
+  onDismiss,
+  className = "",
+  dismissLabel = "Dismiss",
+  variant = "warning",
+}: NotificationBannerProps) {
+  const tone = variant === "info"
+    ? "border-t border-primary/20 bg-blue-100/60 text-blue-900"
+    : "border-t border-primary/20 bg-amber-100/60 text-amber-900";
+
   return (
-    <div className={`border-t border-primary/20 bg-amber-100/60 px-4 py-2 text-sm text-amber-900 ${className}`} role="status" aria-live="polite">
+    <div className={`${tone} px-4 py-2 text-sm ${className}`} role="status" aria-live="polite">
       <div className="container mx-auto flex items-center justify-between gap-3">
         <div>
           <p className="font-semibold">{title}</p>
@@ -19,7 +32,7 @@ export default function NotificationBanner({ title, description, onDismiss, clas
         </div>
         {onDismiss ? (
           <button type="button" onClick={onDismiss} className="cursor-pointer font-medium underline">
-            Dismiss
+            {dismissLabel}
           </button>
         ) : null}
       </div>
