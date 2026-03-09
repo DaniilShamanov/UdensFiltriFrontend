@@ -1,14 +1,19 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { CartItem, Order, User } from "@/lib/types";
 import { products } from "@/lib/mockData";
 import { authApi, SmsPurpose } from "@/lib/auth/api";
+import { logClientEvent } from "@/lib/clientLog";
 
 interface AppContextType {
   user: User | null;
   setUser: (user: User | null) => void;
   authLoading: boolean;
+  routeLoading: boolean;
+  authNotice: string | null;
+  clearAuthNotice: () => void;
 
   requestSmsCode: (input: { purpose: SmsPurpose; phone?: string }) => Promise<void>
   signIn: (input: { phone: string; password: string }) => Promise<void>;
@@ -39,8 +44,11 @@ function getScopedStorageKey(prefix: "cart" | "orders", userId?: string | number
 }
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [routeLoading, setRouteLoading] = useState(false);
+  const [authNotice, setAuthNotice] = useState<string | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
 
@@ -67,6 +75,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  useEffect(() => {
+    setRouteLoading(true);
+    const timer = setTimeout(() => setRouteLoading(false), 220);
+    return () => clearTimeout(timer);
+  }, [pathname]);
+
+  useEffect(() => {
+    const onAuthExpired = () => {
+      setUser(null);
+      setAuthNotice("Your session expired. Please sign in again.");
+      logClientEvent('auth_expired');
+    };
+
+    window.addEventListener('app:auth-expired', onAuthExpired as EventListener);
+    return () => window.removeEventListener('app:auth-expired', onAuthExpired as EventListener);
   }, []);
 
   useEffect(() => {
@@ -130,6 +155,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       await authApi.signIn(input);
       const me = await authApi.me();
       setUser(me);
+      setAuthNotice(null);
+      logClientEvent('sign_in_success');
     } finally {
       setAuthLoading(false);
     }
@@ -141,6 +168,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       await authApi.signUp(input);
       const me = await authApi.me();
       setUser(me);
+      logClientEvent('sign_up_success');
     } finally {
       setAuthLoading(false);
     }
@@ -150,6 +178,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAuthLoading(true);
     try {
       await authApi.signOut();
+      logClientEvent('sign_out');
     } finally {
       setUser(null);
       setAuthLoading(false);
@@ -192,6 +221,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         user,
         setUser,
         authLoading,
+        routeLoading,
+        authNotice,
+        clearAuthNotice: () => setAuthNotice(null),
         requestSmsCode,
         signIn,
         signUp,

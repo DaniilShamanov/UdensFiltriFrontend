@@ -15,6 +15,7 @@ type FetchJsonOpts = {
   body?: unknown;
   credentials?: RequestCredentials;
   csrf?: boolean;
+  retryOn401?: boolean;
 };
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") || "";
@@ -59,7 +60,7 @@ export async function fetchJson<T>(
   });
 
   // Handle 401 Unauthorized – attempt token refresh once
-  if (res.status === 401 && !_isRetry) {
+  if (res.status === 401 && !_isRetry && opts.retryOn401 !== false) {
     try {
       // Call refresh endpoint (credentials: 'include' sends cookies automatically)
       const refreshRes = await fetch(`${API_BASE_URL}${REFRESH_ENDPOINT}`, {
@@ -74,6 +75,9 @@ export async function fetchJson<T>(
         // Retry the original request with a flag to prevent infinite loops
         return fetchJson(path, opts, true);
       } else {
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('app:auth-expired'));
+        }
         // Refresh failed – redirect to login (or throw a special error)
         // Option 1: Redirect (if you have access to router)
         // window.location.href = '/auth/sign-in';
@@ -81,6 +85,9 @@ export async function fetchJson<T>(
         throw new ApiError(401, null, 'Authentication failed. Please log in again.');
       }
     } catch (error) {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('app:auth-expired'));
+      }
       // Network error or refresh failure
       throw new ApiError(401, null, 'Unable to refresh authentication. Please log in again.');
     }
