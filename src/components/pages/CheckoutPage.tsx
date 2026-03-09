@@ -112,9 +112,6 @@ const CheckoutPage: React.FC = () => {
         });
       }
 
-      const countryCode = (formData.country || 'LV').trim();
-      const country = countryCode.length === 2 ? countryCode.toUpperCase() : 'LV';
-
       const orderPayload = {
         email: formData.email,
         phone: formData.phone,

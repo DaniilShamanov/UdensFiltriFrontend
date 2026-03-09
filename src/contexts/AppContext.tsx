@@ -38,6 +38,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const GUEST_CART_KEY = "cart:guest";
 const GUEST_ORDERS_KEY = "orders:guest";
+const AUTH_SEEN_KEY = "auth:seen";
 
 function getScopedStorageKey(prefix: "cart" | "orders", userId?: string | number | null) {
   return userId ? `${prefix}:${userId}` : `${prefix}:guest`;
@@ -67,7 +68,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const me = await authApi.me();
         if (!cancelled) setUser(me);
       } catch {
-        if (!cancelled) setUser(null);
+        if (!cancelled) {
+          setUser(null);
+          if (localStorage.getItem(AUTH_SEEN_KEY) === "1") {
+            setAuthNotice({
+              title: "You've signed out",
+              description: "Please sign in again to access your account.",
+            });
+          }
+        }
       } finally {
         if (!cancelled) setAuthLoading(false);
       }
