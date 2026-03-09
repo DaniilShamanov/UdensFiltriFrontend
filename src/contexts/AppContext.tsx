@@ -7,17 +7,12 @@ import { products } from "@/lib/mockData";
 import { authApi, SmsPurpose } from "@/lib/auth/api";
 import { logClientEvent } from "@/lib/clientLog";
 
-type Notice = {
-  title: string;
-  description?: string;
-};
-
 interface AppContextType {
   user: User | null;
   setUser: (user: User | null) => void;
   authLoading: boolean;
   routeLoading: boolean;
-  authNotice: Notice | null;
+  authNotice: string | null;
   clearAuthNotice: () => void;
 
   requestSmsCode: (input: { purpose: SmsPurpose; phone?: string }) => Promise<void>
@@ -54,7 +49,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [routeLoading, setRouteLoading] = useState(false);
-  const [authNotice, setAuthNotice] = useState<Notice | null>(null);
+  const [authNotice, setAuthNotice] = useState<string | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
 
@@ -93,17 +88,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     setRouteLoading(true);
-    const timer = setTimeout(() => setRouteLoading(false), 320);
+    const timer = setTimeout(() => setRouteLoading(false), 220);
     return () => clearTimeout(timer);
   }, [pathname]);
 
   useEffect(() => {
     const onAuthExpired = () => {
       setUser(null);
-      setAuthNotice({
-        title: "You've signed out",
-        description: "Your session expired. Please sign in again.",
-      });
+      setAuthNotice("Your session expired. Please sign in again.");
       logClientEvent('auth_expired');
     };
 
@@ -172,7 +164,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       await authApi.signIn(input);
       const me = await authApi.me();
       setUser(me);
-      localStorage.setItem(AUTH_SEEN_KEY, "1");
       setAuthNotice(null);
       logClientEvent('sign_in_success');
     } finally {
@@ -186,7 +177,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       await authApi.signUp(input);
       const me = await authApi.me();
       setUser(me);
-      localStorage.setItem(AUTH_SEEN_KEY, "1");
       logClientEvent('sign_up_success');
     } finally {
       setAuthLoading(false);

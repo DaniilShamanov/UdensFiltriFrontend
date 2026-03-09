@@ -36,6 +36,7 @@ const CheckoutPage: React.FC = () => {
     street: '',
     city: '',
     postalCode: '',
+    country: 'Latvia',
     notes: '',
   });
 
@@ -51,6 +52,7 @@ const CheckoutPage: React.FC = () => {
       street: user?.address?.street || prev.street,
       city: user?.address?.city || prev.city,
       postalCode: user?.address?.postalCode || prev.postalCode,
+      country: user?.address?.country || prev.country,
     }));
   }, [user]);
 
@@ -118,7 +120,7 @@ const CheckoutPage: React.FC = () => {
         address_line2: '',
         city: formData.city,
         postcode: formData.postalCode,
-        country: 'LV',
+        country,
         delivery_option: deliveryOption,
         items,
       };
@@ -204,6 +206,10 @@ const CheckoutPage: React.FC = () => {
                       <Label htmlFor="postalCode">{t('address.postalCode')} *</Label>
                       <Input id="postalCode" name="postalCode" required value={formData.postalCode} onChange={handleChange} placeholder={t('address.postalCodePlaceholder')} />
                     </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="country">{t('address.country')} *</Label>
+                    <Input id="country" name="country" required value={formData.country} onChange={handleChange} />
                   </div>
                   <div>
                     <Label htmlFor="notes">{t('address.notes')}</Label>

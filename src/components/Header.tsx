@@ -129,14 +129,72 @@ export default function Header() {
                     <User className="h-5 w-5" />
                   </Button>
                 )}
-              </div>
+              </Link>
+            </Button>
+
+            {/* User menu – always shows the icon, behavior depends on state */}
+            <div className="relative">
+              {authLoading ? (
+                <div
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                  aria-label={t("nav.account")}
+                  aria-disabled="true"
+                >
+                  <User className="h-5 w-5" />
+                </div>
+              ) : user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-10 w-10 cursor-pointer rounded-xl transition-colors hover:bg-primary/15 hover:text-primary" aria-label={t("nav.account")}>
+                      <User className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-52">
+                    <DropdownMenuItem onSelect={() => router.push("/account")}>
+                      <Settings className="mr-2 h-4 w-4" />
+                      {t("nav.account")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => router.push("/orders")}>
+                      <Package className="mr-2 h-4 w-4" />
+                      {t("nav.orders")}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onSelect={handleLogout}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      {t("nav.signOut")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <div
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-sm font-medium opacity-60"
+                  aria-label={t("nav.account")}
+                  aria-disabled="true"
+                  title={t("nav.signIn")}
+                >
+                  <User className="h-5 w-5" />
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        {authNotice ? <NotificationBanner title={authNotice.title} description={authNotice.description} onDismiss={clearAuthNotice} dismissLabel="Close" variant="warning" /> : null}
-        {pathname == "/products" ? <CategoryNav /> : null}
-      </header>
-    </>
+      {routeLoading && (
+        <div className="h-1 w-full overflow-hidden bg-primary/10">
+          <div className="h-full w-1/3 animate-pulse bg-primary" />
+        </div>
+      )}
+
+      {authNotice && (
+        <div className="border-t border-primary/20 bg-amber-100/60 px-4 py-2 text-sm text-amber-900">
+          <div className="container mx-auto flex items-center justify-between gap-3">
+            <span>{authNotice}</span>
+            <button type="button" onClick={clearAuthNotice} className="cursor-pointer font-medium underline">Dismiss</button>
+          </div>
+        </div>
+      )}
+
+      {pathname == "/products" ? <CategoryNav /> : null}
+    </header>
   );
 }
