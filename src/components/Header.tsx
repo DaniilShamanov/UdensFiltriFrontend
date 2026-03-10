@@ -255,27 +255,6 @@ export default function Header() {
           </div>
         </div>
 
-        {routeLoading && (
-          <div className="h-1 w-full overflow-hidden bg-primary/10">
-            <div className="h-full w-1/3 animate-pulse bg-primary" />
-          </div>
-        )}
-
-        {authNotice && (
-          <div className="border-t border-primary/20 bg-amber-100/60 px-4 py-2 text-sm text-amber-900">
-            <div className="container mx-auto flex items-center justify-between gap-3">
-              <span>{authNotice}</span>
-              <button
-                type="button"
-                onClick={clearAuthNotice}
-                className="font-medium underline"
-              >
-                Dismiss
-              </button>
-            </div>
-          </div>
-        )}
-
         {pathname === "/products" && <CategoryNav />}
       </header>
     </>

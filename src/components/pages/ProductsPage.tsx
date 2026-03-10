@@ -172,9 +172,6 @@ const ProductsPage: React.FC = () => {
           formatValue={formatCurrency}
           label={t('filters.priceRange')}
         />
-        <p className="text-xs text-muted-foreground">
-          {formatCurrency(range.min)} - {formatCurrency(range.max)}
-        </p>
       </div>
 
       {/* Brands */}
