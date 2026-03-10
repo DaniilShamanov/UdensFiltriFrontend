@@ -112,32 +112,31 @@ export default function Header() {
                   </Button>
                 </SheetTrigger>
 
-                <SheetContent side="left" className="w-[320px] bg-background/95">
+                <SheetContent side="left" className="w-[320px] bg-background/95 p-0">
                   <SheetHeader>
                     <SheetTitle>Menu</SheetTitle>
                   </SheetHeader>
 
-                  <nav className="mt-6 flex flex-col gap-2">
+                  <nav className="mt-6 flex flex-col border-y">
                     {navLinks.map((link) => (
                       <Button
                         key={link.href}
                         asChild
                         variant="ghost"
-                        className="justify-start"
+                        className="justify-start rounded-none border-b px-4 py-6"
                         onClick={closeMobile}
                       >
                         <Link href={link.href}>{link.label}</Link>
                       </Button>
                     ))}
 
-                    <div className="my-2 border-t" />
 
                     {user ? (
                       <>
                         <Button
                           asChild
                           variant="ghost"
-                          className="justify-start"
+                          className="justify-start rounded-none border-b px-4 py-6"
                           onClick={closeMobile}
                         >
                           <Link href="/account">
@@ -149,7 +148,7 @@ export default function Header() {
                         <Button
                           asChild
                           variant="ghost"
-                          className="justify-start"
+                          className="justify-start rounded-none border-b px-4 py-6"
                           onClick={closeMobile}
                         >
                           <Link href="/orders">
@@ -160,7 +159,7 @@ export default function Header() {
 
                         <Button
                           variant="ghost"
-                          className="justify-start text-destructive"
+                          className="justify-start rounded-none border-b px-4 py-6 text-destructive"
                           onClick={async () => {
                             await handleLogout();
                             closeMobile();
@@ -171,7 +170,7 @@ export default function Header() {
                         </Button>
                       </>
                     ) : (
-                      <Button asChild onClick={closeMobile}>
+                      <Button asChild className="mx-4 my-4 justify-center" onClick={closeMobile}>
                         <Link href="/auth/sign-in">
                           {t("nav.signIn")}
                         </Link>
