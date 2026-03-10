@@ -40,7 +40,15 @@ const ProductsPage: React.FC = () => {
 
   const t = useTranslations('products');
 
-  const formatCurrency = (value: number) => `€${value.toLocaleString()}`;
+  const formatCurrency = (value: number) => `€${value}`;
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 1023px)');
+    const update = () => setIsMobile(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
 
   useEffect(() => {
     const media = window.matchMedia('(max-width: 1023px)');
