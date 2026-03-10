@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { CartItem, Order, User } from "@/lib/types";
 import { products } from "@/lib/mockData";
 import { authApi, SmsPurpose } from "@/lib/auth/api";
@@ -46,6 +47,7 @@ function getScopedStorageKey(prefix: "cart" | "orders", userId?: string | number
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const pathname = usePathname();
+  const t = useTranslations();
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [routeLoading, setRouteLoading] = useState(false);
@@ -71,10 +73,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (!cancelled) {
           setUser(null);
           if (localStorage.getItem(AUTH_SEEN_KEY) === "1") {
-            setAuthNotice({
-              title: "You've signed out",
-              description: "Please sign in again to access your account.",
-            });
+            setAuthNotice(t("notification.signedOut"));
           }
         }
       } finally {
@@ -95,7 +94,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     const onAuthExpired = () => {
       setUser(null);
-      setAuthNotice("Your session expired. Please sign in again.");
+      setAuthNotice(t("notification.signedOut"));
       logClientEvent('auth_expired');
     };
 

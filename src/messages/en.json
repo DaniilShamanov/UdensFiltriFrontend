@@ -499,5 +499,8 @@
     "products": "Products",
     "services": "Services",
     "contact": "Contact"
+  },
+  "notification": {
+    "signedOut": "You've signed out. Please sign in again to access your account"
   }
 }

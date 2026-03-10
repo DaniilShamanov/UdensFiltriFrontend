@@ -499,5 +499,8 @@
     "products": "Produkti",
     "services": "Pakalpojumi",
     "contact": "Kontakti"
+  },
+  "notification": {
+    "signedOut": "Jūs esat izrakstījies. Lūdzu, pierakstieties vēlreiz, lai piekļūtu savam kontam"
   }
 }
