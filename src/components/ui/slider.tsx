@@ -107,6 +107,7 @@ export default function RangeSlider({
 
   type ActiveThumb = 'min' | 'max' | null;
   const [activeThumb, setActiveThumb] = useState<ActiveThumb>(null);
+  const activeThumbRef = useRef<ActiveThumb>(null);
   const dragging = activeThumb !== null;
   const pointerIdRef = useRef<number | null>(null);
 
@@ -162,23 +163,25 @@ export default function RangeSlider({
     e.stopPropagation();
 
     setActiveThumb(which);
+    activeThumbRef.current = which;
     pointerIdRef.current = e.pointerId;
     (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
   }
 
   function onThumbPointerMove(which: 'min' | 'max', e: React.PointerEvent<HTMLDivElement>) {
-    if (disabled || activeThumb !== which) return;
+    if (disabled || activeThumbRef.current !== which) return;
     e.preventDefault();
 
     setThumb(which, valueFromClientX(e.clientX), false);
   }
 
   function onThumbPointerUp(which: 'min' | 'max', e: React.PointerEvent<HTMLDivElement>) {
-    if (disabled || activeThumb !== which) return;
+    if (disabled || activeThumbRef.current !== which) return;
 
     e.preventDefault();
     emitEnd({ min: minRef.current, max: maxRef.current });
     setActiveThumb(null);
+    activeThumbRef.current = null;
     pointerIdRef.current = null;
 
     try {
@@ -198,21 +201,23 @@ export default function RangeSlider({
     const target: ActiveThumb = distToMin <= distToMax ? 'min' : 'max';
 
     setActiveThumb(target);
+    activeThumbRef.current = target;
     pointerIdRef.current = e.pointerId;
     (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
     setThumb(target, v, false);
   }
 
   function onTrackPointerMove(e: React.PointerEvent<HTMLDivElement>) {
-    if (disabled || pointerIdRef.current !== e.pointerId || !activeThumb) return;
-    setThumb(activeThumb, valueFromClientX(e.clientX), false);
+    if (disabled || pointerIdRef.current !== e.pointerId || !activeThumbRef.current) return;
+    setThumb(activeThumbRef.current, valueFromClientX(e.clientX), false);
   }
 
   function onTrackPointerUp(e: React.PointerEvent<HTMLDivElement>) {
-    if (disabled || pointerIdRef.current !== e.pointerId || !activeThumb) return;
+    if (disabled || pointerIdRef.current !== e.pointerId || !activeThumbRef.current) return;
 
     emitEnd({ min: minRef.current, max: maxRef.current });
     setActiveThumb(null);
+    activeThumbRef.current = null;
     pointerIdRef.current = null;
 
     try {

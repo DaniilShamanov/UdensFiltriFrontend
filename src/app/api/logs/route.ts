@@ -17,11 +17,15 @@ export async function POST(request: NextRequest) {
 
     await mkdir(logsDir, { recursive: true });
 
+    const forwardedFor = request.headers.get('x-forwarded-for');
+    const realIp = request.headers.get('x-real-ip');
+    const ip = forwardedFor?.split(',')[0]?.trim() || realIp || 'unknown';
+
     const line = JSON.stringify({
       at: date.toISOString(),
       event: body.event ?? 'unknown',
       details: body.details ?? {},
-      ip: request.ip ?? 'unknown',
+      ip,
       userAgent: request.headers.get('user-agent') ?? 'unknown',
     });
 
