@@ -29,17 +29,9 @@ const OrdersPage: React.FC = () => {
 
   const t = useTranslations('orders');
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      const next = encodeURIComponent(pathname);
-      router.replace(`/auth/sign-in?next=${next}`);
-    }
-  }, [user, authLoading, router, pathname]);
-
-  if (authLoading) return <p>Loading</p>;
-  if (!user) return null; // will redirect via effect
-
   const filteredOrders = useMemo(() => {
+    if (!user) return [];
+
     let result = [...orders];
 
     // Search filter
@@ -74,7 +66,17 @@ const OrdersPage: React.FC = () => {
     }
 
     return result;
-  }, [orders, searchQuery, statusFilter, sortBy]);
+  }, [user, orders, searchQuery, statusFilter, sortBy]);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      const next = encodeURIComponent(pathname);
+      router.replace(`/auth/sign-in?next=${next}`);
+    }
+  }, [user, authLoading, router, pathname]);
+
+  if (authLoading) return <p>Loading</p>;
+  if (!user) return null; // will redirect via effect
 
   const totalSpent = orders.reduce((sum, order) => sum + order.total, 0);
   const orderCount = orders.length;

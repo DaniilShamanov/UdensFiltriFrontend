@@ -38,7 +38,7 @@ const ServicesPage: React.FC = () => {
               <div className="bg-white/20 p-3 rounded-lg">
                 <Wrench className="h-8 w-8" />
               </div>
-              <h1 className="text-4xl font-bold">{t('hero.title')}</h1>
+              <h1 className="text-2xl leading-tight font-bold break-words sm:text-3xl md:text-4xl">{t('hero.title')}</h1>
             </div>
             <p className="text-lg text-white/90 mb-6">
               {t('hero.description')}

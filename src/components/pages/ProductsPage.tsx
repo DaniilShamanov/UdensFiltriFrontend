@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Link } from '@/navigation';
-import { Search, SlidersHorizontal } from 'lucide-react';
+import { Search, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -35,10 +35,20 @@ const ProductsPage: React.FC = () => {
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [inStockOnly, setInStockOnly] = useState(false);
   const [minRating, setMinRating] = useState('0');
+  const [isMobile, setIsMobile] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const t = useTranslations('products');
 
-  const formatCurrency = (value: number) => `€${value.toLocaleString()}`;
+  const formatCurrency = (value: number) => `€${value}`;
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 1023px)');
+    const update = () => setIsMobile(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
 
   const resetFilters = () => {
     setRange({ min: 0, max: 1500 });
@@ -117,6 +127,18 @@ const ProductsPage: React.FC = () => {
 
     return result;
   }, [searchQuery, sortBy, range, selectedBrands, inStockOnly, minRating, categoryId, subCategoryId]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, sortBy, range, selectedBrands, inStockOnly, minRating, categoryId, subCategoryId]);
+
+  const pageSize = isMobile ? 10 : 20;
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedProducts = useMemo(() => {
+    const start = (safePage - 1) * pageSize;
+    return filteredProducts.slice(start, start + pageSize);
+  }, [filteredProducts, safePage, pageSize]);
 
   const toggleBrand = (brand: string) => {
     setSelectedBrands(prev =>
@@ -272,12 +294,14 @@ const ProductsPage: React.FC = () => {
                     {t('filtersButton')}
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-[300px]">
+                <SheetContent side="left" className="w-[300px] p-0">
                   <SheetHeader>
                     <SheetTitle>{t('filtersTitle')}</SheetTitle>
                   </SheetHeader>
-                  <ScrollArea className="h-[calc(100vh-8rem)] mt-6 pr-4">
-                    <FilterSection />
+                  <ScrollArea className="h-[calc(100vh-8rem)] mt-4">
+                    <div className="border-y px-4 py-4">
+                      <FilterSection />
+                    </div>
                   </ScrollArea>
                 </SheetContent>
               </Sheet>
@@ -314,7 +338,7 @@ const ProductsPage: React.FC = () => {
         <div className="grid lg:grid-cols-[280px_1fr] gap-8">
           {/* Desktop Filters Sidebar */}
           <aside className="hidden lg:block">
-            <Card className="sticky top-24 border-primary/20 shadow-sm">
+            <Card className="sticky top-32 border-primary/20 shadow-sm">
               <CardContent className="p-6">
                 <h2 className="font-semibold text-lg mb-4">{t('filtersTitle')}</h2>
                 <ScrollArea className="h-[calc(100vh-16rem)] pr-4">
@@ -338,15 +362,53 @@ const ProductsPage: React.FC = () => {
                 </Button>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredProducts.map(product => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    showWholesalePrice={user?.is_company}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {paginatedProducts.map(product => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      showWholesalePrice={user?.is_company}
+                    />
+                  ))}
+                </div>
+
+                {totalPages > 1 && (
+                  <div className="mt-8 flex items-center justify-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      disabled={safePage === 1}
+                      onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                      aria-label="Previous page"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((page) => (
+                        <Button
+                          key={page}
+                          variant={page === safePage ? 'default' : 'outline'}
+                          size="sm"
+                          className="min-w-9"
+                          onClick={() => setCurrentPage(page)}
+                        >
+                          {page}
+                        </Button>
+                      ))}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      disabled={safePage === totalPages}
+                      onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                      aria-label="Next page"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
