@@ -73,8 +73,7 @@ const SignUpPage: React.FC = () => {
         return;
       }
 
-      const normalizedCode = verificationCode.trim();
-      if (formData.email && !awaitingEmailCode && !normalizedCode) {
+      if (formData.email && !awaitingEmailCode) {
         await signUp({
           phone: formData.phone.trim() || undefined,
           password: formData.password,
@@ -93,7 +92,7 @@ const SignUpPage: React.FC = () => {
         email: formData.email.trim() || undefined,
         first_name: formData.first_name || undefined,
         last_name: formData.last_name || undefined,
-        code: formData.email ? (normalizedCode || undefined) : undefined,
+        code: formData.email ? verificationCode.trim() : undefined,
       });
       toast.success(t('toast.accountCreated'));
       const next = sanitizeNextPath(searchParams.get("next"), "/");
@@ -186,13 +185,11 @@ const SignUpPage: React.FC = () => {
               <p className="text-xs text-muted-foreground mt-1">{t('emailHint')}</p>
             </div>
 
-            {formData.email && (
+            {awaitingEmailCode && (
               <div className="space-y-2">
-                {awaitingEmailCode && (
-                  <div className="rounded-md border border-primary/30 bg-primary/10 px-3 py-2 text-sm text-foreground">
-                    {t('verificationBanner')}
-                  </div>
-                )}
+                <div className="rounded-md border border-primary/30 bg-primary/10 px-3 py-2 text-sm text-foreground">
+                  {t('verificationBanner')}
+                </div>
                 <Label htmlFor="verificationCode">{t('verificationCodeLabel')}</Label>
                 <Input
                   id="verificationCode"
@@ -261,7 +258,7 @@ const SignUpPage: React.FC = () => {
             </div>
 
             <Button type="submit" size="lg" className="w-full bg-accent hover:bg-accent/90" disabled={isSubmitting}>
-              {(awaitingEmailCode || (formData.email && verificationCode.trim())) ? t('confirmCodeButton') : t('createAccountButton')}
+              {awaitingEmailCode ? t('confirmCodeButton') : t('createAccountButton')}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
 
