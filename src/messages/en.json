@@ -370,13 +370,17 @@
       "accountCreated": "Account created successfully!",
       "signUpFailed": "Sign up failed",
       "passwordTooShort": "Password is too short: you entered {current} characters, minimum is {min}.",
-      "verificationCodeSent": "Verification code sent to your email"
+      "verificationCodeSent": "Verification code sent to your email",
+      "verifyEmailFirst": "Please verify email",
+      "verificationCodeRequired": "Please enter verification code",
+      "emailRequiredForVerification": "Email is required to send verification code"
     },
     "createAccountButton": "Create account",
     "verificationBanner": "Verification code has been sent to your email.",
     "verificationCodeLabel": "Verification code",
     "verificationCodePlaceholder": "Enter code from email",
-    "confirmCodeButton": "Confirm code"
+    "confirmCodeButton": "Confirm code",
+    "verifyButton": "Verify"
   },
   "account": {
     "title": "Account Settings",
@@ -398,15 +402,16 @@
       "smsCode": "SMS code",
       "updatePhone": "Update phone",
       "phoneHelp": "Code is sent to your current phone number.",
-      "email": "Email (optional)",
+      "email": "Email",
       "notSet": "Not set",
-      "emailPlaceholder": "(optional)",
+      "emailPlaceholder": "you@example.com",
       "updateEmail": "Update email",
       "emailHelp": "If email is empty, receipts will only be stored in your account.",
       "emailCode": "Verification code",
       "codePlaceholder": "Enter code from email",
       "confirmCode": "Confirm code",
-      "codeBanner": "Verification code has been sent to your email."
+      "codeBanner": "Verification code has been sent to your email.",
+      "phoneOptionalHint": "Phone number (optional)"
     },
     "security": {
       "title": "Password",
@@ -436,7 +441,8 @@
       "checkCode": "Check the code and try again.",
       "checkPhoneFormat": "Check the code and phone format (+371...).",
       "verificationCodeSent": "Verification code sent to your email",
-      "passwordTooShort": "Password is too short: you entered {current} characters, minimum is {min}."
+      "passwordTooShort": "Password is too short: you entered {current} characters, minimum is {min}.",
+      "emailRequired": "Email is required"
     }
   },
   "cart": {

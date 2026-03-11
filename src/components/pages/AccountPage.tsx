@@ -80,6 +80,10 @@ const AccountPage: React.FC = () => {
 
   const doChangeEmail = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!newEmail.trim()) {
+      toast.error(t('toast.emailRequired'));
+      return;
+    }
     try {
       const normalizedEmail = newEmail?.trim() || undefined;
       if (!awaitingEmailCode) {
@@ -185,6 +189,7 @@ const AccountPage: React.FC = () => {
                     <form onSubmit={doChangePhone} className="mt-4 grid gap-3">
                       <Label htmlFor="new_phone">{t('profile.phone')}</Label>
                       <Input id="new_phone" value={newPhone} onChange={(e) => setNewPhone(e.target.value)} placeholder={t('profile.phonePlaceholder')} />
+                      <p className="text-xs text-muted-foreground">{t('profile.phoneOptionalHint')}</p>
                       <Button type="submit" className="cursor-pointer bg-primary hover:bg-primary/90">{t('profile.updatePhone')}</Button>
                     </form>
                   </div>
@@ -193,7 +198,7 @@ const AccountPage: React.FC = () => {
                     <div className="flex items-center gap-2 font-medium"><Mail className="h-4 w-4" /> {t('profile.email')}</div>
                     <form onSubmit={doChangeEmail} className="mt-4 grid gap-3">
                       <Label htmlFor="email">{t('profile.email')}</Label>
-                      <Input id="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder={t('profile.emailPlaceholder')} />
+                      <Input id="email" required value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder={t('profile.emailPlaceholder')} />
                       {awaitingEmailCode && (
                         <>
                           <div className="rounded-md border border-primary/30 bg-primary/10 px-3 py-2 text-sm text-foreground">
