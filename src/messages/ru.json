@@ -370,13 +370,17 @@
       "accountCreated": "Аккаунт успешно создан!",
       "signUpFailed": "Ошибка регистрации",
       "passwordTooShort": "Пароль слишком короткий: вы ввели {current} символа(ов), минимум — {min}.",
-      "verificationCodeSent": "Код подтверждения отправлен на вашу почту"
+      "verificationCodeSent": "Код подтверждения отправлен на вашу почту",
+      "verifyEmailFirst": "Please verify email",
+      "verificationCodeRequired": "Please enter verification code",
+      "emailRequiredForVerification": "Email is required to send verification code"
     },
     "createAccountButton": "Создать аккаунт",
     "verificationBanner": "Код подтверждения отправлен на вашу электронную почту.",
     "verificationCodeLabel": "Код подтверждения",
     "verificationCodePlaceholder": "Введите код из письма",
-    "confirmCodeButton": "Подтвердить код"
+    "confirmCodeButton": "Подтвердить код",
+    "verifyButton": "Verify"
   },
   "account": {
     "title": "Настройки аккаунта",
@@ -406,7 +410,8 @@
       "emailCode": "Код подтверждения",
       "codePlaceholder": "Введите код из письма",
       "confirmCode": "Подтвердить код",
-      "codeBanner": "Код подтверждения отправлен на вашу электронную почту."
+      "codeBanner": "Код подтверждения отправлен на вашу электронную почту.",
+      "phoneOptionalHint": "Phone number (optional)"
     },
     "security": {
       "title": "Пароль",
@@ -436,7 +441,8 @@
       "checkCode": "Проверьте код и попробуйте снова.",
       "checkPhoneFormat": "Проверьте код и формат телефона (+371...).",
       "verificationCodeSent": "Код подтверждения отправлен на вашу почту",
-      "passwordTooShort": "Пароль слишком короткий: вы ввели {current} символа(ов), минимум — {min}."
+      "passwordTooShort": "Пароль слишком короткий: вы ввели {current} символа(ов), минимум — {min}.",
+      "emailRequired": "Email is required"
     }
   },
   "cart": {

@@ -74,15 +74,12 @@ const SignUpPage: React.FC = () => {
       }
 
       if (formData.email && !awaitingEmailCode) {
-        await signUp({
-          phone: formData.phone.trim() || undefined,
-          password: formData.password,
-          email: formData.email.trim() || undefined,
-          first_name: formData.first_name || undefined,
-          last_name: formData.last_name || undefined,
-        });
-        setAwaitingEmailCode(true);
-        toast.success(t('toast.verificationCodeSent'));
+        toast.error(t('toast.verifyEmailFirst'));
+        return;
+      }
+
+      if (formData.email && !verificationCode.trim()) {
+        toast.error(t('toast.verificationCodeRequired'));
         return;
       }
 
@@ -97,6 +94,47 @@ const SignUpPage: React.FC = () => {
       toast.success(t('toast.accountCreated'));
       const next = sanitizeNextPath(searchParams.get("next"), "/");
       router.replace(next);
+    } catch (e: unknown) {
+      toast.error(t('toast.signUpFailed'), {
+        description: getApiErrorMessage(e, t('toast.tryAgain')),
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const requestVerificationCode = async () => {
+    if (!formData.email.trim()) {
+      toast.error(t('toast.emailRequiredForVerification'));
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      toast.error(t('toast.passwordTooShort', { min: 6, current: formData.password.length }));
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error(t('toast.passwordsMismatch'));
+      return;
+    }
+
+    if (!formData.agreeToTerms) {
+      toast.error(t('toast.termsNotAgreed'));
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await signUp({
+        phone: formData.phone.trim() || undefined,
+        password: formData.password,
+        email: formData.email.trim() || undefined,
+        first_name: formData.first_name || undefined,
+        last_name: formData.last_name || undefined,
+      });
+      setAwaitingEmailCode(true);
+      toast.success(t('toast.verificationCodeSent'));
     } catch (e: unknown) {
       toast.error(t('toast.signUpFailed'), {
         description: getApiErrorMessage(e, t('toast.tryAgain')),
@@ -165,22 +203,27 @@ const SignUpPage: React.FC = () => {
 
             <div>
               <Label htmlFor="email">{t('emailLabel')}</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => {
-                    setAwaitingEmailCode(false);
-                    setVerificationCode("");
-                    handleChange(e);
-                  }}
-                  placeholder={t('emailPlaceholder')}
-                  className="pl-10"
-                  autoComplete="email"
-                />
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => {
+                      setAwaitingEmailCode(false);
+                      setVerificationCode("");
+                      handleChange(e);
+                    }}
+                    placeholder={t('emailPlaceholder')}
+                    className="pl-10"
+                    autoComplete="email"
+                  />
+                </div>
+                <Button type="button" variant="outline" onClick={requestVerificationCode} disabled={isSubmitting || !formData.email.trim()}>
+                  {t('verifyButton')}
+                </Button>
               </div>
               <p className="text-xs text-muted-foreground mt-1">{t('emailHint')}</p>
             </div>

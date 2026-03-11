@@ -370,13 +370,17 @@
       "accountCreated": "Konts veiksmīgi izveidots!",
       "signUpFailed": "Reģistrācija neizdevās",
       "passwordTooShort": "Parole ir pārāk īsa: ievadījāt {current} simbolus, minimums ir {min}.",
-      "verificationCodeSent": "Verifikācijas kods nosūtīts uz jūsu e-pastu"
+      "verificationCodeSent": "Verifikācijas kods nosūtīts uz jūsu e-pastu",
+      "verifyEmailFirst": "Please verify email",
+      "verificationCodeRequired": "Please enter verification code",
+      "emailRequiredForVerification": "Email is required to send verification code"
     },
     "createAccountButton": "Izveidot kontu",
     "verificationBanner": "Verifikācijas kods ir nosūtīts uz jūsu e-pastu.",
     "verificationCodeLabel": "Verifikācijas kods",
     "verificationCodePlaceholder": "Ievadiet kodu no e-pasta",
-    "confirmCodeButton": "Apstiprināt kodu"
+    "confirmCodeButton": "Apstiprināt kodu",
+    "verifyButton": "Verify"
   },
   "account": {
     "title": "Konta iestatījumi",
@@ -406,7 +410,8 @@
       "emailCode": "Verifikācijas kods",
       "codePlaceholder": "Ievadiet kodu no e-pasta",
       "confirmCode": "Apstiprināt kodu",
-      "codeBanner": "Verifikācijas kods ir nosūtīts uz jūsu e-pastu."
+      "codeBanner": "Verifikācijas kods ir nosūtīts uz jūsu e-pastu.",
+      "phoneOptionalHint": "Phone number (optional)"
     },
     "security": {
       "title": "Parole",
@@ -436,7 +441,8 @@
       "checkCode": "Pārbaudiet kodu un mēģiniet vēlreiz.",
       "checkPhoneFormat": "Pārbaudiet kodu un tālruņa formātu (+371...).",
       "verificationCodeSent": "Verifikācijas kods nosūtīts uz jūsu e-pastu",
-      "passwordTooShort": "Parole ir pārāk īsa: ievadījāt {current} simbolus, minimums ir {min}."
+      "passwordTooShort": "Parole ir pārāk īsa: ievadījāt {current} simbolus, minimums ir {min}.",
+      "emailRequired": "Email is required"
     }
   },
   "cart": {

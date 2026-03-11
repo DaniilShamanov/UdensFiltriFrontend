@@ -1,51 +1,30 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import createMiddleware from 'next-intl/middleware';
-import { jwtVerify } from 'jose';
 import { defaultLocale, localePrefix, locales } from './i18n/routing';
 
 const localeArray = locales as readonly string[];
 const isDevelopment = process.env.NODE_ENV === 'development';
 const SKIP_AUTH_IN_DEV = isDevelopment && process.env.SKIP_AUTH === 'true';
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-const JWT_SECRET = process.env.JWT_SECRET!;
 
 const PUBLIC_PREFIXES = ['/home', '/about', '/services', '/auth'];
 const PROTECTED_PREFIXES = ['/account', '/orders', '/payment'];
 
 const intlMiddleware = createMiddleware({ locales, defaultLocale, localePrefix });
 
-async function verifyToken(token: string): Promise<boolean> {
-  try {
-    await jwtVerify(token, new TextEncoder().encode(JWT_SECRET));
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 async function refreshAccessToken(request: NextRequest, response: NextResponse): Promise<boolean> {
-  const refreshToken = request.cookies.get('refresh')?.value; // adjust cookie name if needed
+  const refreshToken = request.cookies.get('refresh')?.value;
   if (!refreshToken) return false;
 
   try {
     const res = await fetch(`${API_BASE}/api/auth/refresh/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refresh: refreshToken }), // adjust payload to match your Django endpoint
-      credentials: 'include', // sends cookies (if any)
+      body: JSON.stringify({}),
+      credentials: 'include',
     });
 
     if (!res.ok) return false;
-
-    const { access } = await res.json(); // adjust based on your response shape
-
-    // Set the new access token as an HTTP-only cookie
-    response.cookies.set('access', access, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-    });
 
     return true;
   } catch {
@@ -56,12 +35,12 @@ async function refreshAccessToken(request: NextRequest, response: NextResponse):
 async function isAuthenticated(request: NextRequest, response: NextResponse): Promise<boolean> {
   const accessToken = request.cookies.get('access')?.value;
 
-  // 1. If access token exists and is valid → authenticated
-  if (accessToken && (await verifyToken(accessToken))) {
+  // If access token exists, treat session as authenticated and let backend validate on API calls.
+  if (accessToken) {
     return true;
   }
 
-  // 2. Otherwise try to refresh
+  // Otherwise try to refresh
   const refreshed = await refreshAccessToken(request, response);
   return refreshed;
 }
