@@ -1,6 +1,6 @@
 # Plumbing Web App (Next.js App Router + next-intl)
 
-This project is a create-next-app style Next.js (App Router) frontend scaffolded from a Figma Make export.
+This project is a create-next-app style Next.js (App Router) frontend.
 
 ## Tech
 - Next.js (App Router)
