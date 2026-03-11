@@ -70,6 +70,7 @@ export const authApi = {
     email?: string;
     first_name?: string;
     last_name?: string;
+    code?: string;
   }): Promise<void> {
     await fetchJson<UserEnvelope>(apiUrl(AUTH_ENDPOINTS.signUp), {
       method: "POST",
