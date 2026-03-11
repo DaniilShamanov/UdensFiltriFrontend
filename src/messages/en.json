@@ -368,9 +368,15 @@
       "termsNotAgreed": "Please agree to the terms and conditions",
       "tryAgain": "Please try again.",
       "accountCreated": "Account created successfully!",
-      "signUpFailed": "Sign up failed"
+      "signUpFailed": "Sign up failed",
+      "passwordTooShort": "Password is too short: you entered {current} characters, minimum is {min}.",
+      "verificationCodeSent": "Verification code sent to your email"
     },
-    "createAccountButton": "Create account"
+    "createAccountButton": "Create account",
+    "verificationBanner": "Verification code has been sent to your email.",
+    "verificationCodeLabel": "Verification code",
+    "verificationCodePlaceholder": "Enter code from email",
+    "confirmCodeButton": "Confirm code"
   },
   "account": {
     "title": "Account Settings",
@@ -396,7 +402,11 @@
       "notSet": "Not set",
       "emailPlaceholder": "(optional)",
       "updateEmail": "Update email",
-      "emailHelp": "If email is empty, receipts will only be stored in your account."
+      "emailHelp": "If email is empty, receipts will only be stored in your account.",
+      "emailCode": "Verification code",
+      "codePlaceholder": "Enter code from email",
+      "confirmCode": "Confirm code",
+      "codeBanner": "Verification code has been sent to your email."
     },
     "security": {
       "title": "Password",
@@ -404,7 +414,11 @@
       "sendCode": "Send code",
       "newPassword": "New password",
       "smsCode": "SMS code",
-      "updatePassword": "Update password"
+      "updatePassword": "Update password",
+      "emailCode": "Verification code",
+      "codePlaceholder": "Enter code from email",
+      "confirmCode": "Confirm code",
+      "codeBanner": "Verification code has been sent to your email."
     },
     "toast": {
       "codeSent": "Code sent",
@@ -420,7 +434,9 @@
       "passwordUpdateFailed": "Could not update password",
       "signInAgain": "Please sign in again.",
       "checkCode": "Check the code and try again.",
-      "checkPhoneFormat": "Check the code and phone format (+371...)."
+      "checkPhoneFormat": "Check the code and phone format (+371...).",
+      "verificationCodeSent": "Verification code sent to your email",
+      "passwordTooShort": "Password is too short: you entered {current} characters, minimum is {min}."
     }
   },
   "cart": {

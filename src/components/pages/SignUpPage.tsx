@@ -13,6 +13,7 @@ import { Link, useRouter } from "@/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { sanitizeNextPath } from "@/lib/safeRedirect";
+import { ApiError } from "@/lib/api";
 
 const SignUpPage: React.FC = () => {
   const { signUp } = useApp();
@@ -22,6 +23,8 @@ const SignUpPage: React.FC = () => {
   const t = useTranslations('signUp');
 
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [awaitingEmailCode, setAwaitingEmailCode] = React.useState(false);
+  const [verificationCode, setVerificationCode] = React.useState("");
 
   const [formData, setFormData] = React.useState({
     first_name: "",
@@ -32,6 +35,18 @@ const SignUpPage: React.FC = () => {
     confirmPassword: "",
     agreeToTerms: false,
   });
+
+  const getApiErrorMessage = (error: unknown, fallback: string) => {
+    if (error instanceof ApiError && typeof error.data === "object" && error.data !== null) {
+      const values = Object.values(error.data as Record<string, unknown>)
+        .flatMap((v) => (Array.isArray(v) ? v : [v]))
+        .map((v) => String(v))
+        .filter(Boolean);
+      if (values.length > 0) return values.join(" ");
+    }
+    if (error instanceof Error && error.message) return error.message;
+    return fallback;
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -45,6 +60,10 @@ const SignUpPage: React.FC = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
+      if (formData.password.length < 6) {
+        toast.error(t('toast.passwordTooShort', { min: 6, current: formData.password.length }));
+        return;
+      }
       if (formData.password !== formData.confirmPassword) {
         toast.error(t('toast.passwordsMismatch'));
         return;
@@ -54,19 +73,34 @@ const SignUpPage: React.FC = () => {
         return;
       }
 
+      const normalizedCode = verificationCode.trim();
+      if (formData.email && !awaitingEmailCode && !normalizedCode) {
+        await signUp({
+          phone: formData.phone.trim() || undefined,
+          password: formData.password,
+          email: formData.email.trim() || undefined,
+          first_name: formData.first_name || undefined,
+          last_name: formData.last_name || undefined,
+        });
+        setAwaitingEmailCode(true);
+        toast.success(t('toast.verificationCodeSent'));
+        return;
+      }
+
       await signUp({
         phone: formData.phone.trim() || undefined,
         password: formData.password,
-        email: formData.email || undefined,
+        email: formData.email.trim() || undefined,
         first_name: formData.first_name || undefined,
         last_name: formData.last_name || undefined,
+        code: formData.email ? (normalizedCode || undefined) : undefined,
       });
       toast.success(t('toast.accountCreated'));
       const next = sanitizeNextPath(searchParams.get("next"), "/");
       router.replace(next);
-    } catch (e: any) {
+    } catch (e: unknown) {
       toast.error(t('toast.signUpFailed'), {
-        description: e?.message || t('toast.tryAgain'),
+        description: getApiErrorMessage(e, t('toast.tryAgain')),
       });
     } finally {
       setIsSubmitting(false);
@@ -139,7 +173,11 @@ const SignUpPage: React.FC = () => {
                   name="email"
                   type="email"
                   value={formData.email}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    setAwaitingEmailCode(false);
+                    setVerificationCode("");
+                    handleChange(e);
+                  }}
                   placeholder={t('emailPlaceholder')}
                   className="pl-10"
                   autoComplete="email"
@@ -147,6 +185,24 @@ const SignUpPage: React.FC = () => {
               </div>
               <p className="text-xs text-muted-foreground mt-1">{t('emailHint')}</p>
             </div>
+
+            {formData.email && (
+              <div className="space-y-2">
+                {awaitingEmailCode && (
+                  <div className="rounded-md border border-primary/30 bg-primary/10 px-3 py-2 text-sm text-foreground">
+                    {t('verificationBanner')}
+                  </div>
+                )}
+                <Label htmlFor="verificationCode">{t('verificationCodeLabel')}</Label>
+                <Input
+                  id="verificationCode"
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value)}
+                  placeholder={t('verificationCodePlaceholder')}
+                  autoComplete="one-time-code"
+                />
+              </div>
+            )}
 
             <div>
               <Label htmlFor="password">{t('passwordLabel')}</Label>
@@ -157,6 +213,7 @@ const SignUpPage: React.FC = () => {
                   name="password"
                   type="password"
                   required
+                  minLength={6}
                   value={formData.password}
                   onChange={handleChange}
                   placeholder={t('passwordPlaceholder')}
@@ -175,6 +232,7 @@ const SignUpPage: React.FC = () => {
                   name="confirmPassword"
                   type="password"
                   required
+                  minLength={6}
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   placeholder={t('confirmPasswordPlaceholder')}
@@ -203,7 +261,7 @@ const SignUpPage: React.FC = () => {
             </div>
 
             <Button type="submit" size="lg" className="w-full bg-accent hover:bg-accent/90" disabled={isSubmitting}>
-              {t('createAccountButton')}
+              {(awaitingEmailCode || (formData.email && verificationCode.trim())) ? t('confirmCodeButton') : t('createAccountButton')}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
 
