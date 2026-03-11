@@ -368,9 +368,15 @@
       "termsNotAgreed": "Пожалуйста, примите условия использования",
       "tryAgain": "Пожалуйста, попробуйте снова.",
       "accountCreated": "Аккаунт успешно создан!",
-      "signUpFailed": "Ошибка регистрации"
+      "signUpFailed": "Ошибка регистрации",
+      "passwordTooShort": "Пароль слишком короткий: вы ввели {current} символа(ов), минимум — {min}.",
+      "verificationCodeSent": "Код подтверждения отправлен на вашу почту"
     },
-    "createAccountButton": "Создать аккаунт"
+    "createAccountButton": "Создать аккаунт",
+    "verificationBanner": "Код подтверждения отправлен на вашу электронную почту.",
+    "verificationCodeLabel": "Код подтверждения",
+    "verificationCodePlaceholder": "Введите код из письма",
+    "confirmCodeButton": "Подтвердить код"
   },
   "account": {
     "title": "Настройки аккаунта",
@@ -396,7 +402,11 @@
       "notSet": "Не указан",
       "emailPlaceholder": "(необязательно)",
       "updateEmail": "Обновить email",
-      "emailHelp": "Если email не указан, квитанции будут храниться только в вашем аккаунте."
+      "emailHelp": "Если email не указан, квитанции будут храниться только в вашем аккаунте.",
+      "emailCode": "Код подтверждения",
+      "codePlaceholder": "Введите код из письма",
+      "confirmCode": "Подтвердить код",
+      "codeBanner": "Код подтверждения отправлен на вашу электронную почту."
     },
     "security": {
       "title": "Пароль",
@@ -404,7 +414,11 @@
       "sendCode": "Отправить код",
       "newPassword": "Новый пароль",
       "smsCode": "SMS-код",
-      "updatePassword": "Обновить пароль"
+      "updatePassword": "Обновить пароль",
+      "emailCode": "Код подтверждения",
+      "codePlaceholder": "Введите код из письма",
+      "confirmCode": "Подтвердить код",
+      "codeBanner": "Код подтверждения отправлен на вашу электронную почту."
     },
     "toast": {
       "codeSent": "Код отправлен",
@@ -420,7 +434,9 @@
       "passwordUpdateFailed": "Не удалось обновить пароль",
       "signInAgain": "Пожалуйста, войдите снова.",
       "checkCode": "Проверьте код и попробуйте снова.",
-      "checkPhoneFormat": "Проверьте код и формат телефона (+371...)."
+      "checkPhoneFormat": "Проверьте код и формат телефона (+371...).",
+      "verificationCodeSent": "Код подтверждения отправлен на вашу почту",
+      "passwordTooShort": "Пароль слишком короткий: вы ввели {current} символа(ов), минимум — {min}."
     }
   },
   "cart": {
