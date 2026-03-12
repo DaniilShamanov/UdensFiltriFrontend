@@ -18,6 +18,14 @@ import { ApiError, extractErrorMessage } from "@/lib/api";
 import { Suspense } from "react";
 import VerificationCodeInput from "@/components/VerificationCodeInput";
 
+
+function isLikelyVerificationRequestError(error: unknown) {
+  if (!(error instanceof ApiError) || error.status !== 400) return false;
+
+  const message = extractErrorMessage(error, '').toLowerCase();
+  return message.includes('code');
+}
+
 function SignUpContent() {
   const { signUp } = useApp();
   const router = useRouter();
@@ -125,6 +133,11 @@ function SignUpContent() {
       return;
     }
 
+    // Reveal code input immediately after the user intentionally requests
+    // verification so they can enter an already-received code without waiting
+    // for the API round-trip.
+    setAwaitingEmailCode(true);
+    setVerificationCode("");
     setIsSubmitting(true);
     try {
       const payload = {
@@ -136,21 +149,21 @@ function SignUpContent() {
         // we always include the code field; empty string means "send me a code"
         code: "",
       };
-      
-      console.debug('[SignUpPage] Sending verification request with payload:', payload);
+
       await authApi.signUp(payload as any);
-      setAwaitingEmailCode(true);
       toast.success(t('toast.verificationCodeSent'));
     } catch (e: unknown) {
-      console.error('[SignUpPage] Verification request failed:', e);
-      if (e instanceof Error && 'data' in e) {
-        console.error('[SignUpPage] Error response data:', (e as any).data);
+      // Some backends respond with 400 validation errors for this pre-registration
+      // request while still sending the code. Keep the code input visible and avoid
+      // showing a blocking error toast for this expected case.
+      if (isLikelyVerificationRequestError(e)) {
+        toast.success(t('toast.verificationCodeSent'));
+      } else {
+        const errorMessage = extractErrorMessage(e, t('toast.tryAgain'));
+        toast.error(t('toast.signUpFailed'), {
+          description: errorMessage,
+        });
       }
-      const errorMessage = extractErrorMessage(e, t('toast.tryAgain'));
-      console.error('[SignUpPage] Extracted error message:', errorMessage);
-      toast.error(t('toast.signUpFailed'), {
-        description: errorMessage,
-      });
     } finally {
       setIsSubmitting(false);
     }
