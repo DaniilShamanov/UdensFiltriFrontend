@@ -14,7 +14,7 @@ import { Link, useRouter } from "@/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { sanitizeNextPath } from "@/lib/safeRedirect";
-import { ApiError, extractErrorMessage } from "@/lib/api";
+import { extractErrorMessage } from "@/lib/api";
 import { Suspense } from "react";
 import VerificationCodeInput from "@/components/VerificationCodeInput";
 
@@ -153,17 +153,10 @@ function SignUpContent() {
       await authApi.signUp(payload as any);
       toast.success(t('toast.verificationCodeSent'));
     } catch (e: unknown) {
-      // Some backends respond with 400 validation errors for this pre-registration
-      // request while still sending the code. Keep the code input visible and avoid
-      // showing a blocking error toast for this expected case.
-      if (isLikelyVerificationRequestError(e)) {
-        toast.success(t('toast.verificationCodeSent'));
-      } else {
-        const errorMessage = extractErrorMessage(e, t('toast.tryAgain'));
-        toast.error(t('toast.signUpFailed'), {
-          description: errorMessage,
-        });
-      }
+      const errorMessage = extractErrorMessage(e, t('toast.tryAgain'));
+      toast.error(t('toast.signUpFailed'), {
+        description: errorMessage,
+      });
     } finally {
       setIsSubmitting(false);
     }
