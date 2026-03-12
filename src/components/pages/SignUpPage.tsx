@@ -111,10 +111,8 @@ function SignUpContent() {
   };
 
   // ── Request verification code (does NOT complete registration) ───────────
-  // We call authApi.signUp directly — NOT AppContext.signUp — because
-  // AppContext.signUp always follows up with authApi.me(). At this step the
-  // user is not yet authenticated, so me() throws a 401, the error propagates
-  // to the catch block and setAwaitingEmailCode(true) is never reached.
+  // Use the dedicated email-code endpoint; account registration happens only
+  // in handleRegister() after the user enters the received code.
   const requestVerificationCode = async () => {
     if (!formData.email.trim()) {
       toast.error(t('toast.emailRequiredForVerification'));
