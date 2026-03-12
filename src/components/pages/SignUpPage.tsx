@@ -14,7 +14,7 @@ import { Link, useRouter } from "@/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { sanitizeNextPath } from "@/lib/safeRedirect";
-import { ApiError, extractErrorMessage } from "@/lib/api";
+import { extractErrorMessage } from "@/lib/api";
 import { Suspense } from "react";
 import VerificationCodeInput from "@/components/VerificationCodeInput";
 
@@ -125,6 +125,11 @@ function SignUpContent() {
       return;
     }
 
+    // Reveal code input immediately after the user intentionally requests
+    // verification so they can enter an already-received code without waiting
+    // for the API round-trip.
+    setAwaitingEmailCode(true);
+    setVerificationCode("");
     setIsSubmitting(true);
     try {
       const payload = {
@@ -136,18 +141,11 @@ function SignUpContent() {
         // we always include the code field; empty string means "send me a code"
         code: "",
       };
-      
-      console.debug('[SignUpPage] Sending verification request with payload:', payload);
+
       await authApi.signUp(payload as any);
-      setAwaitingEmailCode(true);
       toast.success(t('toast.verificationCodeSent'));
     } catch (e: unknown) {
-      console.error('[SignUpPage] Verification request failed:', e);
-      if (e instanceof Error && 'data' in e) {
-        console.error('[SignUpPage] Error response data:', (e as any).data);
-      }
       const errorMessage = extractErrorMessage(e, t('toast.tryAgain'));
-      console.error('[SignUpPage] Extracted error message:', errorMessage);
       toast.error(t('toast.signUpFailed'), {
         description: errorMessage,
       });
