@@ -14,7 +14,7 @@ import { Link, useRouter } from "@/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { sanitizeNextPath } from "@/lib/safeRedirect";
-import { extractErrorMessage } from "@/lib/api";
+import { ApiError, extractErrorMessage } from "@/lib/api";
 import { Suspense } from "react";
 import VerificationCodeInput from "@/components/VerificationCodeInput";
 
