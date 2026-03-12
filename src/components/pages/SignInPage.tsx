@@ -92,7 +92,7 @@ function SignInContent() {
               {loading ? t('signingIn') : t('signInButton')}
             </Button>
 
-            <div className="text-right text-sm">
+            <div className="text-center text-sm">
               <Link href="/auth/forgot-password" className="text-primary hover:underline font-medium">
                 {t('forgotPasswordLink')}
               </Link>

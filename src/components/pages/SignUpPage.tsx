@@ -46,8 +46,6 @@ function SignUpContent() {
     agreeToTerms: false,
   });
 
-
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -138,17 +136,8 @@ function SignUpContent() {
     setVerificationCode("");
     setIsSubmitting(true);
     try {
-      const payload = {
-        email: formData.email.trim(),
-        password: formData.password,
-        first_name: formData.first_name?.trim() || "",
-        last_name: formData.last_name?.trim() || "",
-        ...(formData.phone?.trim() && { phone: formData.phone.trim() }),
-        // we always include the code field; empty string means "send me a code"
-        code: "",
-      };
-
-      await authApi.signUp(payload as any);
+      const payload = { email: formData.email.trim(), purpose: 'register'};
+      await authApi.requestEmailCode(payload as any);
       toast.success(t('toast.verificationCodeSent'));
     } catch (e: unknown) {
       const errorMessage = extractErrorMessage(e, t('toast.tryAgain'));
