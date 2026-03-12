@@ -19,6 +19,13 @@ import { Suspense } from "react";
 import VerificationCodeInput from "@/components/VerificationCodeInput";
 
 
+function isLikelyVerificationRequestError(error: unknown) {
+  if (!(error instanceof ApiError) || error.status !== 400) return false;
+
+  const message = extractErrorMessage(error, '').toLowerCase();
+  return message.includes('code');
+}
+
 function SignUpContent() {
   const { signUp } = useApp();
   const router = useRouter();
@@ -131,7 +138,17 @@ function SignUpContent() {
     setVerificationCode("");
     setIsSubmitting(true);
     try {
-      await authApi.requestEmailCode({ email: formData.email.trim() });
+      const payload = {
+        email: formData.email.trim(),
+        password: formData.password,
+        first_name: formData.first_name?.trim() || "",
+        last_name: formData.last_name?.trim() || "",
+        ...(formData.phone?.trim() && { phone: formData.phone.trim() }),
+        // we always include the code field; empty string means "send me a code"
+        code: "",
+      };
+
+      await authApi.signUp(payload as any);
       toast.success(t('toast.verificationCodeSent'));
     } catch (e: unknown) {
       const errorMessage = extractErrorMessage(e, t('toast.tryAgain'));
