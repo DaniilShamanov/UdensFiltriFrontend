@@ -14,9 +14,10 @@ import { Link, useRouter } from "@/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { sanitizeNextPath } from "@/lib/safeRedirect";
-import { ApiError, extractErrorMessage } from "@/lib/api";
+import { extractErrorMessage } from "@/lib/api";
 import { Suspense } from "react";
 import VerificationCodeInput from "@/components/VerificationCodeInput";
+
 
 function SignUpContent() {
   const { signUp } = useApp();
@@ -103,10 +104,8 @@ function SignUpContent() {
   };
 
   // ── Request verification code (does NOT complete registration) ───────────
-  // We call authApi.signUp directly — NOT AppContext.signUp — because
-  // AppContext.signUp always follows up with authApi.me(). At this step the
-  // user is not yet authenticated, so me() throws a 401, the error propagates
-  // to the catch block and setAwaitingEmailCode(true) is never reached.
+  // Use the dedicated email-code endpoint; account registration happens only
+  // in handleRegister() after the user enters the received code.
   const requestVerificationCode = async () => {
     if (!formData.email.trim()) {
       toast.error(t('toast.emailRequiredForVerification'));
@@ -125,29 +124,17 @@ function SignUpContent() {
       return;
     }
 
+    // Reveal code input immediately after the user intentionally requests
+    // verification so they can enter an already-received code without waiting
+    // for the API round-trip.
+    setAwaitingEmailCode(true);
+    setVerificationCode("");
     setIsSubmitting(true);
     try {
-      const payload = {
-        email: formData.email.trim(),
-        password: formData.password,
-        first_name: formData.first_name?.trim() || "",
-        last_name: formData.last_name?.trim() || "",
-        ...(formData.phone?.trim() && { phone: formData.phone.trim() }),
-        // we always include the code field; empty string means "send me a code"
-        code: "",
-      };
-      
-      console.debug('[SignUpPage] Sending verification request with payload:', payload);
-      await authApi.signUp(payload as any);
-      setAwaitingEmailCode(true);
+      await authApi.requestEmailCode({ email: formData.email.trim() });
       toast.success(t('toast.verificationCodeSent'));
     } catch (e: unknown) {
-      console.error('[SignUpPage] Verification request failed:', e);
-      if (e instanceof Error && 'data' in e) {
-        console.error('[SignUpPage] Error response data:', (e as any).data);
-      }
       const errorMessage = extractErrorMessage(e, t('toast.tryAgain'));
-      console.error('[SignUpPage] Extracted error message:', errorMessage);
       toast.error(t('toast.signUpFailed'), {
         description: errorMessage,
       });

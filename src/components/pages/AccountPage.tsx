@@ -13,7 +13,7 @@ import { authApi } from "@/lib/auth/api";
 import { useRouter, usePathname } from "@/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
-import { extractErrorMessage, ApiError } from "@/lib/api";
+import { extractErrorMessage } from "@/lib/api";
 import VerificationCodeInput from "@/components/VerificationCodeInput";
 
 const AccountPage: React.FC = () => {
@@ -76,22 +76,24 @@ const AccountPage: React.FC = () => {
   // ── Email change (two-step: request code → confirm) ─────────────────────
   const doChangeEmail = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newEmail.trim()) {
+    const trimmedEmail = newEmail.trim();
+    if (!trimmedEmail) {
       toast.error(t('toast.emailRequired'));
       return;
     }
+
     try {
       if (!awaitingEmailCode) {
-        // Step 1 — request the code. AppContext.changeEmail calls setUser()
-        // with the returned user, which is fine here.
-        await changeEmail({ email: newEmail.trim() });
+        // Step 1 — request verification code from dedicated endpoint.
         setAwaitingEmailCode(true);
+        setEmailCode("");
+        await authApi.requestEmailCode({ email: trimmedEmail });
         toast.success(t('toast.verificationCodeSent'));
         return;
       }
 
       // Step 2 — confirm with code
-      await changeEmail({ email: newEmail.trim(), code: emailCode.trim() });
+      await changeEmail({ email: trimmedEmail, code: emailCode.trim() });
       setAwaitingEmailCode(false);
       setEmailCode("");
       toast.success(t('toast.emailUpdated'));
@@ -116,10 +118,8 @@ const AccountPage: React.FC = () => {
   };
 
   // ── Password change (two-step: request code → confirm) ──────────────────
-  // We call authApi.changePassword directly (not AppContext.changePassword)
-  // because AppContext.changePassword always calls setUser(null) — even on the
-  // first step (code request). That would log the user out immediately and the
-  // AccountPage redirect useEffect would fire before they can enter the code.
+  // Step 1 uses dedicated email-code endpoint; step 2 confirms via
+  // changePassword and then signs the user out (tokens invalidated).
   const doChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword.length < 6) {
@@ -131,11 +131,18 @@ const AccountPage: React.FC = () => {
       return;
     }
 
+    const emailForVerification = user.email?.trim() || newEmail.trim();
+    if (!emailForVerification) {
+      toast.error(t('toast.emailRequired'));
+      return;
+    }
+
     try {
       if (!awaitingPasswordCode) {
-        // Step 1 — request the verification code (backend sends it to user's email)
-        await authApi.changePassword({ new_password: newPassword });
+        // Step 1 — request verification code from dedicated endpoint.
         setAwaitingPasswordCode(true);
+        setPasswordCode("");
+        await authApi.requestEmailCode({ email: emailForVerification });
         toast.success(t('toast.verificationCodeSent'));
         return;
       }

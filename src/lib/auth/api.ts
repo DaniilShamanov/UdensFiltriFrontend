@@ -11,6 +11,7 @@ export const AUTH_ENDPOINTS = {
   me: "/api/auth/me/",
   profile: "/api/auth/profile/",
   requestSmsCode: "/api/auth/request-sms-code/",
+  requestEmailCode: "/api/auth/request-email-code/",
   signIn: "/api/auth/login/",
   signUp: "/api/auth/register/",
   signOut: "/api/auth/logout/",
@@ -47,6 +48,16 @@ export const authApi = {
 
   async requestSmsCode(input: { purpose: SmsPurpose; phone?: string }): Promise<void> {
     await fetchJson<OkEnvelope>(apiUrl(AUTH_ENDPOINTS.requestSmsCode), {
+      method: "POST",
+      body: input,
+      csrf: true,
+      credentials: "include",
+    });
+  },
+
+
+  async requestEmailCode(input: { email: string }): Promise<void> {
+    await fetchJson<OkEnvelope>(apiUrl(AUTH_ENDPOINTS.requestEmailCode), {
       method: "POST",
       body: input,
       csrf: true,
