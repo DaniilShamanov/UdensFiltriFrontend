@@ -12,15 +12,6 @@ export class ApiError extends Error {
 
 export function extractErrorMessage(error: unknown, defaultMessage: string): string {
   if (error instanceof ApiError) {
-    // Log the full error data for debugging
-    if (typeof window !== 'undefined') {
-      console.debug('[extractErrorMessage] ApiError details:', {
-        status: error.status,
-        data: error.data,
-        message: error.message,
-      });
-    }
-
     // If data is a string, return it directly
     if (typeof error.data === 'string') {
       return error.data;
@@ -175,11 +166,12 @@ export async function fetchJson<T>(
   const data = isJson ? await res.json().catch(() => null) : await res.text().catch(() => null);
 
   if (!res.ok) {
-    // Log full response for debugging (headers converted to object for readability)
-    if (typeof window !== "undefined") {
+    // Keep client console clean for expected validation failures (4xx),
+    // but still log unexpected server errors in the browser.
+    if (typeof window !== "undefined" && res.status >= 500) {
       const headersObj: Record<string,string> = {};
       res.headers.forEach((v,k) => (headersObj[k] = v));
-      console.error('[fetchJson] non-ok response', {
+      console.error('[fetchJson] server error response', {
         url,
         status: res.status,
         headers: headersObj,

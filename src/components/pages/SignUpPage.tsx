@@ -18,6 +18,14 @@ import { extractErrorMessage } from "@/lib/api";
 import { Suspense } from "react";
 import VerificationCodeInput from "@/components/VerificationCodeInput";
 
+
+function isLikelyVerificationRequestError(error: unknown) {
+  if (!(error instanceof ApiError) || error.status !== 400) return false;
+
+  const message = extractErrorMessage(error, '').toLowerCase();
+  return message.includes('code');
+}
+
 function SignUpContent() {
   const { signUp } = useApp();
   const router = useRouter();
