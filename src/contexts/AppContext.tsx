@@ -17,8 +17,8 @@ interface AppContextType {
   clearAuthNotice: () => void;
 
   requestSmsCode: (input: { purpose: SmsPurpose; phone?: string }) => Promise<void>
-  signIn: (input: { phone: string; password: string }) => Promise<void>;
-  signUp: (input: { phone?: string; password: string; email?: string; first_name?: string; last_name?: string; code?: string }) => Promise<void>;
+  signIn: (input: { email: string; password: string }) => Promise<void>;
+  signUp: (input: { phone?: string; password: string; email: string; first_name: string; last_name: string; code: string }) => Promise<void>;
   signOut: () => Promise<void>;
   refreshSession: () => Promise<void>;
   updateProfile: (input: { first_name?: string; last_name?: string }) => Promise<void>;
@@ -156,7 +156,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     await authApi.requestSmsCode(input);
   };
 
-  const signIn = async (input: { phone: string; password: string }) => {
+  const signIn = async (input: { email: string; password: string }) => {
     setAuthLoading(true);
     try {
       await authApi.signIn(input);

@@ -2,7 +2,7 @@
 
 import React, { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Lock, Phone, LogIn } from "lucide-react";
+import { Lock, Phone, LogIn, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,7 +19,7 @@ function SignInContent() {
   const { signIn } = useApp();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [form, setForm] = useState({ phone: "", password: "" });
+  const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
 
   const t = useTranslations('signIn');
@@ -28,7 +28,7 @@ function SignInContent() {
     e.preventDefault();
     setLoading(true);
     try {
-      await signIn({ phone: form.phone, password: form.password });
+      await signIn({ email: form.email, password: form.password });
       toast.success(t('toast.success'));
       const next = sanitizeNextPath(searchParams.get("next"), "/");
       router.replace(next);
@@ -55,17 +55,17 @@ function SignInContent() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="phone">{t('phoneLabel')}</Label>
+              <Label htmlFor="email">{t('emailLabel')}</Label>
               <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="phone"
-                  name="phone"
-                  type="tel"
+                  id="email"
+                  name="email"
+                  type="email"
                   required
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  placeholder={t('phonePlaceholder')}
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  placeholder={t('emailPlaceholder')}
                   className="pl-10"
                 />
               </div>

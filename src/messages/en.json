@@ -329,9 +329,9 @@
   },
   "signIn": {
     "title": "Sign In",
-    "description": "Use your phone number to access your account",
-    "phoneLabel": "Phone Number",
-    "phonePlaceholder": "+371 12345678",
+    "description": "Use your email address to access your account",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "you@example.com",
     "passwordLabel": "Password",
     "passwordPlaceholder": "••••••••",
     "forgotPasswordLink": "Forgot password?",

@@ -329,9 +329,9 @@
   },
   "signIn": {
     "title": "Pierakstīties",
-    "description": "Izmantojiet savu tālruņa numuru, lai piekļūtu savam kontam",
-    "phoneLabel": "Tālruņa numurs",
-    "phonePlaceholder": "+371 12345678",
+    "description": "Izmantojiet savu e-pasta adresi, lai piekļūtu savam kontam",
+    "emailLabel": "E-pasts",
+    "emailPlaceholder": "you@example.com",
     "passwordLabel": "Parole",
     "passwordPlaceholder": "••••••••",
     "forgotPasswordLink": "Aizmirsi paroli?",

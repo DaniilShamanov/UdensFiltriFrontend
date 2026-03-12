@@ -329,9 +329,9 @@
   },
   "signIn": {
     "title": "Вход",
-    "description": "Используйте свой номер телефона для входа в аккаунт",
-    "phoneLabel": "Номер телефона",
-    "phonePlaceholder": "+371 12345678",
+    "description": "Используйте свою электронную почту для входа в аккаунт",
+    "emailLabel": "Электронная почта",
+    "emailPlaceholder": "you@example.com",
     "passwordLabel": "Пароль",
     "passwordPlaceholder": "••••••••",
     "forgotPasswordLink": "Забыли пароль?",

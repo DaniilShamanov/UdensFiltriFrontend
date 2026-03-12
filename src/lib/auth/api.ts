@@ -65,7 +65,7 @@ export const authApi = {
     });
   },
 
-  async signIn(input: { phone: string; password: string }): Promise<void> {
+  async signIn(input: { email: string; password: string }): Promise<void> {
     await fetchJson<UserEnvelope>(apiUrl(AUTH_ENDPOINTS.signIn), {
       method: "POST",
       body: input,
