@@ -10,31 +10,33 @@ export class ApiError extends Error {
   }
 }
 
+
+function normalizeApiMessage(message: string): string {
+  const trimmed = message.trim();
+  if (!trimmed) return trimmed;
+
+  // Convert patterns like "invalid_code Invalid or expired code" or
+  // "invalid_code: Invalid or expired code" into a clean user-facing message.
+  const cleaned = trimmed.replace(/^([a-z][a-z0-9_]*(?:\.[a-z0-9_]+)*)(?:\s*[:\-]\s*|\s+)(.+)$/i, '$2').trim();
+  return cleaned || trimmed;
+}
+
 export function extractErrorMessage(error: unknown, defaultMessage: string): string {
   if (error instanceof ApiError) {
-    // Log the full error data for debugging
-    if (typeof window !== 'undefined') {
-      console.debug('[extractErrorMessage] ApiError details:', {
-        status: error.status,
-        data: error.data,
-        message: error.message,
-      });
-    }
-
     // If data is a string, return it directly
     if (typeof error.data === 'string') {
-      return error.data;
+      return normalizeApiMessage(error.data);
     }
     // If data is an object, try common error response patterns
     if (typeof error.data === 'object' && error.data !== null) {
       const data = error.data as Record<string, unknown>;
       
       // Check for common error field names (prioritize specific messages)
-      if (data.message && typeof data.message === 'string') return data.message;
-      if (data.detail && typeof data.detail === 'string') return data.detail;
-      if (data.error && typeof data.error === 'string') return data.error;
+      if (data.message && typeof data.message === 'string') return normalizeApiMessage(data.message);
+      if (data.detail && typeof data.detail === 'string') return normalizeApiMessage(data.detail);
+      if (data.error && typeof data.error === 'string') return normalizeApiMessage(data.error);
       if (data.non_field_errors && Array.isArray(data.non_field_errors) && data.non_field_errors.length > 0) {
-        return data.non_field_errors.map(e => String(e)).join(' ');
+        return data.non_field_errors.map(e => normalizeApiMessage(String(e))).join(' ');
       }
       
       // Recursively collect all string values from nested structures
@@ -63,14 +65,14 @@ export function extractErrorMessage(error: unknown, defaultMessage: string): str
       collectMessages(data);
       
       // Return specific messages first, fall back to generic if needed
-      if (messages.length > 0) return messages.join(' ');
-      if (genericMessages.length > 0) return genericMessages.join(' ');
+      if (messages.length > 0) return messages.map(normalizeApiMessage).join(' ');
+      if (genericMessages.length > 0) return genericMessages.map(normalizeApiMessage).join(' ');
     }
     // Fall back to error message
-    if (error.message && !error.message.includes('Request failed')) return error.message;
+    if (error.message && !error.message.includes('Request failed')) return normalizeApiMessage(error.message);
   }
-  if (error instanceof Error) return error.message;
-  if (typeof error === 'string') return error;
+  if (error instanceof Error) return normalizeApiMessage(error.message);
+  if (typeof error === 'string') return normalizeApiMessage(error);
   return defaultMessage;
 }
 
@@ -175,11 +177,12 @@ export async function fetchJson<T>(
   const data = isJson ? await res.json().catch(() => null) : await res.text().catch(() => null);
 
   if (!res.ok) {
-    // Log full response for debugging (headers converted to object for readability)
-    if (typeof window !== "undefined") {
+    // Keep client console clean for expected validation failures (4xx),
+    // but still log unexpected server errors in the browser.
+    if (typeof window !== "undefined" && res.status >= 500) {
       const headersObj: Record<string,string> = {};
       res.headers.forEach((v,k) => (headersObj[k] = v));
-      console.error('[fetchJson] non-ok response', {
+      console.error('[fetchJson] server error response', {
         url,
         status: res.status,
         headers: headersObj,
