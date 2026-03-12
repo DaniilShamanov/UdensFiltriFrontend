@@ -1,7 +1,14 @@
 import PaymentPage from "@/components/pages/PaymentPage";
-import { requireAuth } from "@/lib/auth/server";
+import { checkAuth } from "@/lib/auth/server";
+import { redirect } from "next/navigation";
 
-export default function Page({ params }: { params: { locale: string } }) {
-  requireAuth({ locale: params.locale, next: "/payment" });
+export default async function Page({ params }: { params: { locale: string } }) {
+  const isAuthenticated = await checkAuth();
+
+  if (!isAuthenticated) {
+    const next = encodeURIComponent("/payment");
+    redirect(`/${params.locale}/auth/sign-in?next=${next}`);
+  }
+
   return <PaymentPage />;
 }

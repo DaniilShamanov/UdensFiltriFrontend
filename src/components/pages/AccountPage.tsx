@@ -9,16 +9,17 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useApp } from "@/contexts/AppContext";
-import { useRouter } from "@/navigation";
+import { authApi } from "@/lib/auth/api";
+import { useRouter, usePathname } from "@/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
-import { usePathname } from "next/navigation";
-import { ApiError } from "@/lib/api";
+import { extractErrorMessage, ApiError } from "@/lib/api";
+import VerificationCodeInput from "@/components/VerificationCodeInput";
 
 const AccountPage: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, authLoading, updateProfile, changeEmail, changePhone, changePassword, signOut } = useApp();
+  const { user, authLoading, updateProfile, changeEmail, changePhone, signOut } = useApp();
   const t = useTranslations('account');
 
   const displayName = useMemo(() => {
@@ -36,26 +37,19 @@ const AccountPage: React.FC = () => {
   const [newEmail, setNewEmail] = useState(user?.email || "");
   const [newPhone, setNewPhone] = useState(user?.phone || "");
   const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+
   const [emailCode, setEmailCode] = useState("");
   const [passwordCode, setPasswordCode] = useState("");
   const [awaitingEmailCode, setAwaitingEmailCode] = useState(false);
   const [awaitingPasswordCode, setAwaitingPasswordCode] = useState(false);
 
-  const getApiErrorMessage = (error: unknown, fallback: string) => {
-    if (error instanceof ApiError && typeof error.data === "object" && error.data !== null) {
-      const values = Object.values(error.data as Record<string, unknown>)
-        .flatMap((v) => (Array.isArray(v) ? v : [v]))
-        .map((v) => String(v))
-        .filter(Boolean);
-      if (values.length > 0) return values.join(" ");
-    }
-    if (error instanceof Error && error.message) return error.message;
-    return fallback;
-  };
+
 
   useEffect(() => {
     if (!authLoading && !user) {
-      const next = encodeURIComponent(pathname);
+      // Note: pathname from @/navigation usePathname is already without locale prefix
+      const next = encodeURIComponent(pathname || "/");
       router.replace(`/auth/sign-in?next=${next}`);
     }
   }, [user, authLoading, router, pathname]);
@@ -68,6 +62,7 @@ const AccountPage: React.FC = () => {
   if (authLoading) return <p>Loading</p>;
   if (!user) return null;
 
+  // ── Profile name ────────────────────────────────────────────────────────
   const saveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -78,6 +73,7 @@ const AccountPage: React.FC = () => {
     }
   };
 
+  // ── Email change (two-step: request code → confirm) ─────────────────────
   const doChangeEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newEmail.trim()) {
@@ -85,25 +81,28 @@ const AccountPage: React.FC = () => {
       return;
     }
     try {
-      const normalizedEmail = newEmail?.trim() || undefined;
       if (!awaitingEmailCode) {
-        await changeEmail({ email: normalizedEmail });
+        // Step 1 — request the code. AppContext.changeEmail calls setUser()
+        // with the returned user, which is fine here.
+        await changeEmail({ email: newEmail.trim() });
         setAwaitingEmailCode(true);
         toast.success(t('toast.verificationCodeSent'));
         return;
       }
 
-      await changeEmail({ email: normalizedEmail, code: emailCode.trim() });
+      // Step 2 — confirm with code
+      await changeEmail({ email: newEmail.trim(), code: emailCode.trim() });
       setAwaitingEmailCode(false);
       setEmailCode("");
       toast.success(t('toast.emailUpdated'));
     } catch (error) {
       toast.error(t('toast.emailUpdateFailed'), {
-        description: getApiErrorMessage(error, t('toast.checkCode')),
+        description: extractErrorMessage(error, t('toast.checkCode')),
       });
     }
   };
 
+  // ── Phone change ────────────────────────────────────────────────────────
   const doChangePhone = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -111,35 +110,49 @@ const AccountPage: React.FC = () => {
       toast.success(t('toast.phoneUpdated'));
     } catch (error) {
       toast.error(t('toast.phoneUpdateFailed'), {
-        description: getApiErrorMessage(error, t('toast.checkPhoneFormat')),
+        description: extractErrorMessage(error, t('toast.checkPhoneFormat')),
       });
     }
   };
 
+  // ── Password change (two-step: request code → confirm) ──────────────────
+  // We call authApi.changePassword directly (not AppContext.changePassword)
+  // because AppContext.changePassword always calls setUser(null) — even on the
+  // first step (code request). That would log the user out immediately and the
+  // AccountPage redirect useEffect would fire before they can enter the code.
   const doChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword.length < 6) {
       toast.error(t('toast.passwordTooShort', { min: 6, current: newPassword.length }));
       return;
     }
+    if (newPassword !== confirmNewPassword) {
+      toast.error(t('toast.passwordsMismatch'));
+      return;
+    }
+
     try {
       if (!awaitingPasswordCode) {
-        await changePassword({ new_password: newPassword });
+        // Step 1 — request the verification code (backend sends it to user's email)
+        await authApi.changePassword({ new_password: newPassword });
         setAwaitingPasswordCode(true);
         toast.success(t('toast.verificationCodeSent'));
         return;
       }
 
-      await changePassword({ new_password: newPassword, code: passwordCode.trim() });
+      // Step 2 — confirm with code, then sign out (password changed → existing
+      // tokens are invalidated by the backend)
+      await authApi.changePassword({ new_password: newPassword, code: passwordCode.trim() });
       toast.success(t('toast.passwordUpdated'), { description: t('toast.signInAgain') });
       setNewPassword("");
+      setConfirmNewPassword("");
       setPasswordCode("");
       setAwaitingPasswordCode(false);
       await signOut();
       router.replace("/auth/sign-in");
     } catch (error) {
       toast.error(t('toast.passwordUpdateFailed'), {
-        description: getApiErrorMessage(error, t('toast.checkCode')),
+        description: extractErrorMessage(error, t('toast.checkCode')),
       });
     }
   };
@@ -154,26 +167,40 @@ const AccountPage: React.FC = () => {
 
         <Tabs defaultValue="profile" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 bg-primary/10">
-            <TabsTrigger value="profile" className="cursor-pointer data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">{t('tabs.profile')}</TabsTrigger>
-            <TabsTrigger value="security" className="cursor-pointer data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">{t('tabs.security')}</TabsTrigger>
+            <TabsTrigger value="profile" className="cursor-pointer data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              {t('tabs.profile')}
+            </TabsTrigger>
+            <TabsTrigger value="security" className="cursor-pointer data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              {t('tabs.security')}
+            </TabsTrigger>
           </TabsList>
 
+          {/* ── Profile tab ─────────────────────────────────────────────── */}
           <TabsContent value="profile">
             <Card className="border-primary/20 bg-card/95 shadow-sm">
               <CardHeader className="bg-gradient-to-r from-primary/8 to-secondary/8">
                 <CardTitle>{t('profile.title')}</CardTitle>
-                <CardDescription>{t('profile.description')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <form onSubmit={saveProfile} className="space-y-4">
+
+                {/* Name */}
+                <form onSubmit={saveProfile} noValidate className="space-y-4">
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="first_name">{t('profile.firstName')}</Label>
-                      <Input id="first_name" value={profile.first_name} onChange={(e) => setProfile((p) => ({ ...p, first_name: e.target.value }))} />
+                      <Input
+                        id="first_name"
+                        value={profile.first_name}
+                        onChange={(e) => setProfile((p) => ({ ...p, first_name: e.target.value }))}
+                      />
                     </div>
                     <div>
                       <Label htmlFor="last_name">{t('profile.lastName')}</Label>
-                      <Input id="last_name" value={profile.last_name} onChange={(e) => setProfile((p) => ({ ...p, last_name: e.target.value }))} />
+                      <Input
+                        id="last_name"
+                        value={profile.last_name}
+                        onChange={(e) => setProfile((p) => ({ ...p, last_name: e.target.value }))}
+                      />
                     </div>
                   </div>
                   <Button type="submit" className="w-full cursor-pointer bg-primary hover:bg-primary/90 sm:w-auto">
@@ -184,31 +211,59 @@ const AccountPage: React.FC = () => {
                 <Separator />
 
                 <div className="grid gap-6">
+                  {/* Phone — optional */}
                   <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-                    <div className="flex items-center gap-2 font-medium"><Phone className="h-4 w-4" /> {t('profile.phone')}</div>
-                    <form onSubmit={doChangePhone} className="mt-4 grid gap-3">
-                      <Label htmlFor="new_phone">{t('profile.phone')}</Label>
-                      <Input id="new_phone" value={newPhone} onChange={(e) => setNewPhone(e.target.value)} placeholder={t('profile.phonePlaceholder')} />
-                      <p className="text-xs text-muted-foreground">{t('profile.phoneOptionalHint')}</p>
-                      <Button type="submit" className="cursor-pointer bg-primary hover:bg-primary/90">{t('profile.updatePhone')}</Button>
+                    <div className="flex items-center gap-2 font-medium">
+                      <Phone className="h-4 w-4" /> {t('profile.phone')}
+                    </div>
+                    <form onSubmit={doChangePhone} noValidate className="mt-4 grid gap-3">
+                      <Input
+                        id="new_phone"
+                        value={newPhone}
+                        onChange={(e) => setNewPhone(e.target.value)}
+                        placeholder={t('profile.phonePlaceholder')}
+                      />
+                      <Button type="submit" className="cursor-pointer bg-primary hover:bg-primary/90">
+                        {t('profile.updatePhone')}
+                      </Button>
                     </form>
                   </div>
 
+                  {/* Email — required, two-step verification */}
                   <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-                    <div className="flex items-center gap-2 font-medium"><Mail className="h-4 w-4" /> {t('profile.email')}</div>
-                    <form onSubmit={doChangeEmail} className="mt-4 grid gap-3">
-                      <Label htmlFor="email">{t('profile.email')}</Label>
-                      <Input id="email" required value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder={t('profile.emailPlaceholder')} />
+                    <div className="flex items-center gap-2 font-medium">
+                      <Mail className="h-4 w-4" /> {t('profile.email')}
+                    </div>
+                    <form onSubmit={doChangeEmail} noValidate className="mt-4 grid gap-3">
+                      <Input
+                        id="account_email"
+                        type="email"
+                        value={newEmail}
+                        onChange={(e) => {
+                          // Reset verification state when email changes
+                          setAwaitingEmailCode(false);
+                          setEmailCode("");
+                          setNewEmail(e.target.value);
+                        }}
+                        placeholder={t('profile.emailPlaceholder')}
+                      />
+
+                      {/* Code input — appears after clicking Update email */}
                       {awaitingEmailCode && (
-                        <>
-                          <div className="rounded-md border border-primary/30 bg-primary/10 px-3 py-2 text-sm text-foreground">
-                            {t('profile.codeBanner')}
-                          </div>
-                          <Label htmlFor="email_code">{t('profile.emailCode')}</Label>
-                          <Input id="email_code" value={emailCode} onChange={(e) => setEmailCode(e.target.value)} placeholder={t('profile.codePlaceholder')} />
-                        </>
+                        <VerificationCodeInput
+                          id="email_code"
+                          value={emailCode}
+                          onChange={(e) => setEmailCode(e.target.value)}
+                          label={t('profile.emailCode')}
+                          placeholder={t('profile.codePlaceholder')}
+                          banner={t('profile.codeBanner')}
+                          autoFocus
+                        />
                       )}
-                      <Button type="submit" className="cursor-pointer bg-primary hover:bg-primary/90">{awaitingEmailCode ? t('profile.confirmCode') : t('profile.updateEmail')}</Button>
+
+                      <Button type="submit" className="cursor-pointer bg-primary hover:bg-primary/90">
+                        {awaitingEmailCode ? t('profile.confirmCode') : t('profile.updateEmail')}
+                      </Button>
                     </form>
                   </div>
                 </div>
@@ -216,6 +271,7 @@ const AccountPage: React.FC = () => {
             </Card>
           </TabsContent>
 
+          {/* ── Security tab ────────────────────────────────────────────── */}
           <TabsContent value="security">
             <Card className="border-primary/20 bg-card/95 shadow-sm">
               <CardHeader className="bg-gradient-to-r from-primary/8 to-secondary/8">
@@ -223,22 +279,54 @@ const AccountPage: React.FC = () => {
                 <CardDescription>{t('security.description')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <form onSubmit={doChangePassword} className="grid gap-3">
+                <form onSubmit={doChangePassword} noValidate className="grid gap-3">
                   <Label htmlFor="new_password">{t('security.newPassword')}</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input id="new_password" type="password" minLength={6} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="pl-10" />
+                    <Input
+                      id="new_password"
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => {
+                        // Reset code step if password changes after sending code
+                        setAwaitingPasswordCode(false);
+                        setPasswordCode("");
+                        setNewPassword(e.target.value);
+                      }}
+                      className="pl-10"
+                      placeholder="••••••••"
+                    />
                   </div>
+
+                  <Label htmlFor="confirm_new_password">{t('security.confirmNewPassword')}</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="confirm_new_password"
+                      type="password"
+                      value={confirmNewPassword}
+                      onChange={(e) => setConfirmNewPassword(e.target.value)}
+                      className="pl-10"
+                      placeholder="••••••••"
+                    />
+                  </div>
+
+                  {/* Code input — appears after clicking Update password */}
                   {awaitingPasswordCode && (
-                    <>
-                      <div className="rounded-md border border-primary/30 bg-primary/10 px-3 py-2 text-sm text-foreground">
-                        {t('security.codeBanner')}
-                      </div>
-                      <Label htmlFor="password_code">{t('security.emailCode')}</Label>
-                      <Input id="password_code" value={passwordCode} onChange={(e) => setPasswordCode(e.target.value)} placeholder={t('security.codePlaceholder')} />
-                    </>
+                    <VerificationCodeInput
+                      id="password_code"
+                      value={passwordCode}
+                      onChange={(e) => setPasswordCode(e.target.value)}
+                      label={t('security.emailCode')}
+                      placeholder={t('security.codePlaceholder')}
+                      banner={t('security.codeBanner')}
+                      autoFocus
+                    />
                   )}
-                  <Button type="submit" className="cursor-pointer bg-primary hover:bg-primary/90">{awaitingPasswordCode ? t('security.confirmCode') : t('security.updatePassword')}</Button>
+
+                  <Button type="submit" className="cursor-pointer bg-primary hover:bg-primary/90">
+                    {awaitingPasswordCode ? t('security.confirmCode') : t('security.updatePassword')}
+                  </Button>
                 </form>
               </CardContent>
             </Card>

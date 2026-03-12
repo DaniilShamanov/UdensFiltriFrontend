@@ -10,6 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { useApp } from "@/contexts/AppContext";
 import CategoryNav from "@/components/CategoryNav";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
+import NotificationBanner from "@/components/NotificationBanner";
 import { Link, usePathname, useRouter } from "@/navigation";
 
 export default function Header() {

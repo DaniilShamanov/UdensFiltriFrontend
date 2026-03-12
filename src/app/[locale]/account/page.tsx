@@ -1,8 +1,15 @@
 import AccountPage from "@/components/pages/AccountPage";
-import { requireAuth } from "@/lib/auth/server";
+import { checkAuth } from "@/lib/auth/server";
+import { redirect } from "next/navigation";
 
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  requireAuth({ locale, next: "/account" });
+  const isAuthenticated = await checkAuth();
+
+  if (!isAuthenticated) {
+    const next = encodeURIComponent("/account");
+    redirect(`/${locale}/auth/sign-in?next=${next}`);
+  }
+
   return <AccountPage />;
 }

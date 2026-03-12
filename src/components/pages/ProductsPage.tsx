@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Link } from '@/navigation';
 import { Search, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -24,7 +24,7 @@ import { useApp } from '@/contexts/AppContext';
 import ProductCard from '../ProductCard';
 import { useTranslations } from 'next-intl';
 
-const ProductsPage: React.FC = () => {
+function ProductsContent() {
   const searchParams = useSearchParams();
   const categoryId = searchParams.get('categoryId') || undefined;
   const subCategoryId = searchParams.get('subCategoryId') || undefined;
@@ -419,6 +419,14 @@ const ProductsPage: React.FC = () => {
         </div>
       </div>
     </div>
+  );
+}
+
+const ProductsPage: React.FC = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ProductsContent />
+    </Suspense>
   );
 };
 

@@ -120,7 +120,7 @@ const CheckoutPage: React.FC = () => {
         address_line2: '',
         city: formData.city,
         postcode: formData.postalCode,
-        country,
+        country: '',
         delivery_option: deliveryOption,
         items,
       };

@@ -2,11 +2,11 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { CartItem, Order, User } from "@/lib/types";
 import { products } from "@/lib/mockData";
 import { authApi, SmsPurpose } from "@/lib/auth/api";
 import { logClientEvent } from "@/lib/clientLog";
+import { ApiError } from "@/lib/api";
 
 interface AppContextType {
   user: User | null;
@@ -47,7 +47,6 @@ function getScopedStorageKey(prefix: "cart" | "orders", userId?: string | number
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const pathname = usePathname();
-  const t = useTranslations();
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [routeLoading, setRouteLoading] = useState(false);
@@ -73,7 +72,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (!cancelled) {
           setUser(null);
           if (localStorage.getItem(AUTH_SEEN_KEY) === "1") {
-            setAuthNotice(t("notification.signedOut"));
+            setAuthNotice("notification.signedOut");
           }
         }
       } finally {
@@ -94,7 +93,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     const onAuthExpired = () => {
       setUser(null);
-      setAuthNotice(t("notification.signedOut"));
+      setAuthNotice("notification.signedOut");
       logClientEvent('auth_expired');
     };
 
@@ -164,6 +163,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const me = await authApi.me();
       setUser(me);
       setAuthNotice(null);
+      localStorage.setItem(AUTH_SEEN_KEY, "1");
       logClientEvent('sign_in_success');
     } finally {
       setAuthLoading(false);
@@ -176,6 +176,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       await authApi.signUp(input);
       const me = await authApi.me();
       setUser(me);
+      localStorage.setItem(AUTH_SEEN_KEY, "1");
       logClientEvent('sign_up_success');
     } finally {
       setAuthLoading(false);
@@ -187,7 +188,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       await authApi.signOut();
       logClientEvent('sign_out');
+    } catch (error) {
+      // Silently ignore auth errors during sign-out — if the token is already expired
+      // the session is effectively terminated. Log unexpected errors only.
+      if (!(error instanceof ApiError && error.status === 401)) {
+        console.error('Unexpected error during sign out:', error);
+      }
     } finally {
+      localStorage.removeItem(AUTH_SEEN_KEY);
       setUser(null);
       setAuthLoading(false);
     }

@@ -9,7 +9,8 @@
     "orders": "Заказы",
     "signIn": "Войти",
     "signUp": "Регистрация",
-    "signOut": "Выйти"
+    "signOut": "Выйти",
+    "dismiss": "Закрыть"
   },
   "seo": {
     "siteName": "Plumbing",
@@ -333,6 +334,7 @@
     "phonePlaceholder": "+371 12345678",
     "passwordLabel": "Пароль",
     "passwordPlaceholder": "••••••••",
+    "forgotPasswordLink": "Забыли пароль?",
     "signInButton": "Войти",
     "signingIn": "Вход...",
     "noAccount": "Нет аккаунта?",
@@ -353,7 +355,7 @@
     "phoneLabel": "Номер телефона (необязательно)",
     "phonePlaceholder": "+37112345678",
     "phoneHint": "Используйте международный формат (например +371...).",
-    "emailLabel": "Электронная почта (необязательно)",
+    "emailLabel": "Электронная почта",
     "emailPlaceholder": "you@example.com",
     "emailHint": "Если укажете, мы будем присылать подтверждения оплаты на почту.",
     "passwordLabel": "Пароль",
@@ -371,16 +373,17 @@
       "signUpFailed": "Ошибка регистрации",
       "passwordTooShort": "Пароль слишком короткий: вы ввели {current} символа(ов), минимум — {min}.",
       "verificationCodeSent": "Код подтверждения отправлен на вашу почту",
-      "verifyEmailFirst": "Please verify email",
-      "verificationCodeRequired": "Please enter verification code",
-      "emailRequiredForVerification": "Email is required to send verification code"
+      "verifyEmailFirst": "Пожалуйста, подтвердите email",
+      "verificationCodeRequired": "Пожалуйста, введите код подтверждения",
+      "emailRequiredForVerification": "Для отправки кода необходим email"
     },
     "createAccountButton": "Создать аккаунт",
     "verificationBanner": "Код подтверждения отправлен на вашу электронную почту.",
     "verificationCodeLabel": "Код подтверждения",
     "verificationCodePlaceholder": "Введите код из письма",
     "confirmCodeButton": "Подтвердить код",
-    "verifyButton": "Verify"
+    "verifyButton": "Подтвердить",
+    "resendButton": "Отправить снова"
   },
   "account": {
     "title": "Настройки аккаунта",
@@ -395,23 +398,22 @@
       "firstName": "Имя",
       "lastName": "Фамилия",
       "saveName": "Сохранить имя",
-      "phone": "Телефон",
+      "phone": "Номер телефона (необязательно)",
       "sendCode": "Отправить код",
       "newPhone": "Новый телефон",
       "phonePlaceholder": "+37112345678",
       "smsCode": "SMS-код",
       "updatePhone": "Обновить телефон",
       "phoneHelp": "Код отправлен на ваш текущий номер телефона.",
-      "email": "Электронная почта (необязательно)",
+      "email": "Электронная почта",
       "notSet": "Не указан",
-      "emailPlaceholder": "(необязательно)",
+      "emailPlaceholder": "you@example.com",
       "updateEmail": "Обновить email",
       "emailHelp": "Если email не указан, квитанции будут храниться только в вашем аккаунте.",
       "emailCode": "Код подтверждения",
       "codePlaceholder": "Введите код из письма",
       "confirmCode": "Подтвердить код",
-      "codeBanner": "Код подтверждения отправлен на вашу электронную почту.",
-      "phoneOptionalHint": "Phone number (optional)"
+      "codeBanner": "Код подтверждения отправлен на вашу электронную почту."
     },
     "security": {
       "title": "Пароль",
@@ -423,7 +425,9 @@
       "emailCode": "Код подтверждения",
       "codePlaceholder": "Введите код из письма",
       "confirmCode": "Подтвердить код",
-      "codeBanner": "Код подтверждения отправлен на вашу электронную почту."
+      "codeBanner": "Код подтверждения отправлен на вашу электронную почту.",
+      "confirmNewPassword": "Подтвердите новый пароль",
+      "passwordsMismatch": "Пароли не совпадают"
     },
     "toast": {
       "codeSent": "Код отправлен",
@@ -442,7 +446,8 @@
       "checkPhoneFormat": "Проверьте код и формат телефона (+371...).",
       "verificationCodeSent": "Код подтверждения отправлен на вашу почту",
       "passwordTooShort": "Пароль слишком короткий: вы ввели {current} символа(ов), минимум — {min}.",
-      "emailRequired": "Email is required"
+      "emailRequired": "Email обязателен",
+      "passwordsMismatch": "Пароли не совпадают"
     }
   },
   "cart": {

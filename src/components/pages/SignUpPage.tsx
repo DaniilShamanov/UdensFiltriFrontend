@@ -9,17 +9,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useApp } from "@/contexts/AppContext";
+import { authApi } from "@/lib/auth/api";
 import { Link, useRouter } from "@/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { sanitizeNextPath } from "@/lib/safeRedirect";
-import { ApiError } from "@/lib/api";
+import { ApiError, extractErrorMessage } from "@/lib/api";
+import { Suspense } from "react";
+import VerificationCodeInput from "@/components/VerificationCodeInput";
 
-const SignUpPage: React.FC = () => {
+function SignUpContent() {
   const { signUp } = useApp();
   const router = useRouter();
   const searchParams = useSearchParams();
-
   const t = useTranslations('signUp');
 
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -36,17 +38,7 @@ const SignUpPage: React.FC = () => {
     agreeToTerms: false,
   });
 
-  const getApiErrorMessage = (error: unknown, fallback: string) => {
-    if (error instanceof ApiError && typeof error.data === "object" && error.data !== null) {
-      const values = Object.values(error.data as Record<string, unknown>)
-        .flatMap((v) => (Array.isArray(v) ? v : [v]))
-        .map((v) => String(v))
-        .filter(Boolean);
-      if (values.length > 0) return values.join(" ");
-    }
-    if (error instanceof Error && error.message) return error.message;
-    return fallback;
-  };
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -56,69 +48,78 @@ const SignUpPage: React.FC = () => {
     }));
   };
 
+  // ── Final registration (runs after email is verified) ───────────────────
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validation runs before setIsSubmitting — an early return never leaves
+    // the submit button permanently disabled.
+    if (formData.password.length < 6) {
+      toast.error(t('toast.passwordTooShort', { min: 6, current: formData.password.length }));
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      toast.error(t('toast.passwordsMismatch'));
+      return;
+    }
+    if (!formData.agreeToTerms) {
+      toast.error(t('toast.termsNotAgreed'));
+      return;
+    }
+    if (!awaitingEmailCode) {
+      toast.error(t('toast.verifyEmailFirst'));
+      return;
+    }
+    if (!verificationCode.trim()) {
+      toast.error(t('toast.verificationCodeRequired'));
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      if (formData.password.length < 6) {
-        toast.error(t('toast.passwordTooShort', { min: 6, current: formData.password.length }));
-        return;
-      }
-      if (formData.password !== formData.confirmPassword) {
-        toast.error(t('toast.passwordsMismatch'));
-        return;
-      }
-      if (!formData.agreeToTerms) {
-        toast.error(t('toast.termsNotAgreed'));
-        return;
-      }
-
-      if (formData.email && !awaitingEmailCode) {
-        toast.error(t('toast.verifyEmailFirst'));
-        return;
-      }
-
-      if (formData.email && !verificationCode.trim()) {
-        toast.error(t('toast.verificationCodeRequired'));
-        return;
-      }
-
-      await signUp({
-        phone: formData.phone.trim() || undefined,
+      const payload = {
+        email: formData.email.trim(),
         password: formData.password,
-        email: formData.email.trim() || undefined,
-        first_name: formData.first_name || undefined,
-        last_name: formData.last_name || undefined,
-        code: formData.email ? verificationCode.trim() : undefined,
-      });
+        first_name: formData.first_name?.trim() || "",
+        last_name: formData.last_name?.trim() || "",
+        code: verificationCode.trim(),
+        ...(formData.phone?.trim() && { phone: formData.phone.trim() }),
+      };
+
+      // AppContext.signUp completes registration AND calls me() to authenticate.
+      await signUp(payload as any);
       toast.success(t('toast.accountCreated'));
       const next = sanitizeNextPath(searchParams.get("next"), "/");
       router.replace(next);
     } catch (e: unknown) {
+      console.error('Registration failed:', e);
+      const errorMessage = extractErrorMessage(e, t('toast.tryAgain'));
       toast.error(t('toast.signUpFailed'), {
-        description: getApiErrorMessage(e, t('toast.tryAgain')),
+        description: errorMessage,
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  // ── Request verification code (does NOT complete registration) ───────────
+  // We call authApi.signUp directly — NOT AppContext.signUp — because
+  // AppContext.signUp always follows up with authApi.me(). At this step the
+  // user is not yet authenticated, so me() throws a 401, the error propagates
+  // to the catch block and setAwaitingEmailCode(true) is never reached.
   const requestVerificationCode = async () => {
     if (!formData.email.trim()) {
       toast.error(t('toast.emailRequiredForVerification'));
       return;
     }
-
     if (formData.password.length < 6) {
       toast.error(t('toast.passwordTooShort', { min: 6, current: formData.password.length }));
       return;
     }
-
     if (formData.password !== formData.confirmPassword) {
       toast.error(t('toast.passwordsMismatch'));
       return;
     }
-
     if (!formData.agreeToTerms) {
       toast.error(t('toast.termsNotAgreed'));
       return;
@@ -126,18 +127,29 @@ const SignUpPage: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      await signUp({
-        phone: formData.phone.trim() || undefined,
+      const payload = {
+        email: formData.email.trim(),
         password: formData.password,
-        email: formData.email.trim() || undefined,
-        first_name: formData.first_name || undefined,
-        last_name: formData.last_name || undefined,
-      });
+        first_name: formData.first_name?.trim() || "",
+        last_name: formData.last_name?.trim() || "",
+        ...(formData.phone?.trim() && { phone: formData.phone.trim() }),
+        // we always include the code field; empty string means "send me a code"
+        code: "",
+      };
+      
+      console.debug('[SignUpPage] Sending verification request with payload:', payload);
+      await authApi.signUp(payload as any);
       setAwaitingEmailCode(true);
       toast.success(t('toast.verificationCodeSent'));
     } catch (e: unknown) {
+      console.error('[SignUpPage] Verification request failed:', e);
+      if (e instanceof Error && 'data' in e) {
+        console.error('[SignUpPage] Error response data:', (e as any).data);
+      }
+      const errorMessage = extractErrorMessage(e, t('toast.tryAgain'));
+      console.error('[SignUpPage] Extracted error message:', errorMessage);
       toast.error(t('toast.signUpFailed'), {
-        description: getApiErrorMessage(e, t('toast.tryAgain')),
+        description: errorMessage,
       });
     } finally {
       setIsSubmitting(false);
@@ -155,7 +167,9 @@ const SignUpPage: React.FC = () => {
           <CardDescription>{t('descriptionForm')}</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleRegister} className="space-y-4">
+          {/* noValidate disables browser-native HTML5 validation tooltips so
+              our JS toast-based validation handles everything consistently. */}
+          <form onSubmit={handleRegister} noValidate className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="first_name">{t('firstNameLabel')}</Label>
@@ -183,6 +197,7 @@ const SignUpPage: React.FC = () => {
               </div>
             </div>
 
+            {/* Phone — optional */}
             <div>
               <Label htmlFor="phone">{t('phoneLabel')}</Label>
               <div className="relative">
@@ -201,6 +216,7 @@ const SignUpPage: React.FC = () => {
               <p className="text-xs text-muted-foreground mt-1">{t('phoneHint')}</p>
             </div>
 
+            {/* Email + inline Verify button */}
             <div>
               <Label htmlFor="email">{t('emailLabel')}</Label>
               <div className="flex gap-2">
@@ -212,6 +228,7 @@ const SignUpPage: React.FC = () => {
                     type="email"
                     value={formData.email}
                     onChange={(e) => {
+                      // Reset verification state when email changes
                       setAwaitingEmailCode(false);
                       setVerificationCode("");
                       handleChange(e);
@@ -221,29 +238,34 @@ const SignUpPage: React.FC = () => {
                     autoComplete="email"
                   />
                 </div>
-                <Button type="button" variant="outline" onClick={requestVerificationCode} disabled={isSubmitting || !formData.email.trim()}>
-                  {t('verifyButton')}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={requestVerificationCode}
+                  disabled={isSubmitting || !formData.email.trim()}
+                >
+                  {awaitingEmailCode ? t('resendButton') : t('verifyButton')}
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">{t('emailHint')}</p>
+              {!awaitingEmailCode && (
+                <p className="text-xs text-muted-foreground mt-1">{t('emailHint')}</p>
+              )}
             </div>
 
+            {/* Verification code input — appears after Verify is clicked */}
             {awaitingEmailCode && (
-              <div className="space-y-2">
-                <div className="rounded-md border border-primary/30 bg-primary/10 px-3 py-2 text-sm text-foreground">
-                  {t('verificationBanner')}
-                </div>
-                <Label htmlFor="verificationCode">{t('verificationCodeLabel')}</Label>
-                <Input
-                  id="verificationCode"
-                  value={verificationCode}
-                  onChange={(e) => setVerificationCode(e.target.value)}
-                  placeholder={t('verificationCodePlaceholder')}
-                  autoComplete="one-time-code"
-                />
-              </div>
+              <VerificationCodeInput
+                id="verificationCode"
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value)}
+                label={t('verificationCodeLabel')}
+                placeholder={t('verificationCodePlaceholder')}
+                banner={t('verificationBanner')}
+                autoFocus
+              />
             )}
 
+            {/* Password */}
             <div>
               <Label htmlFor="password">{t('passwordLabel')}</Label>
               <div className="relative">
@@ -252,8 +274,6 @@ const SignUpPage: React.FC = () => {
                   id="password"
                   name="password"
                   type="password"
-                  required
-                  minLength={6}
                   value={formData.password}
                   onChange={handleChange}
                   placeholder={t('passwordPlaceholder')}
@@ -263,6 +283,7 @@ const SignUpPage: React.FC = () => {
               </div>
             </div>
 
+            {/* Confirm password */}
             <div>
               <Label htmlFor="confirmPassword">{t('confirmPasswordLabel')}</Label>
               <div className="relative">
@@ -271,8 +292,6 @@ const SignUpPage: React.FC = () => {
                   id="confirmPassword"
                   name="confirmPassword"
                   type="password"
-                  required
-                  minLength={6}
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   placeholder={t('confirmPasswordPlaceholder')}
@@ -287,7 +306,9 @@ const SignUpPage: React.FC = () => {
                 id="agreeToTerms"
                 name="agreeToTerms"
                 checked={formData.agreeToTerms}
-                onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, agreeToTerms: checked as boolean }))}
+                onCheckedChange={(checked) =>
+                  setFormData((prev) => ({ ...prev, agreeToTerms: checked as boolean }))
+                }
               />
               <Label htmlFor="agreeToTerms" className="cursor-pointer font-normal text-sm">
                 {t.rich('agreeToTerms', {
@@ -300,7 +321,12 @@ const SignUpPage: React.FC = () => {
               </Label>
             </div>
 
-            <Button type="submit" size="lg" className="w-full bg-accent hover:bg-accent/90" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full bg-accent hover:bg-accent/90"
+              disabled={isSubmitting}
+            >
               {awaitingEmailCode ? t('confirmCodeButton') : t('createAccountButton')}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -315,6 +341,14 @@ const SignUpPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+const SignUpPage: React.FC = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SignUpContent />
+    </Suspense>
   );
 };
 

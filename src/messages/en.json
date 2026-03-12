@@ -9,7 +9,8 @@
     "orders": "Orders",
     "signIn": "Sign in",
     "signUp": "Sign up",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "dismiss": "Dismiss"
   },
   "seo": {
     "siteName": "Plumbing",
@@ -333,6 +334,7 @@
     "phonePlaceholder": "+371 12345678",
     "passwordLabel": "Password",
     "passwordPlaceholder": "••••••••",
+    "forgotPasswordLink": "Forgot password?",
     "signInButton": "Sign In",
     "signingIn": "Signing in...",
     "noAccount": "Don't have an account?",
@@ -353,7 +355,7 @@
     "phoneLabel": "Phone number (optional)",
     "phonePlaceholder": "+37112345678",
     "phoneHint": "Use international format (e.g. +371...).",
-    "emailLabel": "Email (optional)",
+    "emailLabel": "Email",
     "emailPlaceholder": "you@example.com",
     "emailHint": "If provided, we’ll email you payment confirmations.",
     "passwordLabel": "Password",
@@ -380,7 +382,8 @@
     "verificationCodeLabel": "Verification code",
     "verificationCodePlaceholder": "Enter code from email",
     "confirmCodeButton": "Confirm code",
-    "verifyButton": "Verify"
+    "verifyButton": "Verify",
+    "resendButton": "Resend"
   },
   "account": {
     "title": "Account Settings",
@@ -395,7 +398,7 @@
       "firstName": "First name",
       "lastName": "Last name",
       "saveName": "Save name",
-      "phone": "Phone",
+      "phone": "Phone number (optional)",
       "sendCode": "Send code",
       "newPhone": "New phone",
       "phonePlaceholder": "+37112345678",
@@ -410,8 +413,7 @@
       "emailCode": "Verification code",
       "codePlaceholder": "Enter code from email",
       "confirmCode": "Confirm code",
-      "codeBanner": "Verification code has been sent to your email.",
-      "phoneOptionalHint": "Phone number (optional)"
+      "codeBanner": "Verification code has been sent to your email."
     },
     "security": {
       "title": "Password",
@@ -423,7 +425,9 @@
       "emailCode": "Verification code",
       "codePlaceholder": "Enter code from email",
       "confirmCode": "Confirm code",
-      "codeBanner": "Verification code has been sent to your email."
+      "codeBanner": "Verification code has been sent to your email.",
+      "confirmNewPassword": "Confirm new password",
+      "passwordsMismatch": "Passwords do not match"
     },
     "toast": {
       "codeSent": "Code sent",
@@ -442,7 +446,8 @@
       "checkPhoneFormat": "Check the code and phone format (+371...).",
       "verificationCodeSent": "Verification code sent to your email",
       "passwordTooShort": "Password is too short: you entered {current} characters, minimum is {min}.",
-      "emailRequired": "Email is required"
+      "emailRequired": "Email is required",
+      "passwordsMismatch": "Passwords do not match"
     }
   },
   "cart": {

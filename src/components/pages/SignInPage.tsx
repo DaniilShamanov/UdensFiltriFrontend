@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Lock, Phone, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,9 @@ import { toast } from "sonner";
 import { useApp } from "@/contexts/AppContext";
 import { useTranslations } from "next-intl";
 import { sanitizeNextPath } from "@/lib/safeRedirect";
+import { extractErrorMessage, ApiError } from "@/lib/api";
 
-const SignInPage: React.FC = () => {
+function SignInContent() {
   const { signIn } = useApp();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -32,8 +33,9 @@ const SignInPage: React.FC = () => {
       const next = sanitizeNextPath(searchParams.get("next"), "/");
       router.replace(next);
     } catch (err: any) {
+      const errorMessage = extractErrorMessage(err, t('toast.errorDescription'));
       toast.error(t('toast.error'), {
-        description: err?.message || t('toast.errorDescription'),
+        description: errorMessage,
       });
     } finally {
       setLoading(false);
@@ -90,6 +92,12 @@ const SignInPage: React.FC = () => {
               {loading ? t('signingIn') : t('signInButton')}
             </Button>
 
+            <div className="text-right text-sm">
+              <Link href="/auth/forgot-password" className="text-primary hover:underline font-medium">
+                {t('forgotPasswordLink')}
+              </Link>
+            </div>
+
             <Separator />
 
             <div className="text-center text-sm">
@@ -102,6 +110,14 @@ const SignInPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+const SignInPage: React.FC = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SignInContent />
+    </Suspense>
   );
 };
 

@@ -9,7 +9,8 @@
     "orders": "Pasūtījumi",
     "signIn": "Ienākt",
     "signUp": "Reģistrēties",
-    "signOut": "Iziet"
+    "signOut": "Iziet",
+    "dismiss": "Aizvērt"
   },
   "seo": {
     "siteName": "UdensFiltri",
@@ -333,6 +334,7 @@
     "phonePlaceholder": "+371 12345678",
     "passwordLabel": "Parole",
     "passwordPlaceholder": "••••••••",
+    "forgotPasswordLink": "Aizmirsi paroli?",
     "signInButton": "Pierakstīties",
     "signingIn": "Notiek pierakstīšanās...",
     "noAccount": "Nav konta?",
@@ -353,7 +355,7 @@
     "phoneLabel": "Tālruņa numurs (neobligāti)",
     "phonePlaceholder": "+37112345678",
     "phoneHint": "Izmantojiet starptautisko formātu (piemēram +371...).",
-    "emailLabel": "E-pasts (neobligāti)",
+    "emailLabel": "E-pasts",
     "emailPlaceholder": "you@example.com",
     "emailHint": "Ja norādīsiet, mēs uz e-pastu sūtīsim maksājumu apstiprinājumus.",
     "passwordLabel": "Parole",
@@ -371,16 +373,17 @@
       "signUpFailed": "Reģistrācija neizdevās",
       "passwordTooShort": "Parole ir pārāk īsa: ievadījāt {current} simbolus, minimums ir {min}.",
       "verificationCodeSent": "Verifikācijas kods nosūtīts uz jūsu e-pastu",
-      "verifyEmailFirst": "Please verify email",
-      "verificationCodeRequired": "Please enter verification code",
-      "emailRequiredForVerification": "Email is required to send verification code"
+      "verifyEmailFirst": "Lūdzu, verificējiet e-pastu",
+      "verificationCodeRequired": "Lūdzu, ievadiet verifikācijas kodu",
+      "emailRequiredForVerification": "Verifikācijai nepieciešams e-pasts"
     },
     "createAccountButton": "Izveidot kontu",
     "verificationBanner": "Verifikācijas kods ir nosūtīts uz jūsu e-pastu.",
     "verificationCodeLabel": "Verifikācijas kods",
     "verificationCodePlaceholder": "Ievadiet kodu no e-pasta",
     "confirmCodeButton": "Apstiprināt kodu",
-    "verifyButton": "Verify"
+    "verifyButton": "Verificēt",
+    "resendButton": "Nosūtīt vēlreiz"
   },
   "account": {
     "title": "Konta iestatījumi",
@@ -395,23 +398,22 @@
       "firstName": "Vārds",
       "lastName": "Uzvārds",
       "saveName": "Saglabāt vārdu",
-      "phone": "Tālrunis",
+      "phone": "Tālruņa numurs (neobligāti)",
       "sendCode": "Nosūtīt kodu",
       "newPhone": "Jauns tālrunis",
       "phonePlaceholder": "+37112345678",
       "smsCode": "SMS kods",
       "updatePhone": "Atjaunināt tālruni",
       "phoneHelp": "Kods nosūtīts uz jūsu esošo tālruņa numuru.",
-      "email": "E-pasts (neobligāti)",
+      "email": "E-pasts",
       "notSet": "Nav norādīts",
-      "emailPlaceholder": "(neobligāti)",
+      "emailPlaceholder": "you@example.com",
       "updateEmail": "Atjaunināt e-pastu",
       "emailHelp": "Ja e-pasts nav norādīts, čeki tiks glabāti tikai jūsu kontā.",
       "emailCode": "Verifikācijas kods",
       "codePlaceholder": "Ievadiet kodu no e-pasta",
       "confirmCode": "Apstiprināt kodu",
-      "codeBanner": "Verifikācijas kods ir nosūtīts uz jūsu e-pastu.",
-      "phoneOptionalHint": "Phone number (optional)"
+      "codeBanner": "Verifikācijas kods ir nosūtīts uz jūsu e-pastu."
     },
     "security": {
       "title": "Parole",
@@ -423,7 +425,9 @@
       "emailCode": "Verifikācijas kods",
       "codePlaceholder": "Ievadiet kodu no e-pasta",
       "confirmCode": "Apstiprināt kodu",
-      "codeBanner": "Verifikācijas kods ir nosūtīts uz jūsu e-pastu."
+      "codeBanner": "Verifikācijas kods ir nosūtīts uz jūsu e-pastu.",
+      "confirmNewPassword": "Apstipriniet jauno paroli",
+      "passwordsMismatch": "Paroles nesakrīt"
     },
     "toast": {
       "codeSent": "Kods nosūtīts",
@@ -442,7 +446,8 @@
       "checkPhoneFormat": "Pārbaudiet kodu un tālruņa formātu (+371...).",
       "verificationCodeSent": "Verifikācijas kods nosūtīts uz jūsu e-pastu",
       "passwordTooShort": "Parole ir pārāk īsa: ievadījāt {current} simbolus, minimums ir {min}.",
-      "emailRequired": "Email is required"
+      "emailRequired": "E-pasts ir obligāts",
+      "passwordsMismatch": "Paroles nesakrīt"
     }
   },
   "cart": {
