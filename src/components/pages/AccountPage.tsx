@@ -43,6 +43,8 @@ const AccountPage: React.FC = () => {
   const [passwordCode, setPasswordCode] = useState("");
   const [awaitingEmailCode, setAwaitingEmailCode] = useState(false);
   const [awaitingPasswordCode, setAwaitingPasswordCode] = useState(false);
+  const [isEmailCodeSending, setIsEmailCodeSending] = useState(false);
+  const [isPasswordCodeSending, setIsPasswordCodeSending] = useState(false);
 
 
 
@@ -55,9 +57,15 @@ const AccountPage: React.FC = () => {
   }, [user, authLoading, router, pathname]);
 
   useEffect(() => {
-    setNewEmail(user?.email || "");
-    setNewPhone(user?.phone || "");
-  }, [user?.email, user?.phone]);
+    if (!user) return;
+
+    setProfile({
+      first_name: user.first_name || "",
+      last_name: user.last_name || "",
+    });
+    setNewEmail(user.email || "");
+    setNewPhone(user.phone || "");
+  }, [user]);
 
   if (authLoading) return <p>Loading</p>;
   if (!user) return null;
@@ -79,6 +87,31 @@ const AccountPage: React.FC = () => {
     }
   };
 
+  const requestVerificationCode = async ({
+    email,
+    purpose,
+    onSending,
+    onSent,
+    onError,
+  }: {
+    email: string;
+    purpose: 'change_email' | 'change_password';
+    onSending: (sending: boolean) => void;
+    onSent: () => void;
+    onError: (error: unknown) => void;
+  }) => {
+    onSending(true);
+    try {
+      await authApi.requestEmailCode({ email, purpose });
+      onSent();
+      toast.success(t('toast.verificationCodeSent'));
+    } catch (error) {
+      onError(error);
+    } finally {
+      onSending(false);
+    }
+  };
+
   // ── Email change (two-step: request code → confirm) ─────────────────────
   const doChangeEmail = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,11 +129,20 @@ const AccountPage: React.FC = () => {
 
     try {
       if (!awaitingEmailCode) {
-        // Step 1 — request verification code from dedicated endpoint.
-        setAwaitingEmailCode(true);
-        setEmailCode("");
-        await authApi.requestEmailCode({ email: trimmedEmail, purpose: 'change_email' });
-        toast.success(t('toast.verificationCodeSent'));
+        await requestVerificationCode({
+          email: trimmedEmail,
+          purpose: 'change_email',
+          onSending: setIsEmailCodeSending,
+          onSent: () => {
+            setAwaitingEmailCode(true);
+            setEmailCode("");
+          },
+          onError: (error) => {
+            toast.error(t('toast.emailUpdateFailed'), {
+              description: extractErrorMessage(error, t('toast.checkCode')),
+            });
+          },
+        });
         return;
       }
 
@@ -158,11 +200,20 @@ const AccountPage: React.FC = () => {
 
     try {
       if (!awaitingPasswordCode) {
-        // Step 1 — request verification code from dedicated endpoint.
-        setAwaitingPasswordCode(true);
-        setPasswordCode("");
-        await authApi.requestEmailCode({ email: emailForVerification, purpose: 'change_password' });
-        toast.success(t('toast.verificationCodeSent'));
+        await requestVerificationCode({
+          email: emailForVerification,
+          purpose: 'change_password',
+          onSending: setIsPasswordCodeSending,
+          onSent: () => {
+            setAwaitingPasswordCode(true);
+            setPasswordCode("");
+          },
+          onError: (error) => {
+            toast.error(t('toast.passwordUpdateFailed'), {
+              description: extractErrorMessage(error, t('toast.checkCode')),
+            });
+          },
+        });
         return;
       }
 
@@ -287,9 +338,38 @@ const AccountPage: React.FC = () => {
                         />
                       )}
 
-                      <Button type="submit" className="cursor-pointer bg-primary hover:bg-primary/90">
-                        {awaitingEmailCode ? t('profile.confirmCode') : t('profile.updateEmail')}
-                      </Button>
+                      <div className="flex flex-col gap-2 sm:flex-row">
+                        <Button type="submit" className="cursor-pointer bg-primary hover:bg-primary/90 sm:flex-1" disabled={isEmailCodeSending}>
+                          {isEmailCodeSending
+                            ? t('profile.sendCode')
+                            : awaitingEmailCode
+                              ? t('profile.confirmCode')
+                              : t('profile.updateEmail')}
+                        </Button>
+                        {awaitingEmailCode && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="cursor-pointer sm:flex-1"
+                            onClick={() =>
+                              requestVerificationCode({
+                                email: newEmail.trim(),
+                                purpose: 'change_email',
+                                onSending: setIsEmailCodeSending,
+                                onSent: () => setEmailCode(""),
+                                onError: (error) => {
+                                  toast.error(t('toast.emailUpdateFailed'), {
+                                    description: extractErrorMessage(error, t('toast.checkCode')),
+                                  });
+                                },
+                              })
+                            }
+                            disabled={isEmailCodeSending}
+                          >
+                            {t('profile.sendCode')}
+                          </Button>
+                        )}
+                      </div>
                     </form>
                   </div>
                 </div>
@@ -350,9 +430,38 @@ const AccountPage: React.FC = () => {
                     />
                   )}
 
-                  <Button type="submit" className="cursor-pointer bg-primary hover:bg-primary/90">
-                    {awaitingPasswordCode ? t('security.confirmCode') : t('security.updatePassword')}
-                  </Button>
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <Button type="submit" className="cursor-pointer bg-primary hover:bg-primary/90 sm:flex-1" disabled={isPasswordCodeSending}>
+                      {isPasswordCodeSending
+                        ? t('security.sendCode')
+                        : awaitingPasswordCode
+                          ? t('security.confirmCode')
+                          : t('security.updatePassword')}
+                    </Button>
+                    {awaitingPasswordCode && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="cursor-pointer sm:flex-1"
+                        onClick={() =>
+                          requestVerificationCode({
+                            email: user.email?.trim() || newEmail.trim(),
+                            purpose: 'change_password',
+                            onSending: setIsPasswordCodeSending,
+                            onSent: () => setPasswordCode(""),
+                            onError: (error) => {
+                              toast.error(t('toast.passwordUpdateFailed'), {
+                                description: extractErrorMessage(error, t('toast.checkCode')),
+                              });
+                            },
+                          })
+                        }
+                        disabled={isPasswordCodeSending}
+                      >
+                        {t('security.sendCode')}
+                      </Button>
+                    )}
+                  </div>
                 </form>
               </CardContent>
             </Card>
