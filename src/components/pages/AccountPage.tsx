@@ -82,7 +82,7 @@ const AccountPage: React.FC = () => {
   // ── Email change (two-step: request code → confirm) ─────────────────────
   const doChangeEmail = async (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmedEmail = newEmail.trim();
+    const trimmedEmail: string = newEmail.trim();
 
     if (!trimmedEmail) {
       toast.error(t('toast.emailRequired'));
@@ -105,7 +105,7 @@ const AccountPage: React.FC = () => {
       }
 
       // Step 2 — confirm with code
-      await changeEmail({ email: trimmedEmail, code: emailCode.trim() });
+      await changeEmail({ new_email: trimmedEmail, code: emailCode.trim() });
       setAwaitingEmailCode(false);
       setEmailCode("");
       toast.success(t('toast.emailUpdated'));

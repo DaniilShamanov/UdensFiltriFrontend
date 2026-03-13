@@ -21,7 +21,7 @@ interface AppContextType {
   signOut: () => Promise<void>;
   refreshSession: () => Promise<void>;
   updateProfile: (input: { first_name?: string; last_name?: string }) => Promise<void>;
-  changeEmail: (input: { email?: string; code?: string }) => Promise<void>;
+  changeEmail: (input: { new_email?: string; code?: string }) => Promise<void>;
   changePhone: (input: { new_phone: string; code?: string }) => Promise<void>;
   changePassword: (input: { new_password: string; code?: string }) => Promise<void>;
 
