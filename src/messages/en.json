@@ -440,6 +440,7 @@
       "emailEqualsPrevious": "New email is the same as current email",
       "emailUpdateFailed": "Could not update email",
       "phoneUpdated": "Phone updated",
+      "phoneEqualsPrevious": "New phone number is the same as current one",
       "phoneUpdateFailed": "Could not update phone",
       "passwordUpdated": "Password updated",
       "passwordUpdateFailed": "Could not update password",

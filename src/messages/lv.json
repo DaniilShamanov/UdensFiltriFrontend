@@ -440,6 +440,7 @@
       "emailUpdateFailed": "Neizdevās atjaunināt e-pastu",
       "emailEqualsPrevious": "Jaunais e-pasts ir vienāds ar pašreizējo",
       "phoneUpdated": "Tālrunis atjaunināts",
+      "phoneEqualsPrevious": "Jaunais tālruņa numurs ir vienāds ar pašreizējo",
       "phoneUpdateFailed": "Neizdevās atjaunināt tālruni",
       "passwordUpdated": "Parole atjaunināta",
       "passwordUpdateFailed": "Neizdevās atjaunināt paroli",

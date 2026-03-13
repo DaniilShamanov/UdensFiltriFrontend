@@ -440,6 +440,7 @@
       "emailUpdateFailed": "Не удалось обновить email",
       "emailEqualsPrevious": "Новый email совпадает с текущим",
       "phoneUpdated": "Телефон обновлён",
+      "phoneEqualsPrevious": "Новый номер телефона совпадает с текущим",
       "phoneUpdateFailed": "Не удалось обновить телефон",
       "passwordUpdated": "Пароль обновлён",
       "passwordUpdateFailed": "Не удалось обновить пароль",
