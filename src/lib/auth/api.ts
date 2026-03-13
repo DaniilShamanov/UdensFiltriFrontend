@@ -46,16 +46,6 @@ export const authApi = {
     return res.user;
   },
 
-  async requestSmsCode(input: { purpose: SmsPurpose; phone?: string }): Promise<void> {
-    await fetchJson<OkEnvelope>(apiUrl(AUTH_ENDPOINTS.requestSmsCode), {
-      method: "POST",
-      body: input,
-      csrf: true,
-      credentials: "include",
-    });
-  },
-
-
   async requestEmailCode(input: { email: string, purpose: string }): Promise<void> {
     await fetchJson<OkEnvelope>(apiUrl(AUTH_ENDPOINTS.requestEmailCode), {
       method: "POST",
@@ -109,7 +99,7 @@ export const authApi = {
     });
   },
 
-  async changeEmail(input: { email?: string; code?: string }): Promise<User> {
+  async changeEmail(input: { new_email?: string; code?: string }): Promise<User> {
     const res = await fetchJson<UserEnvelope>(apiUrl(AUTH_ENDPOINTS.changeEmail), {
       method: "POST",
       body: input,

@@ -16,7 +16,6 @@ interface AppContextType {
   authNotice: string | null;
   clearAuthNotice: () => void;
 
-  requestSmsCode: (input: { purpose: SmsPurpose; phone?: string }) => Promise<void>
   signIn: (input: { email: string; password: string }) => Promise<void>;
   signUp: (input: { phone?: string; password: string; email: string; first_name: string; last_name: string; code: string }) => Promise<void>;
   signOut: () => Promise<void>;
@@ -152,10 +151,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const addOrder = (order: Order) => setOrders((prev) => [order, ...prev]);
 
-  const requestSmsCode = async (input: { purpose: SmsPurpose; phone?: string }) => {
-    await authApi.requestSmsCode(input);
-  };
-
   const signIn = async (input: { email: string; password: string }) => {
     setAuthLoading(true);
     try {
@@ -216,7 +211,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setUser(updated);
   };
 
-  const changeEmail = async (input: { email?: string; code?: string }) => {
+  const changeEmail = async (input: { new_email?: string; code?: string }) => {
     const updated = await authApi.changeEmail(input);
     setUser(updated);
   };
@@ -240,7 +235,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         routeLoading,
         authNotice,
         clearAuthNotice: () => setAuthNotice(null),
-        requestSmsCode,
         signIn,
         signUp,
         signOut,

@@ -434,6 +434,7 @@
       "codeSentDescription": "Код отправлен на {phone}",
       "codeFailed": "Не удалось отправить код",
       "profileUpdated": "Профиль обновлён",
+      "profileEqualsPrevious": "Новые имя и фамилия совпадают с текущими",
       "profileUpdateFailed": "Не удалось обновить профиль",
       "emailUpdated": "Email обновлён",
       "emailUpdateFailed": "Не удалось обновить email",

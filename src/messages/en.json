@@ -434,6 +434,7 @@
       "codeSentDescription": "We sent a code to {phone}",
       "codeFailed": "Could not send code",
       "profileUpdated": "Profile updated",
+      "profileEqualsPrevious": "New user first and last name are the same as current ones",
       "profileUpdateFailed": "Could not update profile",
       "emailUpdated": "Email updated",
       "emailEqualsPrevious": "New email is the same as current email",

@@ -65,6 +65,12 @@ const AccountPage: React.FC = () => {
   // ── Profile name ────────────────────────────────────────────────────────
   const saveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if(user?.first_name?.trim() === profile.first_name.trim() && user?.last_name?.trim() === profile.last_name.trim()) {
+      toast.error(t('toast.profileEqualsPrevious'));
+      return;
+    }
+
     try {
       await updateProfile({ first_name: profile.first_name.trim(), last_name: profile.last_name.trim() });
       toast.success(t('toast.profileUpdated'));
@@ -113,6 +119,12 @@ const AccountPage: React.FC = () => {
   // ── Phone change ────────────────────────────────────────────────────────
   const doChangePhone = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if(user?.phone?.trim() === newPhone.trim()) {
+      toast.error(t('toast.noChanges'));
+      return;
+    }
+
     try {
       await changePhone({ new_phone: newPhone.trim() });
       toast.success(t('toast.phoneUpdated'));
@@ -128,6 +140,7 @@ const AccountPage: React.FC = () => {
   // changePassword and then signs the user out (tokens invalidated).
   const doChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (newPassword.length < 6) {
       toast.error(t('toast.passwordTooShort', { min: 6, current: newPassword.length }));
       return;

@@ -434,6 +434,7 @@
       "codeSentDescription": "Kods nosūtīts uz {phone}",
       "codeFailed": "Neizdevās nosūtīt kodu",
       "profileUpdated": "Profils atjaunināts",
+      "profileEqualsPrevious": "Jaunie vārds un uzvārds ir vienādi ar pašreizējiem",
       "profileUpdateFailed": "Neizdevās atjaunināt profilu",
       "emailUpdated": "E-pasts atjaunināts",
       "emailUpdateFailed": "Neizdevās atjaunināt e-pastu",
