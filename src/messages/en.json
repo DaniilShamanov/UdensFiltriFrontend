@@ -436,6 +436,7 @@
       "profileUpdated": "Profile updated",
       "profileUpdateFailed": "Could not update profile",
       "emailUpdated": "Email updated",
+      "emailEqualsPrevious": "New email is the same as current email",
       "emailUpdateFailed": "Could not update email",
       "phoneUpdated": "Phone updated",
       "phoneUpdateFailed": "Could not update phone",

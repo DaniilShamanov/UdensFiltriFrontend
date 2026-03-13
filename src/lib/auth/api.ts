@@ -56,7 +56,7 @@ export const authApi = {
   },
 
 
-  async requestEmailCode(input: { email: string }): Promise<void> {
+  async requestEmailCode(input: { email: string, purpose: string }): Promise<void> {
     await fetchJson<OkEnvelope>(apiUrl(AUTH_ENDPOINTS.requestEmailCode), {
       method: "POST",
       body: input,

@@ -77,8 +77,14 @@ const AccountPage: React.FC = () => {
   const doChangeEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     const trimmedEmail = newEmail.trim();
+
     if (!trimmedEmail) {
       toast.error(t('toast.emailRequired'));
+      return;
+    }
+
+    if(trimmedEmail === user.email) {
+      toast.error(t('toast.emailEqualsPrevious'));
       return;
     }
 
@@ -87,7 +93,7 @@ const AccountPage: React.FC = () => {
         // Step 1 — request verification code from dedicated endpoint.
         setAwaitingEmailCode(true);
         setEmailCode("");
-        await authApi.requestEmailCode({ email: trimmedEmail });
+        await authApi.requestEmailCode({ email: trimmedEmail, purpose: 'change_email' });
         toast.success(t('toast.verificationCodeSent'));
         return;
       }
@@ -142,7 +148,7 @@ const AccountPage: React.FC = () => {
         // Step 1 — request verification code from dedicated endpoint.
         setAwaitingPasswordCode(true);
         setPasswordCode("");
-        await authApi.requestEmailCode({ email: emailForVerification });
+        await authApi.requestEmailCode({ email: emailForVerification, purpose: 'change_password' });
         toast.success(t('toast.verificationCodeSent'));
         return;
       }

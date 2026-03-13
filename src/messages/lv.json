@@ -437,6 +437,7 @@
       "profileUpdateFailed": "Neizdevās atjaunināt profilu",
       "emailUpdated": "E-pasts atjaunināts",
       "emailUpdateFailed": "Neizdevās atjaunināt e-pastu",
+      "emailEqualsPrevious": "Jaunais e-pasts ir vienāds ar pašreizējo",
       "phoneUpdated": "Tālrunis atjaunināts",
       "phoneUpdateFailed": "Neizdevās atjaunināt tālruni",
       "passwordUpdated": "Parole atjaunināta",

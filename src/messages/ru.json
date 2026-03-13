@@ -437,6 +437,7 @@
       "profileUpdateFailed": "Не удалось обновить профиль",
       "emailUpdated": "Email обновлён",
       "emailUpdateFailed": "Не удалось обновить email",
+      "emailEqualsPrevious": "Новый email совпадает с текущим",
       "phoneUpdated": "Телефон обновлён",
       "phoneUpdateFailed": "Не удалось обновить телефон",
       "passwordUpdated": "Пароль обновлён",
