@@ -57,9 +57,15 @@ const AccountPage: React.FC = () => {
   }, [user, authLoading, router, pathname]);
 
   useEffect(() => {
-    setNewEmail(user?.email || "");
-    setNewPhone(user?.phone || "");
-  }, [user?.email, user?.phone]);
+    if (!user) return;
+
+    setProfile({
+      first_name: user.first_name || "",
+      last_name: user.last_name || "",
+    });
+    setNewEmail(user.email || "");
+    setNewPhone(user.phone || "");
+  }, [user]);
 
   if (authLoading) return <p>Loading</p>;
   if (!user) return null;
