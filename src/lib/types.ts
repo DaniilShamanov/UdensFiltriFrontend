@@ -18,13 +18,58 @@ export interface CartItem {
   quantity: number;
 }
 
+export interface CheckoutFormData {
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  street: string;
+  city: string;
+  postalCode: string;
+  country: string;
+  notes?: string;
+}
+
+export interface CheckoutOrderPayload {
+  email: string;
+  phone: string;
+  customer_name: string;          // "firstName lastName"
+  address_line1: string;
+  address_line2?: string;
+  city: string;
+  postcode: string;
+  country: string;
+  delivery_option: string;        // e.g. "courier" (matches DeliveryOption.name)
+  items: Array<{
+    product_id: string | null;
+    title: string;
+    quantity: number;
+    unit_price: number;            // in euros
+  }>;
+}
+
+export interface OrderItem {
+  product: {
+    id: string;
+    name: string;
+    price: number;        // euros
+    wholesalePrice?: number; // euros (same as price for past orders)
+  };
+  quantity: number;
+}
+
 export interface Order {
   id: string;
-  date: string;
-  items: CartItem[];
-  total: number;
+  date: string;           // ISO string
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  shippingAddress: Address;
+  total: number;          // euros
+  items: OrderItem[];
+  shippingAddress: {
+    street: string;
+    city: string;
+    postalCode: string;
+    country: string;
+  };
 }
 
 export interface Address {

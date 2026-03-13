@@ -116,12 +116,10 @@ const CheckoutPage: React.FC = () => {
         email: formData.email,
         phone: formData.phone,
         customer_name: `${formData.firstName} ${formData.lastName}`.trim(),
-        address_line1: formData.street,
-        address_line2: '',
-        city: formData.city,
+        customer_address: `${formData.city}, ${formData.street}`.trim(),
         postcode: formData.postalCode,
         country: '',
-        delivery_option: deliveryOption,
+        delivery_option_id: deliveryOption,
         items,
       };
 

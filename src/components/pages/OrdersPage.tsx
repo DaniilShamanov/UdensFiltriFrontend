@@ -15,19 +15,49 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { useApp } from '@/contexts/AppContext';
 import { usePathname, useRouter } from '@/navigation';
-import { Order } from '@/lib/types';
+import { Order, OrderItem } from '@/lib/types';
 import { useTranslations } from 'next-intl';
+import { fetchJson } from '@/lib/api'; // your fetch helper
 
 const OrdersPage: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, orders, authLoading } = useApp();
+  const { user, authLoading } = useApp();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [sortBy, setSortBy] = useState('date-desc');
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
   const t = useTranslations('orders');
+
+  // Fetch orders when user is authenticated
+  useEffect(() => {
+    if (!user) return;
+    const fetchOrders = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchJson<Order[]>('/api/orders/');
+        setOrders(data);
+      } catch (err) {
+        setFetchError(err instanceof Error ? err.message : 'Failed to load orders');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOrders();
+  }, [user]);
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      const next = encodeURIComponent(pathname);
+      router.replace(`/auth/sign-in?next=${next}`);
+    }
+  }, [user, authLoading, router, pathname]);
 
   const filteredOrders = useMemo(() => {
     if (!user) return [];
@@ -36,10 +66,11 @@ const OrdersPage: React.FC = () => {
 
     // Search filter
     if (searchQuery) {
+      const query = searchQuery.toLowerCase();
       result = result.filter(order =>
-        order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        order.items.some(item => 
-          item.product.name.toLowerCase().includes(searchQuery.toLowerCase())
+        order.id.toLowerCase().includes(query) ||
+        order.items.some((item: OrderItem) => 
+          item.product.name.toLowerCase().includes(query)
         )
       );
     }
@@ -68,15 +99,9 @@ const OrdersPage: React.FC = () => {
     return result;
   }, [user, orders, searchQuery, statusFilter, sortBy]);
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      const next = encodeURIComponent(pathname);
-      router.replace(`/auth/sign-in?next=${next}`);
-    }
-  }, [user, authLoading, router, pathname]);
-
-  if (authLoading) return <p>Loading</p>;
-  if (!user) return null; // will redirect via effect
+  if (authLoading || loading) return <p>{t('loading')}</p>;
+  if (fetchError) return <p className="text-destructive">{fetchError}</p>;
+  if (!user) return null; // will redirect
 
   const totalSpent = orders.reduce((sum, order) => sum + order.total, 0);
   const orderCount = orders.length;
@@ -98,7 +123,6 @@ const OrdersPage: React.FC = () => {
     }
   };
 
-  // Status labels are now taken from translations (filter keys)
   const getStatusLabel = (status: Order['status']) => {
     switch (status) {
       case 'pending': return t('filter.pending');
@@ -118,7 +142,7 @@ const OrdersPage: React.FC = () => {
           <p className="text-muted-foreground">{t('pageDescription')}</p>
         </div>
 
-        {/* Statistics */}
+        {/* Statistics – unchanged JSX */}
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           <Card className="bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
             <CardContent className="p-6">
@@ -165,7 +189,7 @@ const OrdersPage: React.FC = () => {
           </Card>
         </div>
 
-        {/* Filters */}
+        {/* Filters – unchanged */}
         <Card className="mb-6">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row gap-4">
@@ -272,10 +296,9 @@ const OrdersPage: React.FC = () => {
                       {/* Order Items */}
                       <div className="space-y-3 mb-4">
                         <h4 className="font-semibold">{t('orderCard.orderItems')}</h4>
-                        {order.items.map(item => {
-                          const price = user?.is_company && item.product.wholesalePrice
-                            ? item.product.wholesalePrice
-                            : item.product.price;
+                        {order.items.map((item: OrderItem) => {
+                          // Use the stored price directly (no company discount logic)
+                          const price = item.product.price;
                           return (
                             <div key={item.product.id} className="flex items-center gap-4 p-3 bg-muted/30 rounded-lg">
                               <div className="w-16 h-16 bg-muted rounded-md"></div>
