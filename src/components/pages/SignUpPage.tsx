@@ -121,15 +121,12 @@ function SignUpContent() {
       return;
     }
 
-    // Reveal code input immediately after the user intentionally requests
-    // verification so they can enter an already-received code without waiting
-    // for the API round-trip.
-    setAwaitingEmailCode(true);
-    setVerificationCode("");
     setIsSubmitting(true);
     try {
       const payload = { email: formData.email.trim(), purpose: 'register'};
       await authApi.requestEmailCode(payload as any);
+      setAwaitingEmailCode(true);
+      setVerificationCode("");
       toast.success(t('toast.verificationCodeSent'));
     } catch (e: unknown) {
       const errorMessage = extractErrorMessage(e, t('toast.tryAgain'));
