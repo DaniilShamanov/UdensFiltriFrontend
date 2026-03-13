@@ -121,7 +121,7 @@ const AccountPage: React.FC = () => {
     e.preventDefault();
 
     if(user?.phone?.trim() === newPhone.trim()) {
-      toast.error(t('toast.noChanges'));
+      toast.error(t('toast.phoneEqualsPrevious'));
       return;
     }
 
@@ -140,7 +140,7 @@ const AccountPage: React.FC = () => {
   // changePassword and then signs the user out (tokens invalidated).
   const doChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (newPassword.length < 6) {
       toast.error(t('toast.passwordTooShort', { min: 6, current: newPassword.length }));
       return;
