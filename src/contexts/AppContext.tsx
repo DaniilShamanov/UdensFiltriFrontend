@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { CartItem, Order, User } from "@/lib/types";
 import { products } from "@/lib/mockData";
-import { authApi, SmsPurpose } from "@/lib/auth/api";
+import { authApi } from "@/lib/auth/api";
 import { logClientEvent } from "@/lib/clientLog";
 import { ApiError } from "@/lib/api";
 
@@ -26,9 +26,9 @@ interface AppContextType {
   changePassword: (input: { new_password: string; code?: string }) => Promise<void>;
 
   cart: CartItem[];
-  addToCart: (productId: string, quantity?: number) => void;
-  removeFromCart: (productId: string) => void;
-  updateCartQuantity: (productId: string, quantity: number) => void;
+  addToCart: (productId: number, quantity?: number) => void;
+  removeFromCart: (productId: number) => void;
+  updateCartQuantity: (productId: number, quantity: number) => void;
   clearCart: () => void;
   orders: Order[];
   addOrder: (order: Order) => void;
@@ -122,7 +122,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setOrders(savedOrders ? JSON.parse(savedOrders) : []);
   }, [user?.id]);
 
-  const addToCart = (productId: string, quantity: number = 1) => {
+  const addToCart = (productId: number, quantity: number = 1) => {
     const product = products.find((p) => p.id === productId);
     if (!product) return;
 
@@ -135,11 +135,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
-  const removeFromCart = (productId: string) => {
+  const removeFromCart = (productId: number) => {
     setCart((prev) => prev.filter((i) => i.product.id !== productId));
   };
 
-  const updateCartQuantity = (productId: string, quantity: number) => {
+  const updateCartQuantity = (productId: number, quantity: number) => {
     if (quantity <= 0) {
       removeFromCart(productId);
       return;
@@ -168,7 +168,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const signUp = async (input: { phone?: string; password: string; email?: string; first_name?: string; last_name?: string; code?: string }) => {
     setAuthLoading(true);
     try {
-      await authApi.signUp(input);
+      await authApi.signUp(input as any);  // code is now required
       const me = await authApi.me();
       setUser(me);
       localStorage.setItem(AUTH_SEEN_KEY, "1");
@@ -176,7 +176,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } finally {
       setAuthLoading(false);
     }
-  };
+  };  
 
   const signOut = async () => {
     setAuthLoading(true);
@@ -206,24 +206,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  const updateProfile = async (input: { first_name?: string; last_name?: string }) => {
-    const updated = await authApi.updateProfile(input);
+  const changeEmail = async (input: { new_email?: string; code?: string }) => {
+    const updated = await authApi.changeEmail(input as { new_email: string; code: string });
     setUser(updated);
   };
 
-  const changeEmail = async (input: { new_email?: string; code?: string }) => {
-    const updated = await authApi.changeEmail(input);
+  const changePassword = async (input: { new_password: string; code?: string }) => {
+    await authApi.changePassword(input as { new_password: string; code: string });
+    setUser(null);
+  };
+
+  const updateProfile = async (input: { first_name?: string; last_name?: string }) => {
+    const updated = await authApi.updateProfile(input);
     setUser(updated);
   };
 
   const changePhone = async (input: { new_phone: string; code?: string }) => {
     const updated = await authApi.changePhone(input);
     setUser(updated);
-  };
-
-  const changePassword = async (input: { new_password: string; code?: string }) => {
-    await authApi.changePassword(input);
-    setUser(null);
   };
 
   return (

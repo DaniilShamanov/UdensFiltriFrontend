@@ -1,5 +1,5 @@
 export interface Product {
-  id: string;
+  id: number;
   name: string;
   description: string;
   price: number;
@@ -49,27 +49,20 @@ export interface CheckoutOrderPayload {
 }
 
 export interface OrderItem {
-  product: {
-    id: string;
-    name: string;
-    price: number;        // euros
-    wholesalePrice?: number; // euros (same as price for past orders)
-  };
+  id: string;
+  name: string;
+  price: number;        // euros
+  unit_price_cents: number; // euros (same as price for past orders)
   quantity: number;
 }
 
 export interface Order {
   id: string;
-  date: string;           // ISO string
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  total: number;          // euros
+  total_cents: number;          // euros
   items: OrderItem[];
-  shippingAddress: {
-    street: string;
-    city: string;
-    postalCode: string;
-    country: string;
-  };
+  customer_address: string;
+  created_at: string;      // ISO string
 }
 
 export interface Address {

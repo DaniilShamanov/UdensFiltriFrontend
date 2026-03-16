@@ -19,7 +19,7 @@ import VerificationCodeInput from "@/components/VerificationCodeInput";
 const AccountPage: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, authLoading, updateProfile, changeEmail, changePhone, signOut } = useApp();
+  const { user, authLoading, updateProfile, changeEmail, changePhone, changePassword, signOut } = useApp();
   const t = useTranslations('account');
 
   const displayName = useMemo(() => {
@@ -46,11 +46,8 @@ const AccountPage: React.FC = () => {
   const [isEmailCodeSending, setIsEmailCodeSending] = useState(false);
   const [isPasswordCodeSending, setIsPasswordCodeSending] = useState(false);
 
-
-
   useEffect(() => {
     if (!authLoading && !user) {
-      // Note: pathname from @/navigation usePathname is already without locale prefix
       const next = encodeURIComponent(pathname || "/");
       router.replace(`/auth/sign-in?next=${next}`);
     }
@@ -87,22 +84,25 @@ const AccountPage: React.FC = () => {
     }
   };
 
+  // Unified code request function (uses current user's email)
   const requestVerificationCode = async ({
-    email,
     purpose,
     onSending,
     onSent,
     onError,
   }: {
-    email: string;
     purpose: 'change_email' | 'change_password';
     onSending: (sending: boolean) => void;
     onSent: () => void;
     onError: (error: unknown) => void;
   }) => {
+    if (!user?.email) {
+      toast.error(t('toast.emailRequired'));
+      return;
+    }
     onSending(true);
     try {
-      await authApi.requestEmailCode({ email, purpose });
+      await authApi.sendCode({ email: user.email, purpose });
       onSent();
       toast.success(t('toast.verificationCodeSent'));
     } catch (error) {
@@ -112,25 +112,25 @@ const AccountPage: React.FC = () => {
     }
   };
 
-  // ── Email change (two-step: request code → confirm) ─────────────────────
+  // ── Email change (two-step) ─────────────────────────────────────────────
   const doChangeEmail = async (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmedEmail: string = newEmail.trim();
+    const trimmedEmail = newEmail.trim();
 
     if (!trimmedEmail) {
       toast.error(t('toast.emailRequired'));
       return;
     }
 
-    if(trimmedEmail === user.email) {
+    if (trimmedEmail === user.email) {
       toast.error(t('toast.emailEqualsPrevious'));
       return;
     }
 
     try {
       if (!awaitingEmailCode) {
+        // Step 1: request code (sent to current email)
         await requestVerificationCode({
-          email: trimmedEmail,
           purpose: 'change_email',
           onSending: setIsEmailCodeSending,
           onSent: () => {
@@ -146,7 +146,7 @@ const AccountPage: React.FC = () => {
         return;
       }
 
-      // Step 2 — confirm with code
+      // Step 2: confirm code and update email
       await changeEmail({ new_email: trimmedEmail, code: emailCode.trim() });
       setAwaitingEmailCode(false);
       setEmailCode("");
@@ -158,7 +158,7 @@ const AccountPage: React.FC = () => {
     }
   };
 
-  // ── Phone change ────────────────────────────────────────────────────────
+  // ── Phone change (no code) ──────────────────────────────────────────────
   const doChangePhone = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -177,9 +177,7 @@ const AccountPage: React.FC = () => {
     }
   };
 
-  // ── Password change (two-step: request code → confirm) ──────────────────
-  // Step 1 uses dedicated email-code endpoint; step 2 confirms via
-  // changePassword and then signs the user out (tokens invalidated).
+  // ── Password change (two-step) ──────────────────────────────────────────
   const doChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -192,16 +190,10 @@ const AccountPage: React.FC = () => {
       return;
     }
 
-    const emailForVerification = user.email?.trim() || newEmail.trim();
-    if (!emailForVerification) {
-      toast.error(t('toast.emailRequired'));
-      return;
-    }
-
     try {
       if (!awaitingPasswordCode) {
+        // Step 1: request code (sent to current email)
         await requestVerificationCode({
-          email: emailForVerification,
           purpose: 'change_password',
           onSending: setIsPasswordCodeSending,
           onSent: () => {
@@ -217,15 +209,14 @@ const AccountPage: React.FC = () => {
         return;
       }
 
-      // Step 2 — confirm with code, then sign out (password changed → existing
-      // tokens are invalidated by the backend)
-      await authApi.changePassword({ new_password: newPassword, code: passwordCode.trim() });
+      // Step 2: confirm code and update password
+      await changePassword({ new_password: newPassword, code: passwordCode.trim() });
       toast.success(t('toast.passwordUpdated'), { description: t('toast.signInAgain') });
       setNewPassword("");
       setConfirmNewPassword("");
       setPasswordCode("");
       setAwaitingPasswordCode(false);
-      await signOut();
+      await signOut(); // tokens invalidated
       router.replace("/auth/sign-in");
     } catch (error) {
       toast.error(t('toast.passwordUpdateFailed'), {
@@ -252,7 +243,7 @@ const AccountPage: React.FC = () => {
             </TabsTrigger>
           </TabsList>
 
-          {/* ── Profile tab ─────────────────────────────────────────────── */}
+          {/* Profile tab */}
           <TabsContent value="profile">
             <Card className="border-primary/20 bg-card/95 shadow-sm">
               <CardHeader className="bg-gradient-to-r from-primary/8 to-secondary/8">
@@ -288,7 +279,7 @@ const AccountPage: React.FC = () => {
                 <Separator />
 
                 <div className="grid gap-6">
-                  {/* Phone — optional */}
+                  {/* Phone */}
                   <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
                     <div className="flex items-center gap-2 font-medium">
                       <Phone className="h-4 w-4" /> {t('profile.phone')}
@@ -306,7 +297,7 @@ const AccountPage: React.FC = () => {
                     </form>
                   </div>
 
-                  {/* Email — required, two-step verification */}
+                  {/* Email */}
                   <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
                     <div className="flex items-center gap-2 font-medium">
                       <Mail className="h-4 w-4" /> {t('profile.email')}
@@ -317,7 +308,6 @@ const AccountPage: React.FC = () => {
                         type="email"
                         value={newEmail}
                         onChange={(e) => {
-                          // Reset verification state when email changes
                           setAwaitingEmailCode(false);
                           setEmailCode("");
                           setNewEmail(e.target.value);
@@ -325,7 +315,6 @@ const AccountPage: React.FC = () => {
                         placeholder={t('profile.emailPlaceholder')}
                       />
 
-                      {/* Code input — appears after clicking Update email */}
                       {awaitingEmailCode && (
                         <VerificationCodeInput
                           id="email_code"
@@ -353,7 +342,6 @@ const AccountPage: React.FC = () => {
                             className="cursor-pointer sm:flex-1"
                             onClick={() =>
                               requestVerificationCode({
-                                email: newEmail.trim(),
                                 purpose: 'change_email',
                                 onSending: setIsEmailCodeSending,
                                 onSent: () => setEmailCode(""),
@@ -377,7 +365,7 @@ const AccountPage: React.FC = () => {
             </Card>
           </TabsContent>
 
-          {/* ── Security tab ────────────────────────────────────────────── */}
+          {/* Security tab */}
           <TabsContent value="security">
             <Card className="border-primary/20 bg-card/95 shadow-sm">
               <CardHeader className="bg-gradient-to-r from-primary/8 to-secondary/8">
@@ -394,7 +382,6 @@ const AccountPage: React.FC = () => {
                       type="password"
                       value={newPassword}
                       onChange={(e) => {
-                        // Reset code step if password changes after sending code
                         setAwaitingPasswordCode(false);
                         setPasswordCode("");
                         setNewPassword(e.target.value);
@@ -417,7 +404,6 @@ const AccountPage: React.FC = () => {
                     />
                   </div>
 
-                  {/* Code input — appears after clicking Update password */}
                   {awaitingPasswordCode && (
                     <VerificationCodeInput
                       id="password_code"
@@ -445,7 +431,6 @@ const AccountPage: React.FC = () => {
                         className="cursor-pointer sm:flex-1"
                         onClick={() =>
                           requestVerificationCode({
-                            email: user.email?.trim() || newEmail.trim(),
                             purpose: 'change_password',
                             onSending: setIsPasswordCodeSending,
                             onSent: () => setPasswordCode(""),

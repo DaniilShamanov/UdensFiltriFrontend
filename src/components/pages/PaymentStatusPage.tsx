@@ -183,15 +183,15 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ orderId }) => {
             <div>
               <h3 className="font-semibold mb-3">{t('orderItems', { count: order.items.length })}</h3>
               <div className="space-y-3">
-                {order.items.map((it) => (
-                  <div key={it.id} className="flex justify-between">
+                {order.items.map((item) => (
+                  <div key={item.id} className="flex justify-between">
                     <div>
-                      <p className="font-medium">{it.title}</p>
+                      <p className="font-medium">{item.title}</p>
                       <p className="text-sm text-muted-foreground">
-                        {t('quantityLabel', { quantity: it.quantity })}
+                        {t('quantityLabel', { quantity: item.quantity })}
                       </p>
                     </div>
-                    <p className="font-medium">€{(Number(it.unit_price) * it.quantity).toFixed(2)}</p>
+                    <p className="font-medium">€{(Number(item.unit_price) * item.quantity).toFixed(2)}</p>
                   </div>
                 ))}
               </div>
@@ -206,7 +206,7 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ orderId }) => {
             </Button>
           )}
           <Button size="lg" variant="outline" className="w-full" onClick={() => router.push("/")}>
-            <Home className="mr-2 h-5 w-5" /> {t('returnHome')}
+            {t('returnHome')}
           </Button>
           <Button size="lg" variant="outline" className="w-full" onClick={() => router.push("/products")}>
             {t('continueShopping')}

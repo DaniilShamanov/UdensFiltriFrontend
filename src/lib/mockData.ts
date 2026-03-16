@@ -69,7 +69,7 @@ export const categories: Category[] = [
 
 export const products: Product[] = [
   {
-    id: '1',
+    id: 1,
     name: 'AquaPure Whole House Filter System',
     description: 'High-capacity whole house water filtration system with sediment and carbon filters. Removes chlorine, sediment, rust, and improves taste and odor.',
     price: 349.99,
@@ -83,7 +83,7 @@ export const products: Product[] = [
     reviews: 156,
   },
   {
-    id: '2',
+    id: 2,
     name: 'CrystalClear Under Sink Filter',
     description: '3-stage under sink filtration system. Easy installation, removes 99% of contaminants including lead, chlorine, and bacteria.',
     price: 189.99,
@@ -97,7 +97,7 @@ export const products: Product[] = [
     reviews: 203,
   },
   {
-    id: '3',
+    id: 3,
     name: 'PureFlow Countertop Filter',
     description: 'Portable countertop water filter with advanced multi-stage filtration. No installation required.',
     price: 129.99,
@@ -111,7 +111,7 @@ export const products: Product[] = [
     reviews: 89,
   },
   {
-    id: '4',
+    id: 4,
     name: 'AquaBrite Water Filter Pitcher',
     description: '10-cup capacity water filter pitcher with BPA-free materials. Filter lasts up to 2 months.',
     price: 39.99,
@@ -125,7 +125,7 @@ export const products: Product[] = [
     reviews: 421,
   },
   {
-    id: '5',
+    id: 5,
     name: 'Universal Replacement Cartridge 6-Pack',
     description: 'Compatible with most standard 10-inch filter housings. 5-micron sediment filters.',
     price: 45.99,
@@ -139,7 +139,7 @@ export const products: Product[] = [
     reviews: 312,
   },
   {
-    id: '6',
+    id: 6,
     name: 'Premium RO Membrane 75GPD',
     description: 'High-quality reverse osmosis membrane. 75 gallons per day capacity. Removes up to 99% of dissolved solids.',
     price: 79.99,
@@ -153,7 +153,7 @@ export const products: Product[] = [
     reviews: 178,
   },
   {
-    id: '7',
+    id: 7,
     name: 'Clear Filter Housing 10-inch',
     description: 'Durable clear filter housing allows visual inspection. Includes mounting bracket and wrench.',
     price: 24.99,
@@ -167,7 +167,7 @@ export const products: Product[] = [
     reviews: 95,
   },
   {
-    id: '8',
+    id: 8,
     name: 'Quick Connect Fittings Set',
     description: 'Complete set of push-to-connect fittings for 1/4" tubing. Includes elbows, tees, and straight connectors.',
     price: 16.99,
@@ -181,7 +181,7 @@ export const products: Product[] = [
     reviews: 267,
   },
   {
-    id: '9',
+    id: 9,
     name: 'SmartSoft 48000 Grain Water Softener',
     description: 'Digital salt-based water softener for homes up to 6 people. Includes bypass valve and brine tank.',
     price: 599.99,
@@ -195,7 +195,7 @@ export const products: Product[] = [
     reviews: 134,
   },
   {
-    id: '10',
+    id: 10,
     name: 'EcoSoft Salt-Free Conditioner',
     description: 'Environmentally friendly salt-free water conditioner. Prevents scale buildup without chemicals.',
     price: 449.99,
@@ -209,7 +209,7 @@ export const products: Product[] = [
     reviews: 87,
   },
   {
-    id: '11',
+    id: 11,
     name: 'TravelSoft Portable Softener',
     description: 'Compact portable water softener perfect for RVs and boats. 16000 grain capacity.',
     price: 189.99,
@@ -223,7 +223,7 @@ export const products: Product[] = [
     reviews: 62,
   },
   {
-    id: '12',
+    id: 12,
     name: 'PureMax 3-Stage RO System',
     description: 'Compact 3-stage reverse osmosis system. Perfect for apartments and small spaces.',
     price: 199.99,
@@ -237,7 +237,7 @@ export const products: Product[] = [
     reviews: 145,
   },
   {
-    id: '13',
+    id: 13,
     name: 'AquaElite 5-Stage RO System',
     description: 'Premium 5-stage reverse osmosis with remineralization. Includes storage tank and faucet.',
     price: 329.99,
@@ -251,7 +251,7 @@ export const products: Product[] = [
     reviews: 289,
   },
   {
-    id: '14',
+    id: 14,
     name: 'UltraPure 7-Stage Alkaline RO',
     description: 'Advanced 7-stage RO system with alkaline filter and UV sterilization. Premium quality water.',
     price: 499.99,
@@ -265,7 +265,7 @@ export const products: Product[] = [
     reviews: 198,
   },
   {
-    id: '15',
+    id: 15,
     name: 'CommercialPro 400GPD RO System',
     description: 'High-capacity commercial reverse osmosis system. 400 gallons per day for restaurants and offices.',
     price: 1299.99,
@@ -279,7 +279,7 @@ export const products: Product[] = [
     reviews: 76,
   },
   {
-    id: '16',
+    id: 16,
     name: 'Chrome Water Filter Faucet',
     description: 'Designer chrome-finished water filter faucet. 360-degree swivel spout.',
     price: 49.99,
@@ -293,7 +293,7 @@ export const products: Product[] = [
     reviews: 112,
   },
   {
-    id: '17',
+    id: 17,
     name: '4-Gallon Storage Tank',
     description: 'NSF certified pressurized water storage tank for RO systems. Pre-charged and ready to install.',
     price: 69.99,
@@ -307,7 +307,7 @@ export const products: Product[] = [
     reviews: 143,
   },
   {
-    id: '18',
+    id: 18,
     name: '100GPD Booster Pump',
     description: 'Quiet operation booster pump increases RO system efficiency. Automatic shut-off.',
     price: 89.99,
@@ -321,7 +321,7 @@ export const products: Product[] = [
     reviews: 98,
   },
   {
-    id: '19',
+    id: 19,
     name: 'Professional Installation Tool Kit',
     description: 'Complete installation tool kit with tubing cutter, wrench, drill bits, and Teflon tape.',
     price: 34.99,
@@ -335,7 +335,7 @@ export const products: Product[] = [
     reviews: 156,
   },
   {
-    id: '20',
+    id: 20,
     name: 'Complete Water Test Kit',
     description: 'Professional-grade water testing kit. Tests for 10 common contaminants including lead, bacteria, and chlorine.',
     price: 29.99,
@@ -349,7 +349,7 @@ export const products: Product[] = [
     reviews: 234,
   },
   {
-    id: '21',
+    id: 21,
     name: 'Digital TDS Meter',
     description: 'Accurate digital TDS meter with LCD display. Measures water quality from 0-9990 ppm.',
     price: 19.99,
@@ -363,7 +363,7 @@ export const products: Product[] = [
     reviews: 312,
   },
   {
-    id: '22',
+    id: 22,
     name: 'pH Meter with Calibration Solution',
     description: 'Portable pH meter with automatic temperature compensation. Includes calibration solutions.',
     price: 39.99,

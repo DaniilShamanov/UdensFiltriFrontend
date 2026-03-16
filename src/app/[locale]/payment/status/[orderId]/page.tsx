@@ -3,7 +3,9 @@ import PaymentStatusPage from "@/components/pages/PaymentStatusPage";
 export default async function Page({
   params,
 }: {
-  params: { locale: string; orderId: string };
+  params: Promise<{ locale: string; orderId: string }>;
 }) {
-  return <PaymentStatusPage orderId={params.orderId} />;
+  const { locale, orderId } = await params;
+
+  return <PaymentStatusPage orderId={orderId} />;
 }

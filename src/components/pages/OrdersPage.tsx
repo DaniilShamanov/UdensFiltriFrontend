@@ -68,9 +68,9 @@ const OrdersPage: React.FC = () => {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter(order =>
-        order.id.toLowerCase().includes(query) ||
+        order.id.toString().toLocaleLowerCase().includes(query) ||
         order.items.some((item: OrderItem) => 
-          item.product.name.toLowerCase().includes(query)
+          item.name.toLowerCase().includes(query)
         )
       );
     }
@@ -83,16 +83,16 @@ const OrdersPage: React.FC = () => {
     // Sort
     switch (sortBy) {
       case 'date-desc':
-        result.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         break;
       case 'date-asc':
-        result.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        result.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
         break;
       case 'total-desc':
-        result.sort((a, b) => b.total - a.total);
+        result.sort((a, b) => b.total_cents - a.total_cents);
         break;
       case 'total-asc':
-        result.sort((a, b) => a.total - b.total);
+        result.sort((a, b) => a.total_cents - b.total_cents);
         break;
     }
 
@@ -103,7 +103,7 @@ const OrdersPage: React.FC = () => {
   if (fetchError) return <p className="text-destructive">{fetchError}</p>;
   if (!user) return null; // will redirect
 
-  const totalSpent = orders.reduce((sum, order) => sum + order.total, 0);
+  const totalSpent = orders.reduce((sum, order) => sum + order.total_cents, 0);
   const orderCount = orders.length;
 
   const getStatusColor = (status: Order['status']) => {
@@ -265,7 +265,7 @@ const OrdersPage: React.FC = () => {
                         <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
-                            {new Date(order.date).toLocaleDateString('en-US', {
+                            {new Date(order.created_at).toLocaleDateString('en-US', {
                               year: 'numeric',
                               month: 'short',
                               day: 'numeric',
@@ -276,8 +276,7 @@ const OrdersPage: React.FC = () => {
                             {t('orderCard.itemsCount', { count: order.items.length })}
                           </div>
                           <div className="flex items-center gap-1">
-                            <DollarSign className="h-4 w-4" />
-                            €{order.total.toFixed(2)}
+                            €{(order.total_cents ?? 0).toFixed(2)}
                           </div>
                         </div>
                       </div>
@@ -298,12 +297,13 @@ const OrdersPage: React.FC = () => {
                         <h4 className="font-semibold">{t('orderCard.orderItems')}</h4>
                         {order.items.map((item: OrderItem) => {
                           // Use the stored price directly (no company discount logic)
-                          const price = item.product.price;
+                          const price = item.unit_price_cents ?? 0;
+
                           return (
-                            <div key={item.product.id} className="flex items-center gap-4 p-3 bg-muted/30 rounded-lg">
+                            <div key={item.id} className="flex items-center gap-4 p-3 bg-muted/30 rounded-lg">
                               <div className="w-16 h-16 bg-muted rounded-md"></div>
                               <div className="flex-1">
-                                <p className="font-medium">{item.product.name}</p>
+                                <p className="font-medium">{item.name}</p>
                                 <p className="text-sm text-muted-foreground">
                                   {t('orderCard.quantityLabel', { 
                                     quantity: item.quantity, 
@@ -325,9 +325,7 @@ const OrdersPage: React.FC = () => {
                       <div>
                         <h4 className="font-semibold mb-2">{t('orderCard.shippingAddress')}</h4>
                         <p className="text-sm text-muted-foreground">
-                          {order.shippingAddress.street}<br />
-                          {order.shippingAddress.city}, {order.shippingAddress.postalCode}<br />
-                          {order.shippingAddress.country}
+                          {order.customer_address}
                         </p>
                       </div>
                     </CardContent>

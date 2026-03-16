@@ -50,8 +50,6 @@ function SignUpContent() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validation runs before setIsSubmitting — an early return never leaves
-    // the submit button permanently disabled.
     if (formData.password.length < 6) {
       toast.error(t('toast.passwordTooShort', { min: 6, current: formData.password.length }));
       return;
@@ -84,7 +82,6 @@ function SignUpContent() {
         ...(formData.phone?.trim() && { phone: formData.phone.trim() }),
       };
 
-      // AppContext.signUp completes registration AND calls me() to authenticate.
       await signUp(payload as any);
       toast.success(t('toast.accountCreated'));
       const next = sanitizeNextPath(searchParams.get("next"), "/");
@@ -100,34 +97,42 @@ function SignUpContent() {
     }
   };
 
-  // ── Request verification code (does NOT complete registration) ───────────
-  // Use the dedicated email-code endpoint; account registration happens only
-  // in handleRegister() after the user enters the received code.
-  const requestVerificationCode = async () => {
+  // ── Request or resend verification code ─────────────────────────────
+  // In SignUpPage.tsx, inside SignUpContent
+
+  const handleVerificationRequest = async () => {
     if (!formData.email.trim()) {
       toast.error(t('toast.emailRequiredForVerification'));
       return;
     }
-    if (formData.password.length < 6) {
-      toast.error(t('toast.passwordTooShort', { min: 6, current: formData.password.length }));
-      return;
-    }
-    if (formData.password !== formData.confirmPassword) {
-      toast.error(t('toast.passwordsMismatch'));
-      return;
-    }
-    if (!formData.agreeToTerms) {
-      toast.error(t('toast.termsNotAgreed'));
-      return;
+    if (!awaitingEmailCode) {
+      // Validate password and terms on first request
+      if (formData.password.length < 6) {
+        toast.error(t('toast.passwordTooShort', { min: 6, current: formData.password.length }));
+        return;
+      }
+      if (formData.password !== formData.confirmPassword) {
+        toast.error(t('toast.passwordsMismatch'));
+        return;
+      }
+      if (!formData.agreeToTerms) {
+        toast.error(t('toast.termsNotAgreed'));
+        return;
+      }
     }
 
     setIsSubmitting(true);
     try {
-      const payload = { email: formData.email.trim(), purpose: 'register'};
-      await authApi.requestEmailCode(payload as any);
-      setAwaitingEmailCode(true);
-      setVerificationCode("");
-      toast.success(t('toast.verificationCodeSent'));
+      const payload = { email: formData.email.trim(), purpose: 'register' };
+      if (awaitingEmailCode) {
+        await authApi.resendCode(payload);
+        toast.success(t('toast.verificationCodeResent'));
+      } else {
+        await authApi.sendCode(payload);
+        setAwaitingEmailCode(true);
+        setVerificationCode("");
+        toast.success(t('toast.verificationCodeSent'));
+      }
     } catch (e: unknown) {
       const errorMessage = extractErrorMessage(e, t('toast.tryAgain'));
       toast.error(t('toast.signUpFailed'), {
@@ -149,8 +154,6 @@ function SignUpContent() {
           <CardDescription>{t('descriptionForm')}</CardDescription>
         </CardHeader>
         <CardContent>
-          {/* noValidate disables browser-native HTML5 validation tooltips so
-              our JS toast-based validation handles everything consistently. */}
           <form onSubmit={handleRegister} noValidate className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -198,7 +201,7 @@ function SignUpContent() {
               <p className="text-xs text-muted-foreground mt-1">{t('phoneHint')}</p>
             </div>
 
-            {/* Email + inline Verify button */}
+            {/* Email + inline Verify/Resend button */}
             <div>
               <Label htmlFor="email">{t('emailLabel')}</Label>
               <div className="flex gap-2">
@@ -223,7 +226,7 @@ function SignUpContent() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={requestVerificationCode}
+                  onClick={handleVerificationRequest}
                   disabled={isSubmitting || !formData.email.trim()}
                 >
                   {awaitingEmailCode ? t('resendButton') : t('verifyButton')}

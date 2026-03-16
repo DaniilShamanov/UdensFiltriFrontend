@@ -15,19 +15,24 @@ export default function ForgotPasswordPage() {
   const t = useTranslations('forgotPassword');
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
-      await authApi.requestPasswordReset({ email });
+      // Use the unified sendCode endpoint with purpose 'reset_password'
+      await authApi.sendCode({ email, purpose: 'reset_password' });
       setSent(true);
       toast.success(t('toast.successTitle'), {
         description: t('toast.successDescription'),
       });
-    } catch {
+    } catch (error) {
       toast.error(t('toast.errorTitle'), {
         description: t('toast.errorDescription'),
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -58,12 +63,13 @@ export default function ForgotPasswordPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder={t('emailPlaceholder')}
                     className="pl-10"
+                    disabled={isLoading}
                   />
                 </div>
               </div>
 
-              <Button type="submit" size="lg" className="w-full bg-accent hover:bg-accent/90">
-                {t('submitButton')}
+              <Button type="submit" size="lg" className="w-full bg-accent hover:bg-accent/90" disabled={isLoading}>
+                {isLoading ? t('sending') : t('submitButton')}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
 

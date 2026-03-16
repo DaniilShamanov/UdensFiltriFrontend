@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 
 interface ProductDetailPageProps {
-  productId: string;
+  productId: number;
 }
 
 const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {

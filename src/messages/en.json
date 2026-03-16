@@ -128,6 +128,7 @@
   "orders": {
     "pageTitle": "Order History",
     "pageDescription": "View and track all your orders",
+    "loading": "Loading orders...",
     "stats": {
       "totalOrders": "Total Orders",
       "totalSpent": "Total Spent",
@@ -157,7 +158,7 @@
       "startShopping": "Start Shopping"
     },
     "orderCard": {
-      "itemsCount": "{count} item | {count} items",
+      "itemsCount": "{count} item(s)",
       "orderItems": "Order Items",
       "quantityLabel": "Quantity: {quantity} × €{price}",
       "shippingAddress": "Shipping Address"

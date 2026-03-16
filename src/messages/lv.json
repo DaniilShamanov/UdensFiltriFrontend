@@ -128,6 +128,7 @@
   "orders": {
     "pageTitle": "Pasūtījumu vēsture",
     "pageDescription": "Apskatiet un izsekojiet visus savus pasūtījumus",
+    "loading": "Ielādē pasūtījumus...",
     "stats": {
       "totalOrders": "Kopā pasūtījumu",
       "totalSpent": "Kopā iztērēts",
@@ -157,7 +158,7 @@
       "startShopping": "Sākt iepirkšanos"
     },
     "orderCard": {
-      "itemsCount": "{count} prece | {count} preces | {count} preču",
+      "itemsCount": "{count} prece(s)",
       "orderItems": "Pasūtījuma preces",
       "quantityLabel": "Daudzums: {quantity} × €{price}",
       "shippingAddress": "Piegādes adrese"

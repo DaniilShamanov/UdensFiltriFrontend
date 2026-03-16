@@ -15,10 +15,17 @@ import { useApp } from '@/contexts/AppContext';
 import { fetchJson } from '@/lib/api';
 import { useTranslations } from 'next-intl';
 
-const deliveryOptions = [
-  { id: 'courier', name: 'Courier delivery (1-2 days)', price: 9.99, description: 'Delivery to your address.' },
-  { id: 'parcel_locker', name: 'Parcel locker (2-3 days)', price: 4.99, description: 'Pickup from nearest parcel locker.' },
-  { id: 'store_pickup', name: 'Store pickup', price: 0, description: 'Collect your order in person.' },
+type DeliveryOption = {
+  id: number;
+  name: string;
+  price: number;
+  description: string;
+};
+
+const deliveryOptions: DeliveryOption[] = [
+  { id: 1, name: 'Courier delivery (1-2 days)', price: 9.99, description: 'Delivery to your address.' },
+  { id: 2, name: 'Parcel locker (2-3 days)', price: 4.99, description: 'Pickup from nearest parcel locker.' },
+  { id: 3, name: 'Store pickup', price: 0, description: 'Collect your order in person.' },
 ];
 
 const CheckoutPage: React.FC = () => {
@@ -27,7 +34,7 @@ const CheckoutPage: React.FC = () => {
   const { user, cart } = useApp();
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [deliveryOption, setDeliveryOption] = useState(deliveryOptions[0].id);
+  const [deliveryOption, setDeliveryOption] = useState<DeliveryOption>(deliveryOptions[0]); // default first
   const [formData, setFormData] = useState({
     email: '',
     firstName: '',
@@ -56,6 +63,12 @@ const CheckoutPage: React.FC = () => {
     }));
   }, [user]);
 
+  useEffect(() => {
+  if (cart.length === 0) {
+    router.push('/cart');
+  }
+  }, [cart, router]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
@@ -73,8 +86,7 @@ const CheckoutPage: React.FC = () => {
   }, [cart, user]);
 
   const shipping = useMemo(() => {
-    const selected = deliveryOptions.find((option) => option.id === deliveryOption);
-    return selected?.price ?? 0;
+    return deliveryOption?.price ?? 0;
   }, [deliveryOption]);
 
   const total = subtotal + shipping;
@@ -84,14 +96,13 @@ const CheckoutPage: React.FC = () => {
     setSubmitError(null);
 
     if (cart.length === 0) {
-      router.push('/cart');
-      return;
+      return null;
     }
 
     try {
       setSubmitting(true);
 
-      const items: Array<{ product_id: string | null; title: string; quantity: number; unit_price: number }> = cart.map((ci) => {
+      const items: Array<{ product_id: number | null; title: string; quantity: number; unit_price: number }> = cart.map((ci) => {
         const unit = user?.is_company && ci.product.wholesalePrice
           ? ci.product.wholesalePrice
           : ci.product.price;
@@ -103,37 +114,24 @@ const CheckoutPage: React.FC = () => {
         };
       });
 
-      if (shipping > 0) {
-        items.push({
-          product_id: null,
-          title: 'Shipping',
-          quantity: 1,
-          unit_price: shipping,
-        });
-      }
-
       const orderPayload = {
         email: formData.email,
         phone: formData.phone,
         customer_name: `${formData.firstName} ${formData.lastName}`.trim(),
-        customer_address: `${formData.city}, ${formData.street}`.trim(),
-        postcode: formData.postalCode,
-        country: '',
-        delivery_option_id: deliveryOption,
+        customer_address: `${formData.street}, ${formData.city}, ${formData.postalCode}, ${formData.country}`.trim(),
+        delivery_option_id: deliveryOption.id,
         items,
+        locale,
+        successPath: '/payment/status',
+        cancelPath: '/checkout',
       };
 
       const res = await fetchJson<{ checkoutUrl: string; orderId: number }>(
-        '/api/orders/payments/create-checkout-session/',
+        '/api/orders/',
         {
           method: 'POST',
           csrf: true,
-          body: {
-            order: orderPayload,
-            localePrefix: `/${locale}`,
-            successPath: '/payment/status',
-            cancelPath: '/checkout',
-          },
+          body: orderPayload,
         }
       );
 
@@ -145,7 +143,6 @@ const CheckoutPage: React.FC = () => {
   };
 
   if (cart.length === 0) {
-    router.push('/cart');
     return null;
   }
 
@@ -219,10 +216,20 @@ const CheckoutPage: React.FC = () => {
               <Card>
                 <CardHeader><CardTitle>Delivery</CardTitle></CardHeader>
                 <CardContent>
-                  <RadioGroup value={deliveryOption} onValueChange={setDeliveryOption} className="space-y-3">
+                  <RadioGroup 
+                    value={deliveryOption.name} 
+                    onValueChange={(val) => {
+                      const selected = deliveryOptions.find(opt => opt.name === val);
+                      if (selected) setDeliveryOption(selected);
+                    }} 
+                    className="space-y-3"
+                  >
                     {deliveryOptions.map((option) => (
-                      <label key={option.id} className="flex cursor-pointer items-start gap-3 rounded-md border p-3 hover:border-primary/50">
-                        <RadioGroupItem value={option.id} className="mt-1" />
+                      <label 
+                        key={option.id} 
+                        className="flex cursor-pointer items-start gap-3 rounded-md border p-3 hover:border-primary/50"
+                      >
+                        <RadioGroupItem value={option.name} className="mt-1" />
                         <div className="flex-1">
                           <div className="flex items-center justify-between gap-2">
                             <span className="font-medium">{option.name}</span>
@@ -246,9 +253,21 @@ const CheckoutPage: React.FC = () => {
                       const displayPrice = user?.is_company && item.product.wholesalePrice ? item.product.wholesalePrice : item.product.price;
                       return (
                         <div key={item.product.id} className="flex gap-3">
-                          <div className="relative"><div className="w-16 h-16 bg-muted rounded-md"></div><span className="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">{item.quantity}</span></div>
-                          <div className="flex-1 min-w-0"><p className="text-sm font-medium line-clamp-2">{item.product.name}</p><p className="text-sm text-muted-foreground">{t('summary.itemLine', { price: displayPrice.toFixed(2), quantity: item.quantity })}</p></div>
-                          <div className="text-sm font-medium">€{(displayPrice * item.quantity).toFixed(2)}</div>
+                          <div className="relative">
+                            <div className="w-16 h-16 bg-muted rounded-md"></div>
+                            <span className="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                              {item.quantity}
+                            </span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium line-clamp-2">{item.product.name}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {t('summary.itemLine', { price: displayPrice.toFixed(2), quantity: item.quantity })}
+                            </p>
+                          </div>
+                          <div className="text-sm font-medium">
+                            €{(displayPrice * item.quantity).toFixed(2)}
+                          </div>
                         </div>
                       );
                     })}
@@ -256,10 +275,21 @@ const CheckoutPage: React.FC = () => {
 
                   <Separator />
                   <div className="space-y-2">
-                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">{t('summary.subtotal')}</span><span>€{subtotal.toFixed(2)}</span></div>
-                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">{t('summary.shipping')}</span><span className={shipping === 0 ? 'text-green-600' : ''}>{shipping === 0 ? t('summary.free') : `€${shipping.toFixed(2)}`}</span></div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">{t('summary.subtotal')}</span>
+                      <span>€{subtotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">{t('summary.shipping')}</span>
+                      <span className={shipping === 0 ? 'text-green-600' : ''}>
+                        {shipping === 0 ? t('summary.free') : `€${shipping.toFixed(2)}`}
+                      </span>
+                    </div>
                     <Separator />
-                    <div className="flex justify-between font-bold text-lg"><span>{t('summary.total')}</span><span className="text-primary">€{total.toFixed(2)}</span></div>
+                    <div className="flex justify-between font-bold text-lg">
+                      <span>{t('summary.total')}</span>
+                      <span className="text-primary">€{total.toFixed(2)}</span>
+                    </div>
                   </div>
 
                   <Button type="submit" size="lg" className="w-full bg-accent hover:bg-accent/90" disabled={submitting}>
