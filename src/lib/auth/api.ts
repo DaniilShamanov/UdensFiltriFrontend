@@ -130,12 +130,10 @@ export const authApi = {
     const res = await fetch(apiUrl(AUTH_ENDPOINTS.resetPassword), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(input),
-      credentials: 'include',
+      body: JSON.stringify(input)
     });
     await handleResponse(res);
   },
-
 
   sendCode: async (input: { email: string; purpose: string }) => {
     const res = await fetch(apiUrl(AUTH_ENDPOINTS.sendCode), {
