@@ -16,6 +16,7 @@ export const AUTH_ENDPOINTS = {
   changeEmail: "/api/auth/change-email/",
   changePhone: "/api/auth/change-phone/",
   changePassword: "/api/auth/change-password/",
+  resetPassword: "/api/auth/reset-password/",
   sendCode: "/api/auth/send-code/",
   resendCode: "/api/auth/resend-code/",
 } as const;
@@ -115,7 +116,7 @@ export const authApi = {
     return data.user;
   },
 
-  changePassword: async (input: { new_password: string; code: string; email?: string }) => {
+  changePassword: async (input: { new_password: string; code: string; email: string }) => {
     const res = await fetch(apiUrl(AUTH_ENDPOINTS.changePassword), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -123,8 +124,18 @@ export const authApi = {
       credentials: 'include',
     });
     await handleResponse(res);
-    // No user data returned; cookies cleared
   },
+
+  resetPassword: async (input: { new_password: string; code: string; email: string }) => {
+    const res = await fetch(apiUrl(AUTH_ENDPOINTS.resetPassword), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+      credentials: 'include',
+    });
+    await handleResponse(res);
+  },
+
 
   sendCode: async (input: { email: string; purpose: string }) => {
     const res = await fetch(apiUrl(AUTH_ENDPOINTS.sendCode), {

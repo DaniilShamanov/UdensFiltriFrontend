@@ -45,7 +45,7 @@ export default function ForgotPasswordPage() {
     setIsConfirming(true);
 
     try {
-      await authApi.changePassword({
+      await authApi.resetPassword({
         email,
         code: code.trim(),
         new_password: newPassword,
