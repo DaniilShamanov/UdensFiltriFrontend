@@ -50,21 +50,29 @@
   "forgotPassword": {
     "title": "Сброс пароля",
     "description": {
-      "before": "Введите email для получения ссылки для сброса пароля.",
-      "after": "Если аккаунт с таким email существует, вы получите ссылку для сброса пароля в ближайшее время."
+      "before": "Введите email, чтобы получить код для сброса пароля.",
+      "after": "Введите код из письма и задайте новый пароль."
     },
     "emailLabel": "Электронная почта",
     "emailPlaceholder": "you@example.com",
-    "submitButton": "Отправить ссылку",
+    "submitButton": "Отправить код",
     "backToSignIn": "Вернуться ко входу",
-    "returnToSignIn": "Вернуться ко входу",
-    "closeMessage": "Вы можете безопасно закрыть эту страницу.",
     "toast": {
-      "successTitle": "Письмо для сброса пароля отправлено",
-      "successDescription": "Проверьте ваш почтовый ящик для дальнейших инструкций.",
-      "errorTitle": "Не удалось отправить письмо",
-      "errorDescription": "Пожалуйста, попробуйте позже."
-    }
+      "codeSuccessTitle": "Код отправлен",
+      "codeSuccessDescription": "Проверьте почту и введите код подтверждения.",
+      "codeErrorTitle": "Не удалось отправить код",
+      "codeErrorDescription": "Пожалуйста, попробуйте позже.",
+      "resetSuccessTitle": "Пароль изменен",
+      "resetSuccessDescription": "Теперь вы можете войти с новым паролем.",
+      "resetErrorTitle": "Не удалось изменить пароль",
+      "resetErrorDescription": "Проверьте код и попробуйте снова."
+    },
+    "codeLabel": "Код",
+    "codePlaceholder": "Введите код",
+    "newPasswordLabel": "Новый пароль",
+    "newPasswordPlaceholder": "Введите новый пароль",
+    "confirmButton": "Подтвердить",
+    "confirming": "Подтверждение..."
   },
   "home": {
     "heroTitle": "Чистая вода для <highlight>здоровой жизни</highlight>",

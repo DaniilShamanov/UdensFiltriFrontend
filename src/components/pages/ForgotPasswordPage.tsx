@@ -7,32 +7,59 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authApi } from "@/lib/auth/api";
-import { Link } from "@/navigation";
+import { Link, useRouter } from "@/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
 export default function ForgotPasswordPage() {
-  const t = useTranslations('forgotPassword');
+  const t = useTranslations("forgotPassword");
+  const router = useRouter();
   const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [code, setCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [showResetFields, setShowResetFields] = useState(false);
+  const [isSendingCode, setIsSendingCode] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsSendingCode(true);
+
     try {
-      // Use the unified sendCode endpoint with purpose 'reset_password'
-      await authApi.sendCode({ email, purpose: 'reset_password' });
-      setSent(true);
-      toast.success(t('toast.successTitle'), {
-        description: t('toast.successDescription'),
+      await authApi.sendCode({ email, purpose: "reset_password" });
+      setShowResetFields(true);
+      toast.success(t("toast.codeSuccessTitle"), {
+        description: t("toast.codeSuccessDescription"),
       });
-    } catch (error) {
-      toast.error(t('toast.errorTitle'), {
-        description: t('toast.errorDescription'),
+    } catch {
+      toast.error(t("toast.codeErrorTitle"), {
+        description: t("toast.codeErrorDescription"),
       });
     } finally {
-      setIsLoading(false);
+      setIsSendingCode(false);
+    }
+  };
+
+  const handleConfirm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsConfirming(true);
+
+    try {
+      await authApi.changePassword({
+        email,
+        code: code.trim(),
+        new_password: newPassword,
+      });
+      toast.success(t("toast.resetSuccessTitle"), {
+        description: t("toast.resetSuccessDescription"),
+      });
+      router.push("/auth/sign-in");
+    } catch {
+      toast.error(t("toast.resetErrorTitle"), {
+        description: t("toast.resetErrorDescription"),
+      });
+    } finally {
+      setIsConfirming(false);
     }
   };
 
@@ -43,52 +70,81 @@ export default function ForgotPasswordPage() {
           <div className="bg-gradient-to-br from-primary to-secondary w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
             <KeyRound className="h-8 w-8 text-white" />
           </div>
-          <CardTitle className="text-2xl">{t('title')}</CardTitle>
+          <CardTitle className="text-2xl">{t("title")}</CardTitle>
           <CardDescription>
-            {sent ? t('description.after') : t('description.before')}
+            {showResetFields ? t("description.after") : t("description.before")}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {!sent ? (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="email">{t('emailLabel')}</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <form onSubmit={showResetFields ? handleConfirm : handleSendCode} className="space-y-4">
+            <div>
+              <Label htmlFor="email">{t("emailLabel")}</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={t("emailPlaceholder")}
+                  className="pl-10"
+                  disabled={isSendingCode || isConfirming}
+                />
+              </div>
+            </div>
+
+            {showResetFields && (
+              <>
+                <div>
+                  <Label htmlFor="code">{t("codeLabel")}</Label>
                   <Input
-                    id="email"
-                    type="email"
+                    id="code"
                     required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder={t('emailPlaceholder')}
-                    className="pl-10"
-                    disabled={isLoading}
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    placeholder={t("codePlaceholder")}
+                    disabled={isConfirming}
                   />
                 </div>
-              </div>
 
-              <Button type="submit" size="lg" className="w-full bg-accent hover:bg-accent/90" disabled={isLoading}>
-                {isLoading ? t('sending') : t('submitButton')}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+                <div>
+                  <Label htmlFor="newPassword">{t("newPasswordLabel")}</Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    required
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder={t("newPasswordPlaceholder")}
+                    disabled={isConfirming}
+                  />
+                </div>
+              </>
+            )}
 
-              <div className="text-center">
-                <Link href="/auth/sign-in" className="text-sm text-primary hover:underline">
-                  {t('backToSignIn')}
-                </Link>
-              </div>
-            </form>
-          ) : (
-            <div className="space-y-4">
-              <Button asChild size="lg" className="w-full">
-                <Link href="/auth/sign-in">{t('returnToSignIn')}</Link>
-              </Button>
-              <p className="text-xs text-muted-foreground text-center">
-                {t('closeMessage')}
-              </p>
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full bg-accent hover:bg-accent/90"
+              disabled={isSendingCode || isConfirming}
+            >
+              {showResetFields
+                ? isConfirming
+                  ? t("confirming")
+                  : t("confirmButton")
+                : isSendingCode
+                  ? t("sending")
+                  : t("submitButton")}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+
+            <div className="text-center">
+              <Link href="/auth/sign-in" className="text-sm text-primary hover:underline">
+                {t("backToSignIn")}
+              </Link>
             </div>
-          )}
+          </form>
         </CardContent>
       </Card>
     </div>

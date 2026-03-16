@@ -50,21 +50,29 @@
   "forgotPassword": {
     "title": "Paroles atjaunošana",
     "description": {
-      "before": "Ievadiet savu e-pastu, lai saņemtu paroles atjaunošanas saiti.",
-      "after": "Ja šāds e-pasts pastāv, jūs drīz saņemsiet paroles atjaunošanas saiti."
+      "before": "Ievadiet savu e-pastu, lai saņemtu paroles atjaunošanas kodu.",
+      "after": "Ievadiet kodu no e-pasta un iestatiet jaunu paroli."
     },
     "emailLabel": "E-pasta adrese",
     "emailPlaceholder": "you@example.com",
-    "submitButton": "Nosūtīt atjaunošanas saiti",
+    "submitButton": "Nosūtīt kodu",
     "backToSignIn": "Atpakaļ uz pierakstīšanos",
-    "returnToSignIn": "Atgriezties pie pierakstīšanās",
-    "closeMessage": "Šo lapu var droši aizvērt.",
     "toast": {
-      "successTitle": "Paroles atjaunošanas e-pasts nosūtīts",
-      "successDescription": "Pārbaudiet savu pastkastīti turpmākajām instrukcijām.",
-      "errorTitle": "Neizdevās nosūtīt atjaunošanas e-pastu",
-      "errorDescription": "Lūdzu, mēģiniet vēlāk."
-    }
+      "codeSuccessTitle": "Atjaunošanas kods nosūtīts",
+      "codeSuccessDescription": "Pārbaudiet savu pastkastīti, lai atrastu verifikācijas kodu.",
+      "codeErrorTitle": "Neizdevās nosūtīt kodu",
+      "codeErrorDescription": "Lūdzu, mēģiniet vēlāk.",
+      "resetSuccessTitle": "Parole nomainīta",
+      "resetSuccessDescription": "Tagad varat pierakstīties ar jauno paroli.",
+      "resetErrorTitle": "Neizdevās nomainīt paroli",
+      "resetErrorDescription": "Lūdzu, pārbaudiet kodu un mēģiniet vēlreiz."
+    },
+    "codeLabel": "Kods",
+    "codePlaceholder": "Ievadiet kodu",
+    "newPasswordLabel": "Jaunā parole",
+    "newPasswordPlaceholder": "Ievadiet jauno paroli",
+    "confirmButton": "Apstiprināt",
+    "confirming": "Apstiprina..."
   },
   "home": {
     "heroTitle": "Tīrs ūdens <highlight>veselīgai dzīvei</highlight>",
