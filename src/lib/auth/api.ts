@@ -116,7 +116,7 @@ export const authApi = {
     return data.user;
   },
 
-  changePassword: async (input: { new_password: string; code: string; email: string }) => {
+  changePassword: async (input: { new_password: string; code: string }) => {
     const res = await fetch(apiUrl(AUTH_ENDPOINTS.changePassword), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
