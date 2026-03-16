@@ -179,8 +179,8 @@ function ProductsContent() {
     <div className="space-y-6">
       {/* Price Range */}
       <div className="space-y-2 scrollbar-hide">
-        <Label className="font-semibold">{t('filters.priceRange')}</Label>
-        <div className="grid grid-cols-2 gap-3">
+        <Label className="font-semibold">{t('filters.priceRange')} (€)</Label>
+        <div className="flex items-center gap-2">
           <Input
             type="number"
             min={0}
@@ -188,7 +188,9 @@ function ProductsContent() {
             value={range.min}
             onChange={(event) => setMinPrice(event.target.value)}
             placeholder="Min €"
+            className="flex-1"
           />
+          <span className="text-muted-foreground">–</span> {/* en dash */}
           <Input
             type="number"
             min={0}
@@ -196,6 +198,7 @@ function ProductsContent() {
             value={range.max}
             onChange={(event) => setMaxPrice(event.target.value)}
             placeholder="Max €"
+            className="flex-1"
           />
         </div>
       </div>
