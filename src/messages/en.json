@@ -50,21 +50,29 @@
   "forgotPassword": {
     "title": "Reset password",
     "description": {
-      "before": "Enter your email to receive a reset link.",
-      "after": "If an account exists for this email, you will receive a reset link shortly."
+      "before": "Enter your email to receive a reset code.",
+      "after": "Enter the reset code from your email and set a new password."
     },
     "emailLabel": "Email address",
     "emailPlaceholder": "you@example.com",
-    "submitButton": "Send reset link",
+    "submitButton": "Send code",
     "backToSignIn": "Back to sign in",
-    "returnToSignIn": "Return to sign in",
-    "closeMessage": "You can safely close this page.",
     "toast": {
-      "successTitle": "Password reset email sent",
-      "successDescription": "Check your inbox for further instructions.",
-      "errorTitle": "Could not send reset email",
-      "errorDescription": "Please try again later."
-    }
+      "codeSuccessTitle": "Reset code sent",
+      "codeSuccessDescription": "Check your inbox for the verification code.",
+      "codeErrorTitle": "Could not send code",
+      "codeErrorDescription": "Please try again later.",
+      "resetSuccessTitle": "Password changed",
+      "resetSuccessDescription": "You can now sign in with your new password.",
+      "resetErrorTitle": "Could not change password",
+      "resetErrorDescription": "Please verify your code and try again."
+    },
+    "codeLabel": "Code",
+    "codePlaceholder": "Enter code",
+    "newPasswordLabel": "New password",
+    "newPasswordPlaceholder": "Enter new password",
+    "confirmButton": "Confirm",
+    "confirming": "Confirming..."
   },
   "home": {
     "heroTitle": "Pure Water for <highlight>Healthy Living</highlight>",
