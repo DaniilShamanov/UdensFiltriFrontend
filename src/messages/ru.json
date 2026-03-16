@@ -474,7 +474,7 @@
     },
     "summary": {
       "title": "Итог заказа",
-      "subtotal": "Товары ({count} шт.)",
+      "subtotal": "Всего: {count} товар(ов)",
       "shipping": "Доставка",
       "free": "БЕСПЛАТНО",
       "freeShippingMessage": "Добавьте ещё €{amount} для бесплатной доставки!",

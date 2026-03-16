@@ -474,7 +474,7 @@
     },
     "summary": {
       "title": "Pasūtījuma kopsavilkums",
-      "subtotal": "Starpsumma ({count} prece | {count} preces | {count} preču)",
+      "subtotal": "Starpsumma: {count} prece(s)",
       "shipping": "Piegāde",
       "free": "BEZMAKSAS",
       "freeShippingMessage": "Pievienojiet vēl €{amount}, lai saņemtu bezmaksas piegādi!",

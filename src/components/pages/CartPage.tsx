@@ -139,22 +139,7 @@ const CartPage: React.FC = () => {
                       {t('summary.subtotal', { count: cart.reduce((sum, item) => sum + item.quantity, 0) })}
                     </span>
                     <span className="font-medium">€{subtotal.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">{t('summary.shipping')}</span>
-                    <span className="font-medium">
-                      {shipping === 0 ? (
-                        <span className="text-green-600">{t('summary.free')}</span>
-                      ) : (
-                        `€${shipping.toFixed(2)}`
-                      )}
-                    </span>
-                  </div>
-                  {shipping > 0 && subtotal < 100 && (
-                    <div className="text-sm text-muted-foreground bg-muted/30 p-3 rounded-lg">
-                      {t('summary.freeShippingMessage', { amount: (100 - subtotal).toFixed(2) })}
-                    </div>
-                  )}
+                  </div>                 
                   <Separator />
                   <div className="flex justify-between text-lg font-bold">
                     <span>{t('summary.total')}</span>

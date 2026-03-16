@@ -474,7 +474,7 @@
     },
     "summary": {
       "title": "Order Summary",
-      "subtotal": "Subtotal ({count} item | {count} items)",
+      "subtotal": "Subtotal: {count} item(s)",
       "shipping": "Shipping",
       "free": "FREE",
       "freeShippingMessage": "Add €{amount} more for free shipping!",
