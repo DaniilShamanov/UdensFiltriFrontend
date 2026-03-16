@@ -199,7 +199,7 @@
     "orderDate": "Order Date",
     "orderTotal": "Order Total",
     "shippingAddress": "Shipping Address",
-    "orderItems": "{count} Order Item | {count} Order Items",
+    "orderItems": "{count} Order Item(s)",
     "quantityLabel": "Quantity: {quantity}",
     "tryAgain": "Try Again",
     "returnHome": "Return to Home",

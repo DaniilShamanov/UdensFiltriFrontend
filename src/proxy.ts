@@ -7,7 +7,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 const SKIP_AUTH_IN_DEV = isDevelopment && process.env.SKIP_AUTH === 'true';
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || '';
 
-const PUBLIC_PREFIXES = ['/home', '/about', '/services', '/auth'];
+const PUBLIC_PREFIXES = ['/home', '/about', '/services', '/auth', '/payment/status'];
 const PROTECTED_PREFIXES = ['/account', '/orders', '/payment'];
 
 const intlMiddleware = createMiddleware({ locales, defaultLocale, localePrefix });

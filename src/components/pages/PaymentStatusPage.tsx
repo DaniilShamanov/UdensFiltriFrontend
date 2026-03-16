@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "@/navigation";
+import { useSearchParams } from "next/navigation";
 import { CheckCircle, Home, Loader2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -38,6 +39,8 @@ interface PaymentStatusPageProps {
 
 const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ orderId }) => {
   const router = useRouter();
+  const searchParams = useSearchParams(); // 👈 get query params
+  const sessionId = searchParams.get('session_id'); // 👈 extract session_id
   const t = useTranslations('paymentStatus');
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
@@ -47,11 +50,19 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ orderId }) => {
     let isMounted = true;
     let pollId: any = null;
 
+    const buildUrl = () => {
+      let url = `/api/orders/${encodeURIComponent(orderId)}/`;
+      if (sessionId) {
+        url += `?session_id=${encodeURIComponent(sessionId)}`;
+      }
+      return url;
+    };
+
     async function load() {
       try {
         setLoading(true);
         setError(null);
-        const data = await fetchJson<Order>(`/api/orders/${encodeURIComponent(orderId)}/`);
+        const data = await fetchJson<Order>(buildUrl());
         if (isMounted) setOrder(data);
       } catch (e: any) {
         if (isMounted) setError(e?.message || t('errors.loadFailed'));
@@ -62,11 +73,11 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ orderId }) => {
 
     load();
 
-    // Poll a few times while the order is pending (webhook may be delayed).
+    // Poll while order is pending
     pollId = setInterval(async () => {
       if (!isMounted) return;
       try {
-        const data = await fetchJson<Order>(`/api/orders/${encodeURIComponent(orderId)}/`);
+        const data = await fetchJson<Order>(buildUrl());
         if (!isMounted) return;
         setOrder(data);
         if (data.status === "paid" || data.status === "failed" || data.status === "canceled") {
@@ -83,7 +94,7 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ orderId }) => {
       if (pollId) clearInterval(pollId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orderId]);
+  }, [orderId, sessionId]);
 
   if (loading) {
     return (

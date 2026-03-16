@@ -179,8 +179,8 @@ const CheckoutPage: React.FC = () => {
                     </div>
                   </div>
                   <div>
-                    <Label htmlFor="phone">{t('contact.phone')} *</Label>
-                    <Input id="phone" name="phone" type="tel" required value={formData.phone} onChange={handleChange} placeholder={t('contact.phonePlaceholder')} />
+                    <Label htmlFor="phone">{t('contact.phone')}</Label>
+                    <Input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleChange} placeholder={t('contact.phonePlaceholder')} />
                   </div>
                 </CardContent>
               </Card>

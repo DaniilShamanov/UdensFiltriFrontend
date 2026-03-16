@@ -199,7 +199,7 @@
     "orderDate": "Pasūtījuma datums",
     "orderTotal": "Pasūtījuma summa",
     "shippingAddress": "Piegādes adrese",
-    "orderItems": "{count} prece | {count} preces | {count} preču",
+    "orderItems": "{count} prece(s)",
     "quantityLabel": "Daudzums: {quantity}",
     "tryAgain": "Mēģināt vēlreiz",
     "returnHome": "Atgriezties sākumā",

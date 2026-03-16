@@ -199,7 +199,7 @@
     "orderDate": "Дата заказа",
     "orderTotal": "Сумма заказа",
     "shippingAddress": "Адрес доставки",
-    "orderItems": "{count} товар | {count} товара | {count} товаров",
+    "orderItems": "{count} товар(ов)",
     "quantityLabel": "Количество: {quantity}",
     "tryAgain": "Попробовать снова",
     "returnHome": "Вернуться на главную",

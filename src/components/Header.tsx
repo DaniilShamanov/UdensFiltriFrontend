@@ -202,11 +202,7 @@ export default function Header() {
 
               {/* User menu */}
               <div className="relative">
-                {authLoading ? (
-                  <div className="inline-flex h-9 w-9 items-center justify-center rounded-md opacity-50">
-                    <User className="h-5 w-5" />
-                  </div>
-                ) : user ? (
+                {user ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
@@ -247,6 +243,7 @@ export default function Header() {
                     size="icon"
                     className="h-10 w-10 rounded-xl hover:bg-primary/15 hover:text-primary"
                     onClick={() => router.push("/auth/sign-in")}
+                    aria-busy={authLoading}
                   >
                     <User className="h-5 w-5" />
                   </Button>
