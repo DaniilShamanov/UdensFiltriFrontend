@@ -300,7 +300,7 @@ const OrdersPage: React.FC = () => {
                           const price = item.unit_price_cents ?? 0;
 
                           return (
-                            <div key={item.id} className="flex items-center gap-4 p-3 bg-muted/30 rounded-lg">
+                            <div key={order.id} className="flex items-center gap-4 p-3 bg-muted/30 rounded-lg">
                               <div className="w-16 h-16 bg-muted rounded-md"></div>
                               <div className="flex-1">
                                 <p className="font-medium">{item.name}</p>
