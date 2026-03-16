@@ -11,7 +11,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import RangeSlider from '@/components/ui/slider';
 import {
   Select,
   SelectContent,
@@ -25,13 +24,14 @@ import ProductCard from '../ProductCard';
 import { useTranslations } from 'next-intl';
 
 function ProductsContent() {
+  const MAX_PRICE = 5000;
   const searchParams = useSearchParams();
   const categoryId = searchParams.get('categoryId') || undefined;
   const subCategoryId = searchParams.get('subCategoryId') || undefined;
   const { user } = useApp();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('featured');
-  const [range, setRange] = React.useState({ min: 0, max: 1500 });
+  const [range, setRange] = React.useState({ min: 0, max: MAX_PRICE });
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [inStockOnly, setInStockOnly] = useState(false);
   const [minRating, setMinRating] = useState('0');
@@ -39,8 +39,6 @@ function ProductsContent() {
   const [currentPage, setCurrentPage] = useState(1);
 
   const t = useTranslations('products');
-
-  const formatCurrency = (value: number) => `€${value}`;
 
   useEffect(() => {
     const media = window.matchMedia('(max-width: 1023px)');
@@ -59,7 +57,7 @@ function ProductsContent() {
   }, []);
 
   const resetFilters = () => {
-    setRange({ min: 0, max: 1500 });
+    setRange({ min: 0, max: MAX_PRICE });
     setSelectedBrands([]);
     setInStockOnly(false);
     setMinRating('0');
@@ -157,21 +155,49 @@ function ProductsContent() {
   const currentCategory = categories.find(c => c.id === categoryId);
   const currentSubCategory = currentCategory?.subCategories.find(s => s.id === subCategoryId);
 
+  const setMinPrice = (value: string) => {
+    const parsedValue = Number(value);
+    setRange(prev => {
+      const min = Number.isNaN(parsedValue) ? 0 : Math.max(0, Math.min(parsedValue, prev.max));
+
+      return { ...prev, min };
+    });
+  };
+
+  const setMaxPrice = (value: string) => {
+    const parsedValue = Number(value);
+    setRange(prev => {
+      const max = Number.isNaN(parsedValue)
+        ? prev.max
+        : Math.min(MAX_PRICE, Math.max(parsedValue, prev.min));
+
+      return { ...prev, max };
+    });
+  };
+
   const FilterSection = () => (
     <div className="space-y-6">
       {/* Price Range */}
       <div className="space-y-2 scrollbar-hide">
         <Label className="font-semibold">{t('filters.priceRange')}</Label>
-        <RangeSlider
-          min={0}
-          max={1500}
-          step={1}
-          value={range}
-          onChange={(vals) => setRange({ min: vals.min, max: vals.max })}
-          className="w-full"
-          formatValue={formatCurrency}
-          label={t('filters.priceRange')}
-        />
+        <div className="grid grid-cols-2 gap-3">
+          <Input
+            type="number"
+            min={0}
+            max={MAX_PRICE}
+            value={range.min}
+            onChange={(event) => setMinPrice(event.target.value)}
+            placeholder="Min €"
+          />
+          <Input
+            type="number"
+            min={0}
+            max={MAX_PRICE}
+            value={range.max}
+            onChange={(event) => setMaxPrice(event.target.value)}
+            placeholder="Max €"
+          />
+        </div>
       </div>
 
       {/* Brands */}
