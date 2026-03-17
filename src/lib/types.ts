@@ -33,36 +33,38 @@ export interface CheckoutFormData {
 export interface CheckoutOrderPayload {
   email: string;
   phone: string;
-  customer_name: string;          // "firstName lastName"
-  address_line1: string;
-  address_line2?: string;
-  city: string;
-  postcode: string;
-  country: string;
-  delivery_option: string;        // e.g. "courier" (matches DeliveryOption.name)
+  customer_name: string;
+  customer_address: string;
+  delivery_option_id: number;
   items: Array<{
     product_id: string | null;
     title: string;
     quantity: number;
-    unit_price: number;            // in euros
+    unit_price: number;
   }>;
 }
 
 export interface OrderItem {
-  id: string;
+  product_id: number;
   name: string;
-  price: number;        // euros
-  unit_price_cents: number; // euros (same as price for past orders)
   quantity: number;
+  unit_price: number;
 }
 
 export interface Order {
   id: string;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  total_cents: number;          // euros
+  status: string;
+  total_price: number;
   items: OrderItem[];
   customer_address: string;
-  created_at: string;      // ISO string
+  created_at: string;
+  email: string;
+  customer_name: string;
+  delivery_option: {
+    id: number;
+    name: string;
+    price_cents: number;
+  };
 }
 
 export interface Address {
@@ -75,9 +77,9 @@ export interface Address {
 export interface User {
   id: string | number;
   phone?: string | null;
-  email?: string | null;
-  first_name?: string;
-  last_name?: string;
+  email: string;
+  first_name: string;
+  last_name: string;
   address: Address;
   is_company: boolean;
   is_superuser?: boolean;

@@ -89,10 +89,10 @@ const OrdersPage: React.FC = () => {
         result.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
         break;
       case 'total-desc':
-        result.sort((a, b) => b.total_cents - a.total_cents);
+        result.sort((a, b) => b.total_price - a.total_price);
         break;
       case 'total-asc':
-        result.sort((a, b) => a.total_cents - b.total_cents);
+        result.sort((a, b) => a.total_price - b.total_price);
         break;
     }
 
@@ -103,7 +103,7 @@ const OrdersPage: React.FC = () => {
   if (fetchError) return <p className="text-destructive">{fetchError}</p>;
   if (!user) return null; // will redirect
 
-  const totalSpent = orders.reduce((sum, order) => sum + order.total_cents, 0);
+  const totalSpent = orders.reduce((sum, order) => sum + order.total_price, 0);
   const orderCount = orders.length;
 
   const getStatusColor = (status: Order['status']) => {
@@ -276,7 +276,7 @@ const OrdersPage: React.FC = () => {
                             {t('orderCard.itemsCount', { count: order.items.length })}
                           </div>
                           <div className="flex items-center gap-1">
-                            €{(order.total_cents ?? 0).toFixed(2)}
+                            €{(order.total_price ?? 0).toFixed(2)}
                           </div>
                         </div>
                       </div>
@@ -297,7 +297,7 @@ const OrdersPage: React.FC = () => {
                         <h4 className="font-semibold">{t('orderCard.orderItems')}</h4>
                         {order.items.map((item: OrderItem) => {
                           // Use the stored price directly (no company discount logic)
-                          const price = item.unit_price_cents ?? 0;
+                          const price = item.unit_price ?? 0;
 
                           return (
                             <div key={order.id} className="flex items-center gap-4 p-3 bg-muted/30 rounded-lg">
