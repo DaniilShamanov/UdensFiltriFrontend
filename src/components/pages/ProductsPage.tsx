@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -34,7 +33,6 @@ function ProductsContent() {
   const [range, setRange] = React.useState({ min: 0, max: MAX_PRICE });
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [inStockOnly, setInStockOnly] = useState(false);
-  const [minRating, setMinRating] = useState('0');
   const [isMobile, setIsMobile] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -60,7 +58,6 @@ function ProductsContent() {
     setRange({ min: 0, max: MAX_PRICE });
     setSelectedBrands([]);
     setInStockOnly(false);
-    setMinRating('0');
     setSearchQuery('');
   };
 
@@ -107,11 +104,6 @@ function ProductsContent() {
       result = result.filter(p => p.inStock);
     }
 
-    // Rating filter
-    if (minRating !== '0') {
-      result = result.filter(p => p.rating >= parseFloat(minRating));
-    }
-
     // Sort
     switch (sortBy) {
       case 'price-low':
@@ -132,11 +124,11 @@ function ProductsContent() {
     }
 
     return result;
-  }, [searchQuery, sortBy, range, selectedBrands, inStockOnly, minRating, categoryId, subCategoryId]);
+  }, [searchQuery, sortBy, range, selectedBrands, inStockOnly, categoryId, subCategoryId]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, sortBy, range, selectedBrands, inStockOnly, minRating, categoryId, subCategoryId]);
+  }, [searchQuery, sortBy, range, selectedBrands, inStockOnly, categoryId, subCategoryId]);
 
   const pageSize = isMobile ? 10 : 20;
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize));
@@ -222,27 +214,6 @@ function ProductsContent() {
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Rating */}
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <Label className="font-semibold">{t('filters.minRating')}</Label>
-        </div>
-        <RadioGroup value={minRating} onValueChange={setMinRating}>
-          <div className="flex items-center gap-2">
-            <RadioGroupItem value="0" id="rating-all" />
-            <Label htmlFor="rating-all" className="cursor-pointer font-normal">{t('ratings.all')}</Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <RadioGroupItem value="4" id="rating-4" />
-            <Label htmlFor="rating-4" className="cursor-pointer font-normal">{t('ratings.4plus')}</Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <RadioGroupItem value="4.5" id="rating-45" />
-            <Label htmlFor="rating-45" className="cursor-pointer font-normal">{t('ratings.45plus')}</Label>
-          </div>
-        </RadioGroup>
       </div>
 
       {/* Availability */}

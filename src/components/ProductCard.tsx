@@ -1,7 +1,7 @@
 "use client";
 
-import React from 'react';
-import { Star, ShoppingCart } from 'lucide-react';
+import React, { useState } from 'react';
+import { ShoppingCart } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,7 @@ import { useApp } from '@/contexts/AppContext';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 import { toast } from 'sonner';
 import { Link } from '@/navigation';
+import { Input } from '@/components/ui/input';
 
 interface ProductCardProps {
   product: Product;
@@ -18,14 +19,25 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, showWholesalePrice }) => {
   const { addToCart } = useApp();
+  const [quantity, setQuantity] = useState(1);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    addToCart(product.id);
-    toast.success('Added to cart!', {
+    addToCart(product.id, quantity);
+    toast.success(`Added ${quantity} item${quantity > 1 ? 's' : ''} to cart!`, {
       description: product.name,
     });
+  };
+
+  const handleQuantityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(event.target.value, 10);
+    if (Number.isNaN(value)) {
+      setQuantity(1);
+      return;
+    }
+
+    setQuantity(Math.max(1, value));
   };
 
   const displayPrice = showWholesalePrice && product.wholesalePrice 
@@ -61,21 +73,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, showWholesalePrice }
           <h3 className="font-semibold mb-2 line-clamp-2 h-12 group-hover:text-primary transition-colors">
             {product.name}
           </h3>
-          <div className="flex items-center gap-1 mb-3">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className={`h-4 w-4 ${
-                  i < Math.floor(product.rating)
-                    ? 'fill-accent text-accent'
-                    : 'text-gray-300'
-                }`}
-              />
-            ))}
-            <span className="text-sm text-muted-foreground ml-1">
-              ({product.reviews})
-            </span>
-          </div>
           <div className="flex items-center justify-between">
             <div className="flex items-baseline gap-2">
               <span className="text-xl font-bold text-primary">€{displayPrice.toFixed(2)}</span>
@@ -85,6 +82,19 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, showWholesalePrice }
                 </span>
               )}
             </div>
+          </div>
+          <div className="mt-3">
+            <Input
+              type="number"
+              min={1}
+              value={quantity}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              onChange={handleQuantityChange}
+              className="h-8"
+            />
           </div>
           <Button
             className="w-full mt-3 bg-accent hover:bg-accent/90"

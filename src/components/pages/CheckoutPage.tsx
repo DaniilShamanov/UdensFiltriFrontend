@@ -31,7 +31,7 @@ const deliveryOptions: DeliveryOption[] = [
 const CheckoutPage: React.FC = () => {
   const router = useRouter();
   const locale = useLocale();
-  const { user, cart } = useApp();
+  const { user, cart, updateCartQuantity } = useApp();
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [deliveryOption, setDeliveryOption] = useState<DeliveryOption>(deliveryOptions[0]); // default first
@@ -255,13 +255,30 @@ const CheckoutPage: React.FC = () => {
                         <div key={item.product.id} className="flex gap-3">
                           <div className="relative">
                             <div className="w-16 h-16 bg-muted rounded-md"></div>
-                            <span className="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                            <span className="absolute -top-2 -right-2 min-w-6 h-6 px-1 bg-primary text-white text-[10px] rounded-full flex items-center justify-center font-medium leading-none">
                               {item.quantity}
                             </span>
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium line-clamp-2">{item.product.name}</p>
-                            <p className="text-sm text-muted-foreground">
+                            <div className="mt-1 max-w-20">
+                              <Input
+                                type="number"
+                                min={1}
+                                value={item.quantity}
+                                onChange={(event) => {
+                                  const value = parseInt(event.target.value, 10);
+                                  if (Number.isNaN(value)) {
+                                    return;
+                                  }
+
+                                  updateCartQuantity(item.product.id, Math.max(1, value));
+                                }}
+                                aria-label={`Quantity for ${item.product.name}`}
+                                className="h-8 text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                              />
+                            </div>
+                            <p className="text-sm text-muted-foreground mt-1">
                               {t('summary.itemLine', { price: displayPrice.toFixed(2), quantity: item.quantity })}
                             </p>
                           </div>
