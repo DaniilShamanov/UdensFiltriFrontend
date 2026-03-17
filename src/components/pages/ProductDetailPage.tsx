@@ -1,36 +1,78 @@
 "use client";
 
-import React, { useState } from 'react';
-import { ShoppingCart, ChevronLeft, Minus, Plus, Check, Package, Shield, Truck } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ShoppingCart, ChevronLeft, Minus, Plus, Check, Package, Shield, Truck, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { products } from '@/lib/mockData';
 import { useApp } from '@/contexts/AppContext';
 import { Link, useRouter } from '@/navigation';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 import { Input } from '@/components/ui/input';
+import { fetchJson } from '@/lib/api'; // your fetch helper
 
 interface ProductDetailPageProps {
   productId: number;
+}
+
+// Define expected product shape from your backend
+interface Product {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  wholesalePrice?: number;
+  category: string;
+  subCategory?: string;
+  image?: string;
+  inStock: boolean;
+  brand: string;
+  rating?: number;
+  reviews?: number;
 }
 
 const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
   const router = useRouter();
   const { user, addToCart } = useApp();
   const [quantity, setQuantity] = useState(1);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const t = useTranslations('productDetail');
 
-  const product = products.find(p => p.id === productId);
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        // Adjust the endpoint to match your actual catalog API
+        const data = await fetchJson<Product>(`/api/catalog/products/${productId}/`);
+        setProduct(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load product');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProduct();
+  }, [productId]);
 
-  if (!product) {
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <p>{t('loading')}</p>
+      </div>
+    );
+  }
+
+  if (error || !product) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <h2 className="text-2xl font-bold mb-4">{t('notFound.title')}</h2>
+        <p className="text-muted-foreground mb-6">{error || t('notFound.description')}</p>
         <Button onClick={() => router.push('/products')}>{t('backToProducts')}</Button>
       </div>
     );
@@ -47,13 +89,13 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
     ? product.wholesalePrice 
     : product.price;
 
-  const relatedProducts = products
-    .filter(p => p.category === product.category && p.id !== product.id)
-    .slice(0, 4);
-
-  // Generate Unsplash URL from product image search term
-  const imageUrl = `https://source.unsplash.com/800x800/?${encodeURIComponent(product.image)}`;
-  const thumbnailUrl = `https://source.unsplash.com/200x200/?${encodeURIComponent(product.image)}`;
+  // Use a fallback image if product.image is not available
+  const imageUrl = product.image
+    ? `https://source.unsplash.com/800x800/?${encodeURIComponent(product.image)}`
+    : 'https://via.placeholder.com/800';
+  const thumbnailUrl = product.image
+    ? `https://source.unsplash.com/200x200/?${encodeURIComponent(product.image)}`
+    : 'https://via.placeholder.com/200';
 
   return (
     <div className="min-h-screen bg-background py-8">
@@ -146,7 +188,6 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
                       if (Number.isNaN(value)) {
                         return;
                       }
-
                       setQuantity(Math.max(1, value));
                     }}
                     className="h-10 w-16 rounded-none border-y-0 text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
@@ -287,35 +328,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
         </Tabs>
 
         {/* Related Products */}
-        {relatedProducts.length > 0 && (
-          <div>
-            <h2 className="text-2xl font-bold mb-6">{t('relatedTitle')}</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {relatedProducts.map((p) => {
-                const relatedImageUrl = `https://source.unsplash.com/300x300/?${encodeURIComponent(p.image)}`;
-                return (
-                  <Card
-                    key={p.id}
-                    className="cursor-pointer hover:shadow-lg transition-shadow"
-                    onClick={() => router.push(`/products/${encodeURIComponent(p.id)}`)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="aspect-square bg-muted rounded-lg mb-3 overflow-hidden">
-                        <ImageWithFallback
-                          src={relatedImageUrl}
-                          alt={p.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <h3 className="font-semibold mb-2 line-clamp-2">{p.name}</h3>
-                      <div className="text-lg font-bold text-primary">€{p.price.toFixed(2)}</div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          </div>
-        )}
+        {/* Optionally, you could fetch related products from API, but for now we keep it simple */}
       </div>
     </div>
   );
