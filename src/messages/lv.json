@@ -217,7 +217,8 @@
     "quantityLabel": "Daudzums",
     "addToCart": "Pievienot grozam",
     "wholesaleBadge": "Piemērota vairumtirdzniecības cena",
-    "ratingLabel": "{rating} ({count} atsauksme | {count} atsauksmes | {count} atsauksmju)",
+    "ratingLabel": "{rating} ({count} atsauksme(s))",
+    "loading": "Ielādē preces detaļas...",
     "toast": {
       "added": "Pievienotas {count} preces grozam!"
     },

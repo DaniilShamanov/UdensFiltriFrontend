@@ -217,7 +217,8 @@
     "quantityLabel": "Quantity",
     "addToCart": "Add to Cart",
     "wholesaleBadge": "Wholesale Price Applied",
-    "ratingLabel": "{rating} ({count} review | {count} reviews)",
+    "ratingLabel": "{rating} ({count} review(s))",
+    "loading": "Loading product details...",
     "toast": {
       "added": "Added {count} item(s) to cart!"
     },

@@ -217,7 +217,8 @@
     "quantityLabel": "Количество",
     "addToCart": "Добавить в корзину",
     "wholesaleBadge": "Оптовая цена применена",
-    "ratingLabel": "{rating} ({count} отзыв | {count} отзыва | {count} отзывов)",
+    "ratingLabel": "{rating} ({count} отзыв(ов))",
+    "loading": "Загрузка деталей товара...",
     "toast": {
       "added": "Добавлено {count} шт. в корзину!"
     },
