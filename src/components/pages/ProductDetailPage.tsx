@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Star, ShoppingCart, ChevronLeft, Minus, Plus, Check, Package, Shield, Truck } from 'lucide-react';
+import { ShoppingCart, ChevronLeft, Minus, Plus, Check, Package, Shield, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +13,7 @@ import { Link, useRouter } from '@/navigation';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
+import { Input } from '@/components/ui/input';
 
 interface ProductDetailPageProps {
   productId: number;
@@ -103,23 +104,6 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
                 )}
               </div>
               <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="flex items-center gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`h-5 w-5 ${
-                        i < Math.floor(product.rating)
-                          ? 'fill-accent text-accent'
-                          : 'text-gray-300'
-                      }`}
-                    />
-                  ))}
-                </div>
-                <span className="text-muted-foreground">
-                  {t('ratingLabel', { rating: product.rating, count: product.reviews })}
-                </span>
-              </div>
             </div>
 
             <Separator />
@@ -153,7 +137,20 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
                   >
                     <Minus className="h-4 w-4" />
                   </Button>
-                  <span className="w-16 text-center font-semibold">{quantity}</span>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={quantity}
+                    onChange={(event) => {
+                      const value = parseInt(event.target.value, 10);
+                      if (Number.isNaN(value)) {
+                        return;
+                      }
+
+                      setQuantity(Math.max(1, value));
+                    }}
+                    className="h-10 w-16 rounded-none border-y-0 text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                  />
                   <Button
                     variant="ghost"
                     size="icon"

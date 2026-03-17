@@ -9,6 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { useApp } from '@/contexts/AppContext';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 import { useTranslations } from 'next-intl';
+import { Input } from '@/components/ui/input';
 
 const CartPage: React.FC = () => {
   const router = useRouter();
@@ -99,9 +100,20 @@ const CartPage: React.FC = () => {
                             >
                               <Minus className="h-3 w-3" />
                             </Button>
-                            <span className="w-12 text-center font-medium text-sm">
-                              {item.quantity}
-                            </span>
+                            <Input
+                              type="number"
+                              min={1}
+                              value={item.quantity}
+                              onChange={(event) => {
+                                const value = parseInt(event.target.value, 10);
+                                if (Number.isNaN(value)) {
+                                  return;
+                                }
+
+                                updateCartQuantity(item.product.id, Math.max(1, value));
+                              }}
+                              className="h-8 w-14 rounded-none border-y-0 text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                            />
                             <Button
                               variant="ghost"
                               size="icon"
