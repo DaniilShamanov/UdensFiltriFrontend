@@ -169,7 +169,8 @@
       "itemsCount": "{count} товар(ов)",
       "orderItems": "Товары в заказе",
       "quantityLabel": "Количество: {quantity} × €{price}",
-      "shippingAddress": "Адрес доставки"
+      "shippingAddress": "Адрес доставки",
+      "deliveryMethod": "Метод доставки"
     }
   },
   "payment": {
@@ -199,6 +200,7 @@
     "orderDate": "Дата заказа",
     "orderTotal": "Сумма заказа",
     "shippingAddress": "Адрес доставки",
+    "deliveryMethod": "Метод доставки",
     "orderItems": "{count} товар(ов)",
     "quantityLabel": "Количество: {quantity}",
     "tryAgain": "Попробовать снова",

@@ -169,7 +169,8 @@
       "itemsCount": "{count} prece(s)",
       "orderItems": "Pasūtījuma preces",
       "quantityLabel": "Daudzums: {quantity} × €{price}",
-      "shippingAddress": "Piegādes adrese"
+      "shippingAddress": "Piegādes adrese",
+      "deliveryMethod": "Piegādes metode"
     }
   },
   "payment": {
@@ -199,6 +200,7 @@
     "orderDate": "Pasūtījuma datums",
     "orderTotal": "Pasūtījuma summa",
     "shippingAddress": "Piegādes adrese",
+    "deliveryMethod": "Piegādes metode",
     "orderItems": "{count} prece(s)",
     "quantityLabel": "Daudzums: {quantity}",
     "tryAgain": "Mēģināt vēlreiz",

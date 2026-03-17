@@ -328,6 +328,18 @@ const OrdersPage: React.FC = () => {
                           {order.customer_address}
                         </p>
                       </div>
+
+                      <Separator className="my-4" />
+
+                      {/* Delivery Option */}
+                      {order.delivery_option && (
+                        <div>
+                          <h4 className="font-semibold mb-2">{t('orderCard.deliveryMethod')}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {order.delivery_option.name} – €{(order.delivery_option.price_cents / 100).toFixed(2)}
+                          </p>
+                        </div>
+                      )}
                     </CardContent>
                   )}
                 </Card>

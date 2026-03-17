@@ -169,7 +169,8 @@
       "itemsCount": "{count} item(s)",
       "orderItems": "Order Items",
       "quantityLabel": "Quantity: {quantity} × €{price}",
-      "shippingAddress": "Shipping Address"
+      "shippingAddress": "Shipping Address",
+      "deliveryMethod": "Delivery Method"
     }
   },
   "payment": {
@@ -198,6 +199,7 @@
     "orderNumber": "Order Number",
     "orderDate": "Order Date",
     "orderTotal": "Order Total",
+    "deliveryMethod": "Delivery Method",
     "shippingAddress": "Shipping Address",
     "orderItems": "{count} Order Item(s)",
     "quantityLabel": "Quantity: {quantity}",
