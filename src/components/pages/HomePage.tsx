@@ -2,17 +2,35 @@
 
 import React from 'react';
 import { useRouter } from '@/navigation';
-import { Star, Shield, Truck, Headphones, ArrowRight, CheckCircle } from 'lucide-react';
+import { Shield, Truck, Headphones, ArrowRight, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { categories, products } from '@/lib/mockData';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 import { useTranslations } from 'next-intl';
+import { getCategories, getProducts, productImageUrl } from '@/lib/catalog';
+import { Category, Product } from '@/lib/types';
 
 const HomePage: React.FC = () => {
   const router = useRouter();
-  const featuredProducts = products.slice(0, 4);
+  const [categories, setCategories] = React.useState<Category[]>([]);
+  const [featuredProducts, setFeaturedProducts] = React.useState<Product[]>([]);
   const t = useTranslations('home');
+
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const [apiCategories, apiProducts] = await Promise.all([
+          getCategories(),
+          getProducts(new URLSearchParams({ page_size: '4' })),
+        ]);
+        setCategories(apiCategories);
+        setFeaturedProducts(apiProducts.results.slice(0, 4));
+      } catch {
+        setCategories([]);
+        setFeaturedProducts([]);
+      }
+    })();
+  }, []);
 
   return (
     <div className="min-h-screen overflow-x-hidden">
@@ -110,10 +128,10 @@ const HomePage: React.FC = () => {
             <Card className="text-center border border-primary/10 bg-background/90 shadow-md transition-shadow hover:shadow-xl">
               <CardContent className="p-6">
                 <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Star className="h-8 w-8 text-primary" />
+                  <CheckCircle className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="font-semibold mb-2">{t('features.rating.title')}</h3>
-                <p className="text-sm text-muted-foreground">{t('features.rating.description')}</p>
+                <h3 className="font-semibold mb-2">{t('qualityGuaranteed')}</h3>
+                <p className="text-sm text-muted-foreground">{t('featured.description')}</p>
               </CardContent>
             </Card>
           </div>
@@ -226,6 +244,7 @@ const HomePage: React.FC = () => {
                   <CardContent className="p-0">
                     <div className="aspect-square bg-muted overflow-hidden rounded-t-lg">
                       <ImageWithFallback
+                        src={productImageUrl(product.image)}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
