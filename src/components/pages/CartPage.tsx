@@ -54,8 +54,6 @@ const CartPage: React.FC = () => {
                 ? item.product.wholesalePrice
                 : item.product.price;
 
-              const cartImageUrl = `https://source.unsplash.com/200x200/?${encodeURIComponent(item.product.image)}`;
-
               return (
                 <Card key={item.product.id}>
                   <CardContent className="p-4 md:p-6">
@@ -65,7 +63,6 @@ const CartPage: React.FC = () => {
                         onClick={() => router.push(`/products/${encodeURIComponent(item.product.id)}`)}
                       >
                         <ImageWithFallback
-                          src={cartImageUrl}
                           alt={item.product.name}
                           className="w-full h-full object-cover"
                         />

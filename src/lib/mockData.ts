@@ -80,7 +80,6 @@ export const products: Product[] = [
     inStock: true,
     brand: 'AquaPure',
     rating: 4.8,
-    reviews: 156,
   },
   {
     id: 2,
@@ -94,7 +93,6 @@ export const products: Product[] = [
     inStock: true,
     brand: 'CrystalClear',
     rating: 4.6,
-    reviews: 203,
   },
   {
     id: 3,
@@ -108,7 +106,6 @@ export const products: Product[] = [
     inStock: true,
     brand: 'PureFlow',
     rating: 4.5,
-    reviews: 89,
   },
   {
     id: 4,
@@ -122,7 +119,6 @@ export const products: Product[] = [
     inStock: true,
     brand: 'AquaBrite',
     rating: 4.3,
-    reviews: 421,
   },
   {
     id: 5,
@@ -136,7 +132,6 @@ export const products: Product[] = [
     inStock: true,
     brand: 'FilterPro',
     rating: 4.7,
-    reviews: 312,
   },
   {
     id: 6,
@@ -150,7 +145,6 @@ export const products: Product[] = [
     inStock: true,
     brand: 'AquaTech',
     rating: 4.9,
-    reviews: 178,
   },
   {
     id: 7,
@@ -164,7 +158,6 @@ export const products: Product[] = [
     inStock: true,
     brand: 'AquaParts',
     rating: 4.4,
-    reviews: 95,
   },
   {
     id: 8,
@@ -178,7 +171,6 @@ export const products: Product[] = [
     inStock: true,
     brand: 'ConnectPro',
     rating: 4.6,
-    reviews: 267,
   },
   {
     id: 9,
@@ -192,7 +184,6 @@ export const products: Product[] = [
     inStock: true,
     brand: 'SmartSoft',
     rating: 4.7,
-    reviews: 134,
   },
   {
     id: 10,
@@ -206,7 +197,6 @@ export const products: Product[] = [
     inStock: true,
     brand: 'EcoSoft',
     rating: 4.4,
-    reviews: 87,
   },
   {
     id: 11,
@@ -220,7 +210,6 @@ export const products: Product[] = [
     inStock: true,
     brand: 'TravelSoft',
     rating: 4.5,
-    reviews: 62,
   },
   {
     id: 12,
@@ -234,7 +223,6 @@ export const products: Product[] = [
     inStock: true,
     brand: 'PureMax',
     rating: 4.6,
-    reviews: 145,
   },
   {
     id: 13,
@@ -248,7 +236,6 @@ export const products: Product[] = [
     inStock: true,
     brand: 'AquaElite',
     rating: 4.8,
-    reviews: 289,
   },
   {
     id: 14,
@@ -262,7 +249,6 @@ export const products: Product[] = [
     inStock: true,
     brand: 'UltraPure',
     rating: 4.9,
-    reviews: 198,
   },
   {
     id: 15,
@@ -276,7 +262,6 @@ export const products: Product[] = [
     inStock: true,
     brand: 'CommercialPro',
     rating: 4.8,
-    reviews: 76,
   },
   {
     id: 16,
@@ -290,7 +275,6 @@ export const products: Product[] = [
     inStock: true,
     brand: 'FaucetPro',
     rating: 4.5,
-    reviews: 112,
   },
   {
     id: 17,
@@ -304,7 +288,6 @@ export const products: Product[] = [
     inStock: true,
     brand: 'TankMaster',
     rating: 4.6,
-    reviews: 143,
   },
   {
     id: 18,
@@ -318,7 +301,6 @@ export const products: Product[] = [
     inStock: true,
     brand: 'PumpTech',
     rating: 4.7,
-    reviews: 98,
   },
   {
     id: 19,
@@ -332,7 +314,6 @@ export const products: Product[] = [
     inStock: true,
     brand: 'ToolPro',
     rating: 4.4,
-    reviews: 156,
   },
   {
     id: 20,
@@ -346,7 +327,6 @@ export const products: Product[] = [
     inStock: true,
     brand: 'TestPro',
     rating: 4.6,
-    reviews: 234,
   },
   {
     id: 21,
@@ -360,7 +340,6 @@ export const products: Product[] = [
     inStock: true,
     brand: 'AquaMeter',
     rating: 4.7,
-    reviews: 312,
   },
   {
     id: 22,
@@ -374,7 +353,6 @@ export const products: Product[] = [
     inStock: true,
     brand: 'pHPro',
     rating: 4.5,
-    reviews: 187,
   },
 ];
 

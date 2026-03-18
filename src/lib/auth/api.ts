@@ -125,7 +125,7 @@ export const authApi = {
     });
     await handleResponse(res);
   },
-
+  
   resetPassword: async (input: { new_password: string; code: string; email: string }) => {
     const res = await fetch(apiUrl(AUTH_ENDPOINTS.resetPassword), {
       method: 'POST',

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Link } from '@/navigation';
 import { Search, SlidersHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -17,10 +17,31 @@ import {
   SelectTrigger
 } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { products, categories } from '@/lib/mockData';
 import { useApp } from '@/contexts/AppContext';
 import ProductCard from '../ProductCard';
 import { useTranslations } from 'next-intl';
+import { fetchJson } from '@/lib/api';
+
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  wholesalePrice?: number;
+  image?: string;
+  brand: string;
+  inStock: boolean;
+  description?: string;
+  category?: string;
+  subCategory?: string;
+  rating?: number;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  slug?: string;
+  subCategories?: Category[];
+}
 
 function ProductsContent() {
   const MAX_PRICE = 5000;
@@ -28,31 +49,140 @@ function ProductsContent() {
   const categoryId = searchParams.get('categoryId') || undefined;
   const subCategoryId = searchParams.get('subCategoryId') || undefined;
   const { user } = useApp();
+
+  // Products state (current page)
+  const [products, setProducts] = useState<Product[]>([]);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+
+  // Categories for breadcrumb
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  // Full list of brands (for filter)
+  const [brandsList, setBrandsList] = useState<string[]>([]);
+  const [brandsLoading, setBrandsLoading] = useState(true);
+
+  // Filter state (sent to backend)
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('featured');
-  const [range, setRange] = React.useState({ min: 0, max: MAX_PRICE });
+  const [range, setRange] = useState({ min: 0, max: MAX_PRICE });
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [inStockOnly, setInStockOnly] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+
+  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 20;
 
   const t = useTranslations('products');
 
+  // Fetch categories once
   useEffect(() => {
-    const media = window.matchMedia('(max-width: 1023px)');
-    const update = () => setIsMobile(media.matches);
-    update();
-    media.addEventListener('change', update);
-    return () => media.removeEventListener('change', update);
+    const fetchCategories = async () => {
+      try {
+        const data = await fetchJson<Category[]>('/api/catalog/categories/');
+        setCategories(data);
+      } catch (error) {
+        console.error('Failed to fetch categories', error);
+      }
+    };
+    fetchCategories();
   }, []);
 
+  // Fetch all brands for filter (adjust endpoint to your backend)
   useEffect(() => {
-    const media = window.matchMedia('(max-width: 1023px)');
-    const update = () => setIsMobile(media.matches);
-    update();
-    media.addEventListener('change', update);
-    return () => media.removeEventListener('change', update);
+    const fetchBrands = async () => {
+      try {
+        // Example endpoint – replace with your actual endpoint
+        const data = await fetchJson<string[]>('/api/catalog/brands/');
+        setBrandsList(data.sort());
+      } catch (error) {
+        console.error('Failed to fetch brands', error);
+        // Fallback to empty list if endpoint missing
+        setBrandsList([]);
+      } finally {
+        setBrandsLoading(false);
+      }
+    };
+    fetchBrands();
   }, []);
+
+  // Fetch products when filters/page change
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const params = new URLSearchParams({
+          page: currentPage.toString(),
+          page_size: pageSize.toString(),
+        });
+
+        if (categoryId) params.append('category', categoryId);
+        if (subCategoryId) params.append('subcategory', subCategoryId);
+        if (searchQuery) params.append('search', searchQuery);
+
+        // Sorting mapping – adjust to your backend
+        if (sortBy !== 'featured') {
+          const sortMap: Record<string, string> = {
+            'price-low': 'price',
+            'price-high': '-price',
+            rating: '-rating',
+            name: 'name',
+          };
+          params.append('ordering', sortMap[sortBy] || '');
+        }
+
+        if (selectedBrands.length > 0) {
+          params.append('brand', selectedBrands.join(','));
+        }
+        if (inStockOnly) params.append('in_stock', 'true');
+        if (range.min > 0) params.append('min_price', range.min.toString());
+        if (range.max < MAX_PRICE) params.append('max_price', range.max.toString());
+
+        const url = `/api/catalog/products/?${params.toString()}`;
+        const data = await fetchJson<{
+          count: number;
+          next: string | null;
+          previous: string | null;
+          results: Product[];
+        }>(url);
+
+        setProducts(data.results);
+        setTotalProducts(data.count);
+      } catch (err) {
+        setFetchError(err instanceof Error ? err.message : 'Failed to load products');
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [
+    currentPage,
+    categoryId,
+    subCategoryId,
+    searchQuery,
+    sortBy,
+    selectedBrands,
+    inStockOnly,
+    range.min,
+    range.max,
+  ]);
+
+  // Reset to page 1 when any filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    searchQuery,
+    sortBy,
+    selectedBrands,
+    inStockOnly,
+    range.min,
+    range.max,
+    categoryId,
+    subCategoryId,
+  ]);
 
   const resetFilters = () => {
     setRange({ min: 0, max: MAX_PRICE });
@@ -61,111 +191,34 @@ function ProductsContent() {
     setSearchQuery('');
   };
 
-  // Get unique brands
-  const brands = useMemo(() => {
-    return Array.from(new Set(products.map(p => p.brand))).sort();
-  }, []);
-
-  // Filter products
-  const filteredProducts = useMemo(() => {
-    let result = [...products];
-
-    // Category filter
-    if (categoryId) {
-      result = result.filter(p => p.category === categoryId);
-    }
-
-    // SubCategory filter
-    if (subCategoryId) {
-      result = result.filter(p => p.subCategory === subCategoryId);
-    }
-
-    // Search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        p =>
-          p.name.toLowerCase().includes(query) ||
-          p.description.toLowerCase().includes(query) ||
-          p.brand.toLowerCase().includes(query)
-      );
-    }
-
-    // Price filter
-    result = result.filter(p => p.price >= range.min && p.price <= range.max);
-
-    // Brand filter
-    if (selectedBrands.length > 0) {
-      result = result.filter(p => selectedBrands.includes(p.brand));
-    }
-
-    // Stock filter
-    if (inStockOnly) {
-      result = result.filter(p => p.inStock);
-    }
-
-    // Sort
-    switch (sortBy) {
-      case 'price-low':
-        result.sort((a, b) => a.price - b.price);
-        break;
-      case 'price-high':
-        result.sort((a, b) => b.price - a.price);
-        break;
-      case 'rating':
-        result.sort((a, b) => b.rating - a.rating);
-        break;
-      case 'name':
-        result.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      default:
-        // Featured - keep original order
-        break;
-    }
-
-    return result;
-  }, [searchQuery, sortBy, range, selectedBrands, inStockOnly, categoryId, subCategoryId]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, sortBy, range, selectedBrands, inStockOnly, categoryId, subCategoryId]);
-
-  const pageSize = isMobile ? 10 : 20;
-  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize));
-  const safePage = Math.min(currentPage, totalPages);
-  const paginatedProducts = useMemo(() => {
-    const start = (safePage - 1) * pageSize;
-    return filteredProducts.slice(start, start + pageSize);
-  }, [filteredProducts, safePage, pageSize]);
-
   const toggleBrand = (brand: string) => {
     setSelectedBrands(prev =>
       prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]
     );
   };
 
+  // Find current category/subcategory for breadcrumb
   const currentCategory = categories.find(c => c.id === categoryId);
-  const currentSubCategory = currentCategory?.subCategories.find(s => s.id === subCategoryId);
+  const currentSubCategory = currentCategory?.subCategories?.find(s => s.id === subCategoryId);
 
   const setMinPrice = (value: string) => {
-    const parsedValue = Number(value);
-    setRange(prev => {
-      const min = Number.isNaN(parsedValue) ? 0 : Math.max(0, Math.min(parsedValue, prev.max));
-
-      return { ...prev, min };
-    });
+    const parsed = Number(value);
+    setRange(prev => ({
+      ...prev,
+      min: isNaN(parsed) ? 0 : Math.max(0, Math.min(parsed, prev.max)),
+    }));
   };
 
   const setMaxPrice = (value: string) => {
-    const parsedValue = Number(value);
-    setRange(prev => {
-      const max = Number.isNaN(parsedValue)
-        ? prev.max
-        : Math.min(MAX_PRICE, Math.max(parsedValue, prev.min));
-
-      return { ...prev, max };
-    });
+    const parsed = Number(value);
+    setRange(prev => ({
+      ...prev,
+      max: isNaN(parsed) ? prev.max : Math.min(MAX_PRICE, Math.max(parsed, prev.min)),
+    }));
   };
+
+  const totalPages = Math.ceil(totalProducts / pageSize);
+  const safePage = Math.min(currentPage, totalPages);
 
   const FilterSection = () => (
     <div className="space-y-6">
@@ -178,43 +231,49 @@ function ProductsContent() {
             min={0}
             max={MAX_PRICE}
             value={range.min}
-            onChange={(event) => setMinPrice(event.target.value)}
+            onChange={e => setMinPrice(e.target.value)}
             placeholder="Min €"
             className="flex-1"
           />
-          <span className="text-muted-foreground">–</span> {/* en dash */}
+          <span className="text-muted-foreground">–</span>
           <Input
             type="number"
             min={0}
             max={MAX_PRICE}
             value={range.max}
-            onChange={(event) => setMaxPrice(event.target.value)}
+            onChange={e => setMaxPrice(e.target.value)}
             placeholder="Max €"
             className="flex-1"
           />
         </div>
       </div>
 
-      {/* Brands */}
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <Label className="font-semibold">{t('filters.brands')}</Label>
-        </div>
-        <div className="space-y-2">
-          {brands.map(brand => (
-            <div key={brand} className="flex items-center gap-2">
-              <Checkbox
-                id={`brand-${brand}`}
-                checked={selectedBrands.includes(brand)}
-                onCheckedChange={() => toggleBrand(brand)}
-              />
-              <Label htmlFor={`brand-${brand}`} className="cursor-pointer font-normal">
-                {brand}
-              </Label>
+      {/* Brands – from full list */}
+      {brandsList.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <Label className="font-semibold">{t('filters.brands')}</Label>
+          </div>
+          {brandsLoading ? (
+            <p className="text-sm text-muted-foreground">Loading brands...</p>
+          ) : (
+            <div className="space-y-2">
+              {brandsList.map(brand => (
+                <div key={brand} className="flex items-center gap-2">
+                  <Checkbox
+                    id={`brand-${brand}`}
+                    checked={selectedBrands.includes(brand)}
+                    onCheckedChange={() => toggleBrand(brand)}
+                  />
+                  <Label htmlFor={`brand-${brand}`} className="cursor-pointer font-normal">
+                    {brand}
+                  </Label>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
         </div>
-      </div>
+      )}
 
       {/* Availability */}
       <div>
@@ -225,7 +284,7 @@ function ProductsContent() {
           <Checkbox
             id="in-stock"
             checked={inStockOnly}
-            onCheckedChange={(checked) => setInStockOnly(checked as boolean)}
+            onCheckedChange={checked => setInStockOnly(checked as boolean)}
           />
           <Label htmlFor="in-stock" className="cursor-pointer font-normal">
             {t('filters.inStockOnly')}
@@ -243,6 +302,9 @@ function ProductsContent() {
       </Button>
     </div>
   );
+
+  if (loading && products.length === 0) return <p>{t('loading')}</p>;
+  if (fetchError) return <p className="text-destructive">{fetchError}</p>;
 
   return (
     <div className="relative min-h-screen bg-background py-8">
@@ -313,15 +375,12 @@ function ProductsContent() {
 
               {/* Sort */}
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-                {/* Item count - on mobile it appears below sort controls (order-2), on desktop on the left (order-1) */}
                 <p className="text-muted-foreground order-2 md:order-1">
-                  {t('showingCount', { count: filteredProducts.length })}
+                  {t('showingCount', { count: totalProducts })}
                 </p>
-
-                {/* Sort controls container - on mobile appears above count (order-1), on desktop on the right (order-2) */}
                 <div className="flex items-center gap-2 order-1 md:order-2">
                   <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
-                    {t('sort.placeholder')} {/* e.g., "Sort by:" */}
+                    {t('sort.placeholder')}
                   </span>
                   <Select value={sortBy} onValueChange={setSortBy}>
                     <SelectTrigger className="w-full cursor-pointer md:w-[200px]" />
@@ -354,8 +413,8 @@ function ProductsContent() {
           </aside>
 
           {/* Products Grid */}
-          <div>           
-            {filteredProducts.length === 0 ? (
+          <div>
+            {products.length === 0 ? (
               <Card className="border-destructive/20 bg-card/95 p-12 text-center shadow-sm">
                 <p className="text-muted-foreground mb-4">{t('noProductsFound')}</p>
                 <Button
@@ -369,7 +428,7 @@ function ProductsContent() {
             ) : (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {paginatedProducts.map(product => (
+                  {products.map(product => (
                     <ProductCard
                       key={product.id}
                       product={product}
@@ -383,17 +442,17 @@ function ProductsContent() {
                     <Button
                       variant="outline"
                       size="icon"
-                      disabled={safePage === 1}
-                      onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                       aria-label="Previous page"
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
                     <div className="flex items-center gap-1">
-                      {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((page) => (
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                         <Button
                           key={page}
-                          variant={page === safePage ? 'default' : 'outline'}
+                          variant={page === currentPage ? 'default' : 'outline'}
                           size="sm"
                           className="min-w-9"
                           onClick={() => setCurrentPage(page)}
@@ -405,8 +464,8 @@ function ProductsContent() {
                     <Button
                       variant="outline"
                       size="icon"
-                      disabled={safePage === totalPages}
-                      onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                      disabled={currentPage === totalPages}
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                       aria-label="Next page"
                     >
                       <ChevronRight className="h-4 w-4" />

@@ -217,7 +217,6 @@ const HomePage: React.FC = () => {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {featuredProducts.map((product) => {
-              const productImageUrl = `https://source.unsplash.com/400x400/?${encodeURIComponent(product.image)}`;
               return (
                 <Card
                   key={product.id}
@@ -227,7 +226,6 @@ const HomePage: React.FC = () => {
                   <CardContent className="p-0">
                     <div className="aspect-square bg-muted overflow-hidden rounded-t-lg">
                       <ImageWithFallback
-                        src={productImageUrl}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
@@ -235,21 +233,6 @@ const HomePage: React.FC = () => {
                     <div className="p-4">
                       <div className="text-sm text-muted-foreground mb-1">{product.brand}</div>
                       <h3 className="font-semibold mb-2 line-clamp-2 h-12">{product.name}</h3>
-                      <div className="flex items-center gap-1 mb-2">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-4 w-4 ${
-                              i < Math.floor(product.rating)
-                                ? 'fill-accent text-accent'
-                                : 'text-gray-300'
-                            }`}
-                          />
-                        ))}
-                        <span className="text-sm text-muted-foreground ml-1">
-                          ({product.reviews})
-                        </span>
-                      </div>
                       <div className="flex items-baseline gap-2">
                         <span className="text-lg font-bold text-primary">€{product.price}</span>
                         {product.wholesalePrice && (
