@@ -20,28 +20,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { useApp } from '@/contexts/AppContext';
 import ProductCard from '../ProductCard';
 import { useTranslations } from 'next-intl';
-import { fetchJson } from '@/lib/api';
-
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  wholesalePrice?: number;
-  image?: string;
-  brand: string;
-  inStock: boolean;
-  description?: string;
-  category?: string;
-  subCategory?: string;
-  rating?: number;
-}
-
-interface Category {
-  id: string;
-  name: string;
-  slug?: string;
-  subCategories?: Category[];
-}
+import { getBrands, getCategories, getProducts } from '@/lib/catalog';
+import { Category, Product } from '@/lib/types';
 
 function ProductsContent() {
   const MAX_PRICE = 5000;
@@ -80,7 +60,7 @@ function ProductsContent() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const data = await fetchJson<Category[]>('/api/catalog/categories/');
+        const data = await getCategories();
         setCategories(data);
       } catch (error) {
         console.error('Failed to fetch categories', error);
@@ -93,9 +73,8 @@ function ProductsContent() {
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        // Example endpoint – replace with your actual endpoint
-        const data = await fetchJson<string[]>('/api/catalog/brands/');
-        setBrandsList(data.sort());
+        const data = await getBrands();
+        setBrandsList(data);
       } catch (error) {
         console.error('Failed to fetch brands', error);
         // Fallback to empty list if endpoint missing
@@ -126,10 +105,12 @@ function ProductsContent() {
           const sortMap: Record<string, string> = {
             'price-low': 'price',
             'price-high': '-price',
-            rating: '-rating',
             name: 'name',
           };
-          params.append('ordering', sortMap[sortBy] || '');
+          const ordering = sortMap[sortBy];
+          if (ordering) {
+            params.append('ordering', ordering);
+          }
         }
 
         if (selectedBrands.length > 0) {
@@ -139,14 +120,7 @@ function ProductsContent() {
         if (range.min > 0) params.append('min_price', range.min.toString());
         if (range.max < MAX_PRICE) params.append('max_price', range.max.toString());
 
-        const url = `/api/catalog/products/?${params.toString()}`;
-        const data = await fetchJson<{
-          count: number;
-          next: string | null;
-          previous: string | null;
-          results: Product[];
-        }>(url);
-
+        const data = await getProducts(params);
         setProducts(data.results);
         setTotalProducts(data.count);
       } catch (err) {
@@ -218,7 +192,6 @@ function ProductsContent() {
   };
 
   const totalPages = Math.ceil(totalProducts / pageSize);
-  const safePage = Math.min(currentPage, totalPages);
 
   const FilterSection = () => (
     <div className="space-y-6">
@@ -388,7 +361,6 @@ function ProductsContent() {
                       <SelectItem value="featured">{t('sort.featured')}</SelectItem>
                       <SelectItem value="price-low">{t('sort.priceLowHigh')}</SelectItem>
                       <SelectItem value="price-high">{t('sort.priceHighLow')}</SelectItem>
-                      <SelectItem value="rating">{t('sort.highestRated')}</SelectItem>
                       <SelectItem value="name">{t('sort.nameAZ')}</SelectItem>
                     </SelectContent>
                   </Select>

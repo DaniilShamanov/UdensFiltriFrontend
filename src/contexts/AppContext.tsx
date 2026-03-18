@@ -2,8 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { CartItem, Order, User } from "@/lib/types";
-import { products } from "@/lib/mockData";
+import { CartItem, Order, Product, User } from "@/lib/types";
 import { authApi } from "@/lib/auth/api";
 import { logClientEvent } from "@/lib/clientLog";
 import { ApiError } from "@/lib/api";
@@ -26,7 +25,7 @@ interface AppContextType {
   changePassword: (input: { new_password: string; code?: string }) => Promise<void>;
 
   cart: CartItem[];
-  addToCart: (productId: number, quantity?: number) => void;
+  addToCart: (product: Product, quantity?: number) => void;
   removeFromCart: (productId: number) => void;
   updateCartQuantity: (productId: number, quantity: number) => void;
   clearCart: () => void;
@@ -122,14 +121,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setOrders(savedOrders ? JSON.parse(savedOrders) : []);
   }, [user?.id]);
 
-  const addToCart = (productId: number, quantity: number = 1) => {
-    const product = products.find((p) => p.id === productId);
-    if (!product) return;
-
+  const addToCart = (product: Product, quantity: number = 1) => {
     setCart((prev) => {
-      const existing = prev.find((i) => i.product.id === productId);
+      const existing = prev.find((i) => i.product.id === product.id);
       if (existing) {
-        return prev.map((i) => (i.product.id === productId ? { ...i, quantity: i.quantity + quantity } : i));
+        return prev.map((i) => (i.product.id === product.id ? { ...i, quantity: i.quantity + quantity } : i));
       }
       return [...prev, { product, quantity }];
     });
