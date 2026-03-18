@@ -11,6 +11,7 @@ import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 import { toast } from 'sonner';
 import { Link } from '@/navigation';
 import { Input } from '@/components/ui/input';
+import { productImageUrl } from '@/lib/catalog';
 
 interface ProductCardProps {
   product: Product;
@@ -24,7 +25,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, showWholesalePrice }
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    addToCart(product.id, quantity);
+    addToCart(product, quantity);
     toast.success(`Added ${quantity} item${quantity > 1 ? 's' : ''} to cart!`, {
       description: product.name,
     });
@@ -44,6 +45,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, showWholesalePrice }
         <CardContent className="p-0 flex-1 flex flex-col">
           <div className="relative aspect-square bg-muted overflow-hidden">
             <ImageWithFallback
+              src={productImageUrl(product.image)}
               alt={product.name}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
             />
