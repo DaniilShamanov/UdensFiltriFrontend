@@ -1,96 +1,127 @@
-# Plumbing Web App (Next.js App Router + next-intl)
+# Udens Filtri Frontend (Next.js + next-intl)
 
-This project is a create-next-app style Next.js (App Router) frontend.
+Production-ready Next.js storefront frontend for Udens Filtri with API-first data loading and cookie-based auth integration.
 
-## Tech
-- Next.js (App Router)
-- TailwindCSS
-- next-intl (lv/ru first, en placeholder)
-- Cookie-based auth scaffold (JWT in HttpOnly cookies: access/refresh) prepared for Django backend
+## Tech stack
 
-## Getting started
+- Next.js (App Router, standalone output)
+- TypeScript
+- Tailwind CSS
+- `next-intl` localization (`lv`, `ru`, `en`)
+- Cookie-based authentication (frontend prepared for Django backend)
 
-1) Copy env template and set your API base URL:
+## Prerequisites
+
+- Node.js 20+
+- npm 10+
+- Docker + Docker Compose (for containerized run)
+
+## Environment variables
+
+Copy the template and adjust values:
 
 ```bash
 cp .env.example .env.local
 ```
 
-2) Install deps and run:
+Important variable:
+
+- `NEXT_PUBLIC_API_BASE_URL` — backend base URL used by the frontend API client.
+
+Examples:
+
+- Local backend on host machine: `http://localhost:8000`
+- Backend service in the same Docker network: `http://backend:8000`
+
+## Local development
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open http://localhost:3000
+App runs at: `http://localhost:3000`
 
-## Internationalization
+## Production build (without Docker)
 
-Locales:
-- Latvian: `/lv`
-- Russian: `/ru`
-- English (placeholder): `/en`
+```bash
+npm run build
+npm run start
+```
 
-Messages live in `src/messages/*.json`.
+## Docker integration
 
-## Backend integration (Django)
+This repository includes:
 
-The API wrapper lives in:
-- `src/lib/api.ts`
+- `Dockerfile` multi-stage production build
+- `docker-compose.yml` service definition
 
-It is configured to:
-- send cookies (`credentials: 'include'`)
-- automatically attach CSRF header (`X-CSRFToken`) when a `csrftoken` cookie exists
-
-Auth endpoint placeholders are in:
-- `src/lib/auth/api.ts`
-
-Adjust endpoint paths to match your Django/DRF setup.
-
-## Protected routes
-
-Protected paths (client + middleware):
-- `/account`
-- `/orders`
-- `/checkout`
-- `/payment`
-
-Client-side guard component:
-- `src/components/auth/ClientProtected.tsx`
-
-## SEO
-
-- `src/app/sitemap.ts`
-- `src/app/robots.ts`
-- page metadata is set in `src/app/[locale]/layout.tsx`
-
-
-
-## Run with Docker (production-like)
-
-1) Copy environment template:
+### 1) Configure env for Docker
 
 ```bash
 cp .env.example .env
 ```
 
-2) Build and start:
+Set `NEXT_PUBLIC_API_BASE_URL` in `.env`.
+
+If backend runs in another container on the same Docker network, use the backend service name, for example:
+
+```env
+NEXT_PUBLIC_API_BASE_URL=http://backend:8000
+```
+
+### 2) Build and start container
 
 ```bash
 docker compose up -d --build
 ```
 
-3) Open:
+### 3) Open app
 
-- http://localhost:3000
+- `http://localhost:3000`
 
-Stop containers:
+### 4) Stop
 
 ```bash
 docker compose down
 ```
 
-## Production branch
+## Connecting frontend container to backend container
 
-A `production-ready` branch is intended to contain deployment-focused updates (Docker, env template, standalone build output).
+`docker-compose.yml` attaches the frontend to a named network (`udens-filtri-network` by default).
+
+Use one of these patterns:
+
+1. **Same compose project (recommended)**
+   - Run backend and frontend in one compose file.
+   - Set `NEXT_PUBLIC_API_BASE_URL` to `http://backend:8000` (where `backend` is backend service name).
+
+2. **Different compose projects, shared network**
+   - Reuse the same network name (`APP_NETWORK`) in both projects.
+   - Ensure backend service is discoverable by its container/service DNS name.
+
+3. **Backend on host machine**
+   - Set API base URL to `http://host.docker.internal:8000`.
+   - `extra_hosts` is already configured in `docker-compose.yml`.
+
+## API integration notes
+
+- Core request helper: `src/lib/api.ts`
+- Catalog and data mapping helpers: `src/lib/catalog.ts`
+- Auth API: `src/lib/auth/api.ts`
+
+The frontend sends cookies (`credentials: include`) and supports CSRF header forwarding for compatible backends.
+
+## Internationalization
+
+Messages are in:
+
+- `src/messages/lv.json`
+- `src/messages/ru.json`
+- `src/messages/en.json`
+
+Locale routes:
+
+- `/lv`
+- `/ru`
+- `/en`

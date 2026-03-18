@@ -9,7 +9,6 @@ export interface Product {
   image?: string;
   inStock: boolean;
   brand: string;
-  rating?: number;
 }
 
 export interface CartItem {

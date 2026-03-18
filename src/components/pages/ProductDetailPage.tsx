@@ -1,38 +1,23 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, ChevronLeft, Minus, Plus, Check, Package, Shield, Truck, Star } from 'lucide-react';
+import { ShoppingCart, ChevronLeft, Minus, Plus, Check, Package, Shield, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useApp } from '@/contexts/AppContext';
-import { Link, useRouter } from '@/navigation';
+import { useRouter } from '@/navigation';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 import { Input } from '@/components/ui/input';
-import { fetchJson } from '@/lib/api'; // your fetch helper
+import { getProduct, productImageUrl } from '@/lib/catalog';
+import { Product } from '@/lib/types';
 
 interface ProductDetailPageProps {
   productId: number;
-}
-
-// Define expected product shape from your backend
-interface Product {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  wholesalePrice?: number;
-  category: string;
-  subCategory?: string;
-  image?: string;
-  inStock: boolean;
-  brand: string;
-  rating?: number;
-  reviews?: number;
 }
 
 const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
@@ -48,8 +33,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        // Adjust the endpoint to match your actual catalog API
-        const data = await fetchJson<Product>(`/api/catalog/products/${productId}/`);
+        const data = await getProduct(productId);
         setProduct(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load product');
@@ -79,7 +63,7 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
   }
 
   const handleAddToCart = () => {
-    addToCart(product.id, quantity);
+    addToCart(product, quantity);
     toast.success(t('toast.added', { count: quantity, name: product.name }), {
       description: product.name,
     });
@@ -90,12 +74,8 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
     : product.price;
 
   // Use a fallback image if product.image is not available
-  const imageUrl = product.image
-    ? `https://source.unsplash.com/800x800/?${encodeURIComponent(product.image)}`
-    : 'https://via.placeholder.com/800';
-  const thumbnailUrl = product.image
-    ? `https://source.unsplash.com/200x200/?${encodeURIComponent(product.image)}`
-    : 'https://via.placeholder.com/200';
+  const imageUrl = productImageUrl(product.image, 800);
+  const thumbnailUrl = productImageUrl(product.image, 200);
 
   return (
     <div className="min-h-screen bg-background py-8">
@@ -249,10 +229,9 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
 
         {/* Product Details Tabs */}
         <Tabs defaultValue="description" className="mb-16">
-          <TabsList className="grid w-full max-w-md grid-cols-3">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
             <TabsTrigger value="description">{t('tabs.description')}</TabsTrigger>
             <TabsTrigger value="specifications">{t('tabs.specifications')}</TabsTrigger>
-            <TabsTrigger value="reviews">{t('tabs.reviews')}</TabsTrigger>
           </TabsList>
           <TabsContent value="description" className="mt-6">
             <Card>
@@ -288,39 +267,12 @@ const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ productId }) => {
                   </div>
                   <div className="flex justify-between py-2 border-b">
                     <span className="text-muted-foreground">{t('specifications.category')}</span>
-                    <span className="font-medium capitalize">{product.category.replace('-', ' ')}</span>
+                    <span className="font-medium capitalize">{product.category?.replace('-', ' ') ?? '—'}</span>
                   </div>
                   <div className="flex justify-between py-2 border-b">
                     <span className="text-muted-foreground">{t('specifications.warranty')}</span>
                     <span className="font-medium">{t('specifications.warrantyValue')}</span>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          <TabsContent value="reviews" className="mt-6">
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-lg mb-4">{t('reviews.title')}</h3>
-                <div className="space-y-4">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="border-b pb-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="flex">
-                          {[...Array(5)].map((_, j) => (
-                            <Star key={j} className="h-4 w-4 fill-accent text-accent" />
-                          ))}
-                        </div>
-                        <span className="font-semibold">{t('reviews.sampleTitle')}</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-1">
-                        {t('reviews.sampleText')}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {t('reviews.customerLabel', { number: i })}
-                      </p>
-                    </div>
-                  ))}
                 </div>
               </CardContent>
             </Card>

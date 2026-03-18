@@ -1,7 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { categories } from "@/lib/mockData";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,6 +10,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { IntlLink } from "@/components/IntlLink";
+import { getCategories } from "@/lib/catalog";
+import { Category } from "@/lib/types";
 
 function buildProductsUrl(categoryId?: string, subCategoryId?: string) {
   const params = new URLSearchParams();
@@ -20,6 +22,18 @@ function buildProductsUrl(categoryId?: string, subCategoryId?: string) {
 }
 
 export default function CategoryNav() {
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setCategories(await getCategories());
+      } catch {
+        setCategories([]);
+      }
+    })();
+  }, []);
+
   return (
     <div className="border-t border-primary/20 bg-gradient-to-r from-white via-primary/5 to-secondary/10">
       <div className="container mx-auto px-4">

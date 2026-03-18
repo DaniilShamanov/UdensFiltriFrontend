@@ -14,14 +14,26 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { services } from '@/lib/mockData';
 import { useRouter } from '@/navigation';
 import { useTranslations } from 'next-intl';
+import { getServices } from '@/lib/catalog';
+import { Service } from '@/lib/types';
 
 const ServicesPage: React.FC = () => {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
+  const [services, setServices] = useState<Service[]>([]);
   const t = useTranslations('services');
+
+  React.useEffect(() => {
+    (async () => {
+      try {
+        setServices(await getServices());
+      } catch {
+        setServices([]);
+      }
+    })();
+  }, []);
 
   const filteredServices = services.filter(service =>
     service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
