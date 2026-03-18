@@ -9,7 +9,8 @@
     "orders": "Pasūtījumi",
     "signIn": "Ienākt",
     "signUp": "Reģistrēties",
-    "signOut": "Iziet"
+    "signOut": "Iziet",
+    "dismiss": "Aizvērt"
   },
   "seo": {
     "siteName": "UdensFiltri",
@@ -49,21 +50,29 @@
   "forgotPassword": {
     "title": "Paroles atjaunošana",
     "description": {
-      "before": "Ievadiet savu e-pastu, lai saņemtu paroles atjaunošanas saiti.",
-      "after": "Ja šāds e-pasts pastāv, jūs drīz saņemsiet paroles atjaunošanas saiti."
+      "before": "Ievadiet savu e-pastu, lai saņemtu paroles atjaunošanas kodu.",
+      "after": "Ievadiet kodu no e-pasta un iestatiet jaunu paroli."
     },
     "emailLabel": "E-pasta adrese",
     "emailPlaceholder": "you@example.com",
-    "submitButton": "Nosūtīt atjaunošanas saiti",
+    "submitButton": "Nosūtīt kodu",
     "backToSignIn": "Atpakaļ uz pierakstīšanos",
-    "returnToSignIn": "Atgriezties pie pierakstīšanās",
-    "closeMessage": "Šo lapu var droši aizvērt.",
     "toast": {
-      "successTitle": "Paroles atjaunošanas e-pasts nosūtīts",
-      "successDescription": "Pārbaudiet savu pastkastīti turpmākajām instrukcijām.",
-      "errorTitle": "Neizdevās nosūtīt atjaunošanas e-pastu",
-      "errorDescription": "Lūdzu, mēģiniet vēlāk."
-    }
+      "codeSuccessTitle": "Atjaunošanas kods nosūtīts",
+      "codeSuccessDescription": "Pārbaudiet savu pastkastīti, lai atrastu verifikācijas kodu.",
+      "codeErrorTitle": "Neizdevās nosūtīt kodu",
+      "codeErrorDescription": "Lūdzu, mēģiniet vēlāk.",
+      "resetSuccessTitle": "Parole nomainīta",
+      "resetSuccessDescription": "Tagad varat pierakstīties ar jauno paroli.",
+      "resetErrorTitle": "Neizdevās nomainīt paroli",
+      "resetErrorDescription": "Lūdzu, pārbaudiet kodu un mēģiniet vēlreiz."
+    },
+    "codeLabel": "Kods",
+    "codePlaceholder": "Ievadiet kodu",
+    "newPasswordLabel": "Jaunā parole",
+    "newPasswordPlaceholder": "Ievadiet jauno paroli",
+    "confirmButton": "Apstiprināt",
+    "confirming": "Apstiprina..."
   },
   "home": {
     "heroTitle": "Tīrs ūdens <highlight>veselīgai dzīvei</highlight>",
@@ -127,6 +136,7 @@
   "orders": {
     "pageTitle": "Pasūtījumu vēsture",
     "pageDescription": "Apskatiet un izsekojiet visus savus pasūtījumus",
+    "loading": "Ielādē pasūtījumus...",
     "stats": {
       "totalOrders": "Kopā pasūtījumu",
       "totalSpent": "Kopā iztērēts",
@@ -156,10 +166,11 @@
       "startShopping": "Sākt iepirkšanos"
     },
     "orderCard": {
-      "itemsCount": "{count} prece | {count} preces | {count} preču",
+      "itemsCount": "{count} prece(s)",
       "orderItems": "Pasūtījuma preces",
       "quantityLabel": "Daudzums: {quantity} × €{price}",
-      "shippingAddress": "Piegādes adrese"
+      "shippingAddress": "Piegādes adrese",
+      "deliveryMethod": "Piegādes metode"
     }
   },
   "payment": {
@@ -189,7 +200,8 @@
     "orderDate": "Pasūtījuma datums",
     "orderTotal": "Pasūtījuma summa",
     "shippingAddress": "Piegādes adrese",
-    "orderItems": "{count} prece | {count} preces | {count} preču",
+    "deliveryMethod": "Piegādes metode",
+    "orderItems": "{count} prece(s)",
     "quantityLabel": "Daudzums: {quantity}",
     "tryAgain": "Mēģināt vēlreiz",
     "returnHome": "Atgriezties sākumā",
@@ -205,7 +217,8 @@
     "quantityLabel": "Daudzums",
     "addToCart": "Pievienot grozam",
     "wholesaleBadge": "Piemērota vairumtirdzniecības cena",
-    "ratingLabel": "{rating} ({count} atsauksme | {count} atsauksmes | {count} atsauksmju)",
+    "ratingLabel": "{rating} ({count} atsauksme(s))",
+    "loading": "Ielādē preces detaļas...",
     "toast": {
       "added": "Pievienotas {count} preces grozam!"
     },
@@ -328,11 +341,12 @@
   },
   "signIn": {
     "title": "Pierakstīties",
-    "description": "Izmantojiet savu tālruņa numuru, lai piekļūtu savam kontam",
-    "phoneLabel": "Tālruņa numurs",
-    "phonePlaceholder": "+371 12345678",
+    "description": "Izmantojiet savu e-pasta adresi, lai piekļūtu savam kontam",
+    "emailLabel": "E-pasts",
+    "emailPlaceholder": "you@example.com",
     "passwordLabel": "Parole",
     "passwordPlaceholder": "••••••••",
+    "forgotPasswordLink": "Aizmirsi paroli?",
     "signInButton": "Pierakstīties",
     "signingIn": "Notiek pierakstīšanās...",
     "noAccount": "Nav konta?",
@@ -345,16 +359,15 @@
   },
   "signUp": {
     "title": "Izveidot kontu",
-    "descriptionForm": "Reģistrējieties ar savu tālruņa numuru",
-    "descriptionVerify": "Ievadiet kodu, ko nosūtījām uz {phone}",
+    "descriptionForm": "Aizpildiet datus konta izveidei.",
     "firstNameLabel": "Vārds",
     "firstNamePlaceholder": "Jānis",
     "lastNameLabel": "Uzvārds",
     "lastNamePlaceholder": "Bērziņš",
-    "phoneLabel": "Tālruņa numurs",
+    "phoneLabel": "Tālruņa numurs (neobligāti)",
     "phonePlaceholder": "+37112345678",
     "phoneHint": "Izmantojiet starptautisko formātu (piemēram +371...).",
-    "emailLabel": "E-pasts (neobligāti)",
+    "emailLabel": "E-pasts",
     "emailPlaceholder": "you@example.com",
     "emailHint": "Ja norādīsiet, mēs uz e-pastu sūtīsim maksājumu apstiprinājumus.",
     "passwordLabel": "Parole",
@@ -362,25 +375,27 @@
     "confirmPasswordLabel": "Apstipriniet paroli",
     "confirmPasswordPlaceholder": "••••••••",
     "agreeToTerms": "Piekrītu <termsLink>Lietošanas noteikumiem</termsLink>",
-    "sendCodeButton": "Nosūtīt verifikācijas kodu",
     "alreadyHaveAccount": "Jau ir konts?",
     "signInLink": "Pierakstīties",
-    "smsCodeLabel": "SMS kods",
-    "verifyButton": "Apstiprināt un izveidot",
-    "resendCode": "Nosūtīt kodu vēlreiz",
-    "editPhone": "Rediģēt tālruni",
-    "footerWithName": "Tiek izveidots konts lietotājam {fullName}.",
-    "footerWithoutName": "Vārdu varēsiet pievienot vēlāk konta iestatījumos.",
     "toast": {
       "passwordsMismatch": "Paroles nesakrīt",
       "termsNotAgreed": "Lūdzu, piekrītiet lietošanas noteikumiem",
-      "codeSent": "Kods nosūtīts",
-      "codeSentDescription": "Pārbaudiet SMS ar verifikācijas kodu.",
-      "failedToSendCode": "Neizdevās nosūtīt kodu",
       "tryAgain": "Lūdzu, mēģiniet vēlreiz.",
       "accountCreated": "Konts veiksmīgi izveidots!",
-      "signUpFailed": "Reģistrācija neizdevās"
-    }
+      "signUpFailed": "Reģistrācija neizdevās",
+      "passwordTooShort": "Parole ir pārāk īsa: ievadījāt {current} simbolus, minimums ir {min}.",
+      "verificationCodeSent": "Verifikācijas kods nosūtīts uz jūsu e-pastu",
+      "verifyEmailFirst": "Lūdzu, verificējiet e-pastu",
+      "verificationCodeRequired": "Lūdzu, ievadiet verifikācijas kodu",
+      "emailRequiredForVerification": "Verifikācijai nepieciešams e-pasts"
+    },
+    "createAccountButton": "Izveidot kontu",
+    "verificationBanner": "Verifikācijas kods ir nosūtīts uz jūsu e-pastu.",
+    "verificationCodeLabel": "Verifikācijas kods",
+    "verificationCodePlaceholder": "Ievadiet kodu no e-pasta",
+    "confirmCodeButton": "Apstiprināt kodu",
+    "verifyButton": "Verificēt",
+    "resendButton": "Nosūtīt vēlreiz"
   },
   "account": {
     "title": "Konta iestatījumi",
@@ -391,46 +406,63 @@
     },
     "profile": {
       "title": "Personiskā informācija",
-      "description": "Vārdu var mainīt uzreiz. Tālrunim/e-pastam nepieciešams SMS kods.",
+      "description": "Atjauniniet personīgo un kontaktinformāciju.",
       "firstName": "Vārds",
       "lastName": "Uzvārds",
       "saveName": "Saglabāt vārdu",
-      "phone": "Tālrunis",
+      "phone": "Tālruņa numurs (neobligāti)",
       "sendCode": "Nosūtīt kodu",
       "newPhone": "Jauns tālrunis",
       "phonePlaceholder": "+37112345678",
       "smsCode": "SMS kods",
       "updatePhone": "Atjaunināt tālruni",
       "phoneHelp": "Kods nosūtīts uz jūsu esošo tālruņa numuru.",
-      "email": "E-pasts (neobligāti)",
+      "email": "E-pasts",
       "notSet": "Nav norādīts",
-      "emailPlaceholder": "(neobligāti)",
+      "emailPlaceholder": "you@example.com",
       "updateEmail": "Atjaunināt e-pastu",
-      "emailHelp": "Ja e-pasts nav norādīts, čeki tiks glabāti tikai jūsu kontā."
+      "emailHelp": "Ja e-pasts nav norādīts, čeki tiks glabāti tikai jūsu kontā.",
+      "emailCode": "Verifikācijas kods",
+      "codePlaceholder": "Ievadiet kodu no e-pasta",
+      "confirmCode": "Apstiprināt kodu",
+      "codeBanner": "Verifikācijas kods ir nosūtīts uz jūsu e-pastu."
     },
     "security": {
       "title": "Parole",
-      "description": "Lai mainītu paroli, nepieciešams SMS kods.",
+      "description": "Paroli varat mainīt jebkurā laikā.",
       "sendCode": "Nosūtīt kodu",
       "newPassword": "Jauna parole",
       "smsCode": "SMS kods",
-      "updatePassword": "Atjaunināt paroli"
+      "updatePassword": "Atjaunināt paroli",
+      "emailCode": "Verifikācijas kods",
+      "codePlaceholder": "Ievadiet kodu no e-pasta",
+      "confirmCode": "Apstiprināt kodu",
+      "codeBanner": "Verifikācijas kods ir nosūtīts uz jūsu e-pastu.",
+      "confirmNewPassword": "Apstipriniet jauno paroli",
+      "passwordsMismatch": "Paroles nesakrīt"
     },
     "toast": {
       "codeSent": "Kods nosūtīts",
       "codeSentDescription": "Kods nosūtīts uz {phone}",
       "codeFailed": "Neizdevās nosūtīt kodu",
       "profileUpdated": "Profils atjaunināts",
+      "profileEqualsPrevious": "Jaunie vārds un uzvārds ir vienādi ar pašreizējiem",
       "profileUpdateFailed": "Neizdevās atjaunināt profilu",
       "emailUpdated": "E-pasts atjaunināts",
       "emailUpdateFailed": "Neizdevās atjaunināt e-pastu",
+      "emailEqualsPrevious": "Jaunais e-pasts ir vienāds ar pašreizējo",
       "phoneUpdated": "Tālrunis atjaunināts",
+      "phoneEqualsPrevious": "Jaunais tālruņa numurs ir vienāds ar pašreizējo",
       "phoneUpdateFailed": "Neizdevās atjaunināt tālruni",
       "passwordUpdated": "Parole atjaunināta",
       "passwordUpdateFailed": "Neizdevās atjaunināt paroli",
       "signInAgain": "Lūdzu, pierakstieties vēlreiz.",
       "checkCode": "Pārbaudiet kodu un mēģiniet vēlreiz.",
-      "checkPhoneFormat": "Pārbaudiet kodu un tālruņa formātu (+371...)."
+      "checkPhoneFormat": "Pārbaudiet kodu un tālruņa formātu (+371...).",
+      "verificationCodeSent": "Verifikācijas kods nosūtīts uz jūsu e-pastu",
+      "passwordTooShort": "Parole ir pārāk īsa: ievadījāt {current} simbolus, minimums ir {min}.",
+      "emailRequired": "E-pasts ir obligāts",
+      "passwordsMismatch": "Paroles nesakrīt"
     }
   },
   "cart": {
@@ -445,7 +477,7 @@
     },
     "summary": {
       "title": "Pasūtījuma kopsavilkums",
-      "subtotal": "Starpsumma ({count} prece | {count} preces | {count} preču)",
+      "subtotal": "Starpsumma: {count} prece(s)",
       "shipping": "Piegāde",
       "free": "BEZMAKSAS",
       "freeShippingMessage": "Pievienojiet vēl €{amount}, lai saņemtu bezmaksas piegādi!",
@@ -509,5 +541,8 @@
     "products": "Produkti",
     "services": "Pakalpojumi",
     "contact": "Kontakti"
+  },
+  "notification": {
+    "signedOut": "Jūs esat izrakstījies. Lūdzu, pierakstieties vēlreiz, lai piekļūtu savam kontam"
   }
 }

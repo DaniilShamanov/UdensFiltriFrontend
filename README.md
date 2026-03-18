@@ -1,6 +1,6 @@
 # Plumbing Web App (Next.js App Router + next-intl)
 
-This project is a create-next-app style Next.js (App Router) frontend scaffolded from a Figma Make export.
+This project is a create-next-app style Next.js (App Router) frontend.
 
 ## Tech
 - Next.js (App Router)
@@ -65,3 +65,32 @@ Client-side guard component:
 - `src/app/robots.ts`
 - page metadata is set in `src/app/[locale]/layout.tsx`
 
+
+
+## Run with Docker (production-like)
+
+1) Copy environment template:
+
+```bash
+cp .env.example .env
+```
+
+2) Build and start:
+
+```bash
+docker compose up -d --build
+```
+
+3) Open:
+
+- http://localhost:3000
+
+Stop containers:
+
+```bash
+docker compose down
+```
+
+## Production branch
+
+A `production-ready` branch is intended to contain deployment-focused updates (Docker, env template, standalone build output).

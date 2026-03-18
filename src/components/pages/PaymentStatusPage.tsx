@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "@/navigation";
+import { useSearchParams } from "next/navigation";
 import { CheckCircle, Home, Loader2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,26 +11,26 @@ import { fetchJson } from "@/lib/api";
 import { useTranslations } from "next-intl";
 
 type OrderItem = {
-  id: number;
-  title: string;
+  product_id: number;
+  name: string;
   quantity: number;
-  unit_price: string | number;
+  unit_price: number;
 };
 
 type Order = {
   id: number;
-  status: "pending" | "paid" | "canceled" | "failed" | string;
-  currency: string;
-  total: string | number;
+  status: string;
+  total_price: number;
   created_at: string;
   email: string;
   customer_name: string;
-  address_line1: string;
-  address_line2: string;
-  city: string;
-  postcode: string;
-  country: string;
+  customer_address: string;
   items: OrderItem[];
+  delivery_option: {
+    id: number;
+    name: string;
+    price_cents: number;
+  };
 };
 
 interface PaymentStatusPageProps {
@@ -38,6 +39,8 @@ interface PaymentStatusPageProps {
 
 const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ orderId }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const sessionId = searchParams.get('session_id');
   const t = useTranslations('paymentStatus');
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
@@ -47,11 +50,19 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ orderId }) => {
     let isMounted = true;
     let pollId: any = null;
 
+    const buildUrl = () => {
+      let url = `/api/orders/${encodeURIComponent(orderId)}/`;
+      if (sessionId) {
+        url += `?session_id=${encodeURIComponent(sessionId)}`;
+      }
+      return url;
+    };
+
     async function load() {
       try {
         setLoading(true);
         setError(null);
-        const data = await fetchJson<Order>(`/api/orders/${encodeURIComponent(orderId)}/`);
+        const data = await fetchJson<Order>(buildUrl());
         if (isMounted) setOrder(data);
       } catch (e: any) {
         if (isMounted) setError(e?.message || t('errors.loadFailed'));
@@ -62,11 +73,10 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ orderId }) => {
 
     load();
 
-    // Poll a few times while the order is pending (webhook may be delayed).
     pollId = setInterval(async () => {
       if (!isMounted) return;
       try {
-        const data = await fetchJson<Order>(`/api/orders/${encodeURIComponent(orderId)}/`);
+        const data = await fetchJson<Order>(buildUrl());
         if (!isMounted) return;
         setOrder(data);
         if (data.status === "paid" || data.status === "failed" || data.status === "canceled") {
@@ -82,8 +92,7 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ orderId }) => {
       isMounted = false;
       if (pollId) clearInterval(pollId);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orderId]);
+  }, [orderId, sessionId, t]);
 
   if (loading) {
     return (
@@ -162,7 +171,9 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ orderId }) => {
               </div>
               <div>
                 <h3 className="font-semibold mb-2">{t('orderTotal')}</h3>
-                <p className="text-2xl font-bold text-primary">€{Number(order.total).toFixed(2)}</p>
+                <p className="text-2xl font-bold text-primary">
+                  €{order.total_price.toFixed(2)}
+                </p>
               </div>
             </div>
 
@@ -170,11 +181,18 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ orderId }) => {
 
             <div>
               <h3 className="font-semibold mb-2">{t('shippingAddress')}</h3>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground whitespace-pre-line">
                 {order.customer_name ? <>{order.customer_name}<br /></> : null}
-                {order.address_line1}<br />
-                {order.city}, {order.postcode}<br />
-                {order.country}
+                {order.customer_address}
+              </p>
+            </div>
+
+            <Separator />
+
+            <div>
+              <h3 className="font-semibold mb-2">{t('deliveryMethod')}</h3>
+              <p className="text-muted-foreground">
+                {order.delivery_option.name} – €{(order.delivery_option.price_cents / 100).toFixed(2)}
               </p>
             </div>
 
@@ -183,15 +201,17 @@ const PaymentStatusPage: React.FC<PaymentStatusPageProps> = ({ orderId }) => {
             <div>
               <h3 className="font-semibold mb-3">{t('orderItems', { count: order.items.length })}</h3>
               <div className="space-y-3">
-                {order.items.map((it) => (
-                  <div key={it.id} className="flex justify-between">
+                {order.items.map((item) => (
+                  <div key={item.product_id} className="flex justify-between">
                     <div>
-                      <p className="font-medium">{it.title}</p>
+                      <p className="font-medium">{item.name}</p>
                       <p className="text-sm text-muted-foreground">
-                        {t('quantityLabel', { quantity: it.quantity })}
+                        {t('quantityLabel', { quantity: item.quantity })}
                       </p>
                     </div>
-                    <p className="font-medium">€{(Number(it.unit_price) * it.quantity).toFixed(2)}</p>
+                    <p className="font-medium">
+                      €{(item.unit_price * item.quantity).toFixed(2)}
+                    </p>
                   </div>
                 ))}
               </div>

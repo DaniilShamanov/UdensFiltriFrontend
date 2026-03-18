@@ -5,69 +5,69 @@ export default async function Footer() {
   const t = await getTranslations('footer');
 
   return (
-    <footer className="border-t bg-white">
-      <div className="container mx-auto px-4 py-10">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8">
-          <div className="col-span-2 sm:col-span-3 lg:col-span-2">
-            <div className="font-semibold text-lg text-secondary">{t('brand')}</div>
-            <p className="mt-3 text-sm text-muted-foreground max-w-md">
+    <footer className="border-t border-secondary/35 bg-gradient-to-r from-secondary to-primary text-white">
+      <div className="container mx-auto px-4 py-10 sm:py-12">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="sm:col-span-2 lg:col-span-2">
+            <div className="inline-flex rounded-full bg-white/18 px-3 py-1 text-lg font-semibold text-white">{t('brand')}</div>
+            <p className="mt-3 max-w-md text-sm text-white/85">
               {t('description')}
             </p>
           </div>
 
           <div>
-            <div className="text-sm font-semibold">{t('company')}</div>
-            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+            <div className="text-sm font-semibold text-white">{t('company')}</div>
+            <ul className="mt-3 space-y-2 text-sm text-white/85">
               <li>
-                <Link className="hover:text-foreground" href="/">{t('home')}</Link>
+                <Link className="cursor-pointer transition-colors hover:text-accent" href="/">{t('home')}</Link>
               </li>
               <li>
-                <Link className="hover:text-foreground" href="/products">{t('products')}</Link>
+                <Link className="cursor-pointer transition-colors hover:text-accent" href="/products">{t('products')}</Link>
               </li>
               <li>
-                <Link className="hover:text-foreground" href="/services">{t('services')}</Link>
+                <Link className="cursor-pointer transition-colors hover:text-accent" href="/services">{t('services')}</Link>
               </li>
               <li>
-                <Link className="hover:text-foreground" href="/contact">{t('contact')}</Link>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <div className="text-sm font-semibold">{t('help')}</div>
-            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-              <li>
-                <Link className="hover:text-foreground" href="/info/faq">{t('faq')}</Link>
-              </li>
-              <li>
-                <Link className="hover:text-foreground" href="/info/shipping">{t('shipping')}</Link>
-              </li>
-              <li>
-                <Link className="hover:text-foreground" href="/info/returns">{t('returns')}</Link>
-              </li>
-              <li>
-                <Link className="hover:text-foreground" href="/info/warranty">{t('warranty')}</Link>
+                <Link className="cursor-pointer transition-colors hover:text-accent" href="/contact">{t('contact')}</Link>
               </li>
             </ul>
           </div>
 
           <div>
-            <div className="text-sm font-semibold">{t('legal')}</div>
-            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+            <div className="text-sm font-semibold text-white">{t('help')}</div>
+            <ul className="mt-3 space-y-2 text-sm text-white/85">
               <li>
-                <Link className="hover:text-foreground" href="/info/privacy">{t('privacy')}</Link>
+                <Link className="cursor-pointer transition-colors hover:text-accent" href="/info/faq">{t('faq')}</Link>
               </li>
               <li>
-                <Link className="hover:text-foreground" href="/info/terms">{t('terms')}</Link>
+                <Link className="cursor-pointer transition-colors hover:text-accent" href="/info/shipping">{t('shipping')}</Link>
               </li>
               <li>
-                <Link className="hover:text-foreground" href="/info/cookies">{t('cookies')}</Link>
+                <Link className="cursor-pointer transition-colors hover:text-accent" href="/info/returns">{t('returns')}</Link>
+              </li>
+              <li>
+                <Link className="cursor-pointer transition-colors hover:text-accent" href="/info/warranty">{t('warranty')}</Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <div className="text-sm font-semibold text-white">{t('legal')}</div>
+            <ul className="mt-3 space-y-2 text-sm text-white/85">
+              <li>
+                <Link className="cursor-pointer transition-colors hover:text-accent" href="/info/privacy">{t('privacy')}</Link>
+              </li>
+              <li>
+                <Link className="cursor-pointer transition-colors hover:text-accent" href="/info/terms">{t('terms')}</Link>
+              </li>
+              <li>
+                <Link className="cursor-pointer transition-colors hover:text-accent" href="/info/cookies">{t('cookies')}</Link>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-10 pt-6 border-t text-xs text-muted-foreground flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
+        <div className="mt-10 flex flex-col gap-2 border-t border-white/25 pt-6 text-xs text-white/75 sm:flex-row sm:items-center sm:justify-between">
           <div>{t('copyright', { year: new Date().getFullYear() })}</div>
           <div>{t('languages')}</div>
         </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState, useEffect } from "react";
-import { Mail, Phone, Lock, Save, ShieldCheck } from "lucide-react";
+import { Mail, Phone, Lock, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,23 +9,24 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useApp } from "@/contexts/AppContext";
-import { useRouter } from "@/navigation";
+import { authApi } from "@/lib/auth/api";
+import { useRouter, usePathname } from "@/navigation";
 import { toast } from "sonner";
-import { OtpInput } from "@/components/auth/OtpInput";
 import { useTranslations } from "next-intl";
-import { usePathname } from "next/navigation";
+import { extractErrorMessage } from "@/lib/api";
+import VerificationCodeInput from "@/components/VerificationCodeInput";
 
 const AccountPage: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, authLoading, updateProfile, requestSmsCode, changeEmail, changePhone, changePassword, signOut } = useApp();
+  const { user, authLoading, updateProfile, changeEmail, changePhone, changePassword, signOut } = useApp();
   const t = useTranslations('account');
 
   const displayName = useMemo(() => {
     const fn = user?.first_name?.trim() || "";
     const ln = user?.last_name?.trim() || "";
     const n = `${fn} ${ln}`.trim();
-    return n || user?.phone || "";
+    return n || user?.email || user?.phone || "";
   }, [user]);
 
   const [profile, setProfile] = useState({
@@ -33,115 +34,225 @@ const AccountPage: React.FC = () => {
     last_name: user?.last_name || "",
   });
 
-  const [smsSent, setSmsSent] = useState(false);
-  const [code, setCode] = useState("");
-
   const [newEmail, setNewEmail] = useState(user?.email || "");
-  const [newPhone, setNewPhone] = useState("");
+  const [newPhone, setNewPhone] = useState(user?.phone || "");
   const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+
+  const [emailCode, setEmailCode] = useState("");
+  const [passwordCode, setPasswordCode] = useState("");
+  const [awaitingEmailCode, setAwaitingEmailCode] = useState(false);
+  const [awaitingPasswordCode, setAwaitingPasswordCode] = useState(false);
+  const [isEmailCodeSending, setIsEmailCodeSending] = useState(false);
+  const [isPasswordCodeSending, setIsPasswordCodeSending] = useState(false);
 
   useEffect(() => {
-      if (!authLoading && !user) {
-        const next = encodeURIComponent(pathname);
-        router.replace(`/auth/sign-in?next=${next}`);
-      }
-    }, [user, authLoading, router, pathname]);
-  
-    if (authLoading) return <p>Loading</p>;
-    if (!user) return null; // will redirect via effect
-
-  const sendSensitiveCode = async () => {
-    try {
-      await requestSmsCode({ purpose: "sensitive" });
-      setSmsSent(true);
-      toast.success(t('toast.codeSent'), { description: t('toast.codeSentDescription', { phone: user.phone }) });
-    } catch {
-      toast.error(t('toast.codeFailed'));
+    if (!authLoading && !user) {
+      const next = encodeURIComponent(pathname || "/");
+      router.replace(`/auth/sign-in?next=${next}`);
     }
-  };
+  }, [user, authLoading, router, pathname]);
 
-  const resetCode = () => {
-    setSmsSent(false);
-    setCode("");
-  };
+  useEffect(() => {
+    if (!user) return;
 
+    setProfile({
+      first_name: user.first_name || "",
+      last_name: user.last_name || "",
+    });
+    setNewEmail(user.email || "");
+    setNewPhone(user.phone || "");
+  }, [user]);
+
+  if (authLoading) return <p>Loading</p>;
+  if (!user) return null;
+
+  // ── Profile name ────────────────────────────────────────────────────────
   const saveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if(user?.first_name?.trim() === profile.first_name.trim() && user?.last_name?.trim() === profile.last_name.trim()) {
+      toast.error(t('toast.profileEqualsPrevious'));
+      return;
+    }
+
     try {
-      await updateProfile({ first_name: profile.first_name, last_name: profile.last_name });
+      await updateProfile({ first_name: profile.first_name.trim(), last_name: profile.last_name.trim() });
       toast.success(t('toast.profileUpdated'));
     } catch {
       toast.error(t('toast.profileUpdateFailed'));
     }
   };
 
+  // Unified code request function (uses current user's email)
+  const requestVerificationCode = async ({
+    purpose,
+    onSending,
+    onSent,
+    onError,
+  }: {
+    purpose: 'change_email' | 'change_password';
+    onSending: (sending: boolean) => void;
+    onSent: () => void;
+    onError: (error: unknown) => void;
+  }) => {
+    if (!user?.email) {
+      toast.error(t('toast.emailRequired'));
+      return;
+    }
+    onSending(true);
+    try {
+      await authApi.sendCode({ email: user.email, purpose });
+      onSent();
+      toast.success(t('toast.verificationCodeSent'));
+    } catch (error) {
+      onError(error);
+    } finally {
+      onSending(false);
+    }
+  };
+
+  // ── Email change (two-step) ─────────────────────────────────────────────
   const doChangeEmail = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!smsSent) await sendSensitiveCode();
-    if (!code) return;
+    const trimmedEmail = newEmail.trim();
+
+    if (!trimmedEmail) {
+      toast.error(t('toast.emailRequired'));
+      return;
+    }
+
+    if (trimmedEmail === user.email) {
+      toast.error(t('toast.emailEqualsPrevious'));
+      return;
+    }
+
     try {
-      await changeEmail({ email: newEmail?.trim() || undefined, code });
+      if (!awaitingEmailCode) {
+        // Step 1: request code (sent to current email)
+        await requestVerificationCode({
+          purpose: 'change_email',
+          onSending: setIsEmailCodeSending,
+          onSent: () => {
+            setAwaitingEmailCode(true);
+            setEmailCode("");
+          },
+          onError: (error) => {
+            toast.error(t('toast.emailUpdateFailed'), {
+              description: extractErrorMessage(error, t('toast.checkCode')),
+            });
+          },
+        });
+        return;
+      }
+
+      // Step 2: confirm code and update email
+      await changeEmail({ new_email: trimmedEmail, code: emailCode.trim() });
+      setAwaitingEmailCode(false);
+      setEmailCode("");
       toast.success(t('toast.emailUpdated'));
-      resetCode();
-    } catch {
-      toast.error(t('toast.emailUpdateFailed'), { description: t('toast.checkCode') });
+    } catch (error) {
+      toast.error(t('toast.emailUpdateFailed'), {
+        description: extractErrorMessage(error, t('toast.checkCode')),
+      });
     }
   };
 
+  // ── Phone change (no code) ──────────────────────────────────────────────
   const doChangePhone = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!smsSent) await sendSensitiveCode();
-    if (!code) return;
+
+    if(user?.phone?.trim() === newPhone.trim()) {
+      toast.error(t('toast.phoneEqualsPrevious'));
+      return;
+    }
+
     try {
-      await changePhone({ new_phone: newPhone, code });
+      await changePhone({ new_phone: newPhone.trim() });
       toast.success(t('toast.phoneUpdated'));
-      resetCode();
-      setNewPhone("");
-    } catch {
-      toast.error(t('toast.phoneUpdateFailed'), { description: t('toast.checkPhoneFormat') });
+    } catch (error) {
+      toast.error(t('toast.phoneUpdateFailed'), {
+        description: extractErrorMessage(error, t('toast.checkPhoneFormat')),
+      });
     }
   };
 
+  // ── Password change (two-step) ──────────────────────────────────────────
   const doChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!smsSent) await sendSensitiveCode();
-    if (!code) return;
+
+    if (newPassword.length < 6) {
+      toast.error(t('toast.passwordTooShort', { min: 6, current: newPassword.length }));
+      return;
+    }
+    if (newPassword !== confirmNewPassword) {
+      toast.error(t('toast.passwordsMismatch'));
+      return;
+    }
+
     try {
-      await changePassword({ new_password: newPassword, code });
+      if (!awaitingPasswordCode) {
+        // Step 1: request code (sent to current email)
+        await requestVerificationCode({
+          purpose: 'change_password',
+          onSending: setIsPasswordCodeSending,
+          onSent: () => {
+            setAwaitingPasswordCode(true);
+            setPasswordCode("");
+          },
+          onError: (error) => {
+            toast.error(t('toast.passwordUpdateFailed'), {
+              description: extractErrorMessage(error, t('toast.checkCode')),
+            });
+          },
+        });
+        return;
+      }
+
+      // Step 2: confirm code and update password
+      await changePassword({ new_password: newPassword, code: passwordCode.trim() });
       toast.success(t('toast.passwordUpdated'), { description: t('toast.signInAgain') });
-      resetCode();
       setNewPassword("");
-      await signOut();
+      setConfirmNewPassword("");
+      setPasswordCode("");
+      setAwaitingPasswordCode(false);
+      await signOut(); // tokens invalidated
       router.replace("/auth/sign-in");
-    } catch {
-      toast.error(t('toast.passwordUpdateFailed'));
+    } catch (error) {
+      toast.error(t('toast.passwordUpdateFailed'), {
+        description: extractErrorMessage(error, t('toast.checkCode')),
+      });
     }
   };
 
   return (
-    <div className="min-h-screen bg-background py-6 sm:py-8">
+    <div className="min-h-screen bg-gradient-to-b from-background via-primary/5 to-background py-6 sm:py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-1">{t('title')}</h1>
-          <p className="text-muted-foreground">
-            {t('signedInAs', { name: displayName })}
-          </p>
+          <h1 className="mb-1 text-2xl font-bold text-secondary sm:text-3xl">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('signedInAs', { name: displayName })}</p>
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="profile">{t('tabs.profile')}</TabsTrigger>
-            <TabsTrigger value="security">{t('tabs.security')}</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 bg-primary/10">
+            <TabsTrigger value="profile" className="cursor-pointer data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              {t('tabs.profile')}
+            </TabsTrigger>
+            <TabsTrigger value="security" className="cursor-pointer data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              {t('tabs.security')}
+            </TabsTrigger>
           </TabsList>
 
+          {/* Profile tab */}
           <TabsContent value="profile">
-            <Card>
-              <CardHeader>
+            <Card className="border-primary/20 bg-card/95 shadow-sm">
+              <CardHeader className="bg-gradient-to-r from-primary/8 to-secondary/8">
                 <CardTitle>{t('profile.title')}</CardTitle>
-                <CardDescription>{t('profile.description')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <form onSubmit={saveProfile} className="space-y-4">
+
+                {/* Name */}
+                <form onSubmit={saveProfile} noValidate className="space-y-4">
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="first_name">{t('profile.firstName')}</Label>
@@ -160,7 +271,7 @@ const AccountPage: React.FC = () => {
                       />
                     </div>
                   </div>
-                  <Button type="submit" className="bg-accent hover:bg-accent/90 w-full sm:w-auto">
+                  <Button type="submit" className="w-full cursor-pointer bg-primary hover:bg-primary/90 sm:w-auto">
                     <Save className="mr-2 h-4 w-4" /> {t('profile.saveName')}
                   </Button>
                 </form>
@@ -168,43 +279,85 @@ const AccountPage: React.FC = () => {
                 <Separator />
 
                 <div className="grid gap-6">
-                  <div className="rounded-lg border p-4">
-                    <div className="flex items-center justify-between gap-4 flex-wrap">
-                      <div>
-                        <div className="flex items-center gap-2 font-medium"><Phone className="h-4 w-4" /> {t('profile.phone')}</div>
-                        <div className="text-sm text-muted-foreground">{user.phone}</div>
-                      </div>
-                      <Button variant="outline" onClick={sendSensitiveCode} className="w-full sm:w-auto">
-                        <ShieldCheck className="mr-2 h-4 w-4" /> {t('profile.sendCode')}
-                      </Button>
+                  {/* Phone */}
+                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+                    <div className="flex items-center gap-2 font-medium">
+                      <Phone className="h-4 w-4" /> {t('profile.phone')}
                     </div>
-                    <form onSubmit={doChangePhone} className="mt-4 grid gap-3">
-                      <Label htmlFor="new_phone">{t('profile.newPhone')}</Label>
-                      <Input id="new_phone" value={newPhone} onChange={(e) => setNewPhone(e.target.value)} placeholder={t('profile.phonePlaceholder')} />
-                      <Label>{t('profile.smsCode')}</Label>
-                      <OtpInput value={code} onChange={setCode} />
-                      <Button type="submit" className="bg-accent hover:bg-accent/90">{t('profile.updatePhone')}</Button>
-                      <p className="text-xs text-muted-foreground">{t('profile.phoneHelp')}</p>
+                    <form onSubmit={doChangePhone} noValidate className="mt-4 grid gap-3">
+                      <Input
+                        id="new_phone"
+                        value={newPhone}
+                        onChange={(e) => setNewPhone(e.target.value)}
+                        placeholder={t('profile.phonePlaceholder')}
+                      />
+                      <Button type="submit" className="cursor-pointer bg-primary hover:bg-primary/90">
+                        {t('profile.updatePhone')}
+                      </Button>
                     </form>
                   </div>
 
-                  <div className="rounded-lg border p-4">
-                    <div className="flex items-center justify-between gap-4 flex-wrap">
-                      <div>
-                        <div className="flex items-center gap-2 font-medium"><Mail className="h-4 w-4" /> {t('profile.email')}</div>
-                        <div className="text-sm text-muted-foreground">{user.email || t('profile.notSet')}</div>
-                      </div>
-                      <Button variant="outline" onClick={sendSensitiveCode} className="w-full sm:w-auto">
-                        <ShieldCheck className="mr-2 h-4 w-4" /> {t('profile.sendCode')}
-                      </Button>
+                  {/* Email */}
+                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+                    <div className="flex items-center gap-2 font-medium">
+                      <Mail className="h-4 w-4" /> {t('profile.email')}
                     </div>
-                    <form onSubmit={doChangeEmail} className="mt-4 grid gap-3">
-                      <Label htmlFor="email">{t('profile.email')}</Label>
-                      <Input id="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder={t('profile.emailPlaceholder')} />
-                      <Label>{t('profile.smsCode')}</Label>
-                      <OtpInput value={code} onChange={setCode} />
-                      <Button type="submit" className="bg-accent hover:bg-accent/90">{t('profile.updateEmail')}</Button>
-                      <p className="text-xs text-muted-foreground">{t('profile.emailHelp')}</p>
+                    <form onSubmit={doChangeEmail} noValidate className="mt-4 grid gap-3">
+                      <Input
+                        id="account_email"
+                        type="email"
+                        value={newEmail}
+                        onChange={(e) => {
+                          setAwaitingEmailCode(false);
+                          setEmailCode("");
+                          setNewEmail(e.target.value);
+                        }}
+                        placeholder={t('profile.emailPlaceholder')}
+                      />
+
+                      {awaitingEmailCode && (
+                        <VerificationCodeInput
+                          id="email_code"
+                          value={emailCode}
+                          onChange={(e) => setEmailCode(e.target.value)}
+                          label={t('profile.emailCode')}
+                          placeholder={t('profile.codePlaceholder')}
+                          banner={t('profile.codeBanner')}
+                          autoFocus
+                        />
+                      )}
+
+                      <div className="flex flex-col gap-2 sm:flex-row">
+                        <Button type="submit" className="cursor-pointer bg-primary hover:bg-primary/90 sm:flex-1" disabled={isEmailCodeSending}>
+                          {isEmailCodeSending
+                            ? t('profile.sendCode')
+                            : awaitingEmailCode
+                              ? t('profile.confirmCode')
+                              : t('profile.updateEmail')}
+                        </Button>
+                        {awaitingEmailCode && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="cursor-pointer sm:flex-1"
+                            onClick={() =>
+                              requestVerificationCode({
+                                purpose: 'change_email',
+                                onSending: setIsEmailCodeSending,
+                                onSent: () => setEmailCode(""),
+                                onError: (error) => {
+                                  toast.error(t('toast.emailUpdateFailed'), {
+                                    description: extractErrorMessage(error, t('toast.checkCode')),
+                                  });
+                                },
+                              })
+                            }
+                            disabled={isEmailCodeSending}
+                          >
+                            {t('profile.sendCode')}
+                          </Button>
+                        )}
+                      </div>
                     </form>
                   </div>
                 </div>
@@ -212,18 +365,15 @@ const AccountPage: React.FC = () => {
             </Card>
           </TabsContent>
 
+          {/* Security tab */}
           <TabsContent value="security">
-            <Card>
-              <CardHeader>
+            <Card className="border-primary/20 bg-card/95 shadow-sm">
+              <CardHeader className="bg-gradient-to-r from-primary/8 to-secondary/8">
                 <CardTitle>{t('security.title')}</CardTitle>
                 <CardDescription>{t('security.description')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Button variant="outline" onClick={sendSensitiveCode} className="w-full sm:w-auto">
-                  <ShieldCheck className="mr-2 h-4 w-4" /> {t('security.sendCode')}
-                </Button>
-
-                <form onSubmit={doChangePassword} className="grid gap-3">
+                <form onSubmit={doChangePassword} noValidate className="grid gap-3">
                   <Label htmlFor="new_password">{t('security.newPassword')}</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -231,13 +381,72 @@ const AccountPage: React.FC = () => {
                       id="new_password"
                       type="password"
                       value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
+                      onChange={(e) => {
+                        setAwaitingPasswordCode(false);
+                        setPasswordCode("");
+                        setNewPassword(e.target.value);
+                      }}
                       className="pl-10"
+                      placeholder="••••••••"
                     />
                   </div>
-                  <Label>{t('security.smsCode')}</Label>
-                  <OtpInput value={code} onChange={setCode} />
-                  <Button type="submit" className="bg-accent hover:bg-accent/90">{t('security.updatePassword')}</Button>
+
+                  <Label htmlFor="confirm_new_password">{t('security.confirmNewPassword')}</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="confirm_new_password"
+                      type="password"
+                      value={confirmNewPassword}
+                      onChange={(e) => setConfirmNewPassword(e.target.value)}
+                      className="pl-10"
+                      placeholder="••••••••"
+                    />
+                  </div>
+
+                  {awaitingPasswordCode && (
+                    <VerificationCodeInput
+                      id="password_code"
+                      value={passwordCode}
+                      onChange={(e) => setPasswordCode(e.target.value)}
+                      label={t('security.emailCode')}
+                      placeholder={t('security.codePlaceholder')}
+                      banner={t('security.codeBanner')}
+                      autoFocus
+                    />
+                  )}
+
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <Button type="submit" className="cursor-pointer bg-primary hover:bg-primary/90 sm:flex-1" disabled={isPasswordCodeSending}>
+                      {isPasswordCodeSending
+                        ? t('security.sendCode')
+                        : awaitingPasswordCode
+                          ? t('security.confirmCode')
+                          : t('security.updatePassword')}
+                    </Button>
+                    {awaitingPasswordCode && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="cursor-pointer sm:flex-1"
+                        onClick={() =>
+                          requestVerificationCode({
+                            purpose: 'change_password',
+                            onSending: setIsPasswordCodeSending,
+                            onSent: () => setPasswordCode(""),
+                            onError: (error) => {
+                              toast.error(t('toast.passwordUpdateFailed'), {
+                                description: extractErrorMessage(error, t('toast.checkCode')),
+                              });
+                            },
+                          })
+                        }
+                        disabled={isPasswordCodeSending}
+                      >
+                        {t('security.sendCode')}
+                      </Button>
+                    )}
+                  </div>
                 </form>
               </CardContent>
             </Card>

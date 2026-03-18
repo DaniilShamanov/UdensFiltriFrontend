@@ -1,7 +1,7 @@
 import CheckoutPage from "@/components/pages/CheckoutPage";
-import { requireAuth } from "@/lib/auth/server";
 
-export default function Page({ params }: { params: { locale: string } }) {
-  requireAuth({ locale: params.locale, next: "/checkout" });
+export const dynamic = 'force-dynamic';
+
+export default function Page() {
   return <CheckoutPage />;
 }

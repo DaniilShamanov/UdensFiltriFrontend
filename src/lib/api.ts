@@ -6,7 +6,74 @@ export class ApiError extends Error {
     super(message);
     this.status = status;
     this.data = data;
+    Object.setPrototypeOf(this, ApiError.prototype);
   }
+}
+
+
+function normalizeApiMessage(message: string): string {
+  const trimmed = message.trim();
+  if (!trimmed) return trimmed;
+
+  // Convert patterns like "invalid_code Invalid or expired code" or
+  // "invalid_code: Invalid or expired code" into a clean user-facing message.
+  const cleaned = trimmed.replace(/^([a-z][a-z0-9_]*(?:\.[a-z0-9_]+)*)(?:\s*[:\-]\s*|\s+)(.+)$/i, '$2').trim();
+  return cleaned || trimmed;
+}
+
+export function extractErrorMessage(error: unknown, defaultMessage: string): string {
+  if (error instanceof ApiError) {
+    // If data is a string, return it directly
+    if (typeof error.data === 'string') {
+      return normalizeApiMessage(error.data);
+    }
+    // If data is an object, try common error response patterns
+    if (typeof error.data === 'object' && error.data !== null) {
+      const data = error.data as Record<string, unknown>;
+      
+      // Check for common error field names (prioritize specific messages)
+      if (data.message && typeof data.message === 'string') return normalizeApiMessage(data.message);
+      if (data.detail && typeof data.detail === 'string') return normalizeApiMessage(data.detail);
+      if (data.error && typeof data.error === 'string') return normalizeApiMessage(data.error);
+      if (data.non_field_errors && Array.isArray(data.non_field_errors) && data.non_field_errors.length > 0) {
+        return data.non_field_errors.map(e => normalizeApiMessage(String(e))).join(' ');
+      }
+      
+      // Recursively collect all string values from nested structures
+      const messages: string[] = [];
+      const genericMessages: string[] = [];
+      
+      const collectMessages = (obj: unknown, depth = 0): void => {
+        if (depth > 2) return;
+        if (Array.isArray(obj)) {
+          obj.forEach((item) => collectMessages(item, depth + 1));
+        } else if (typeof obj === 'object' && obj !== null) {
+          Object.values(obj).forEach((val) => collectMessages(val, depth + 1));
+        } else if (typeof obj === 'string' && obj.trim()) {
+          const msg = obj.trim();
+          if (!messages.includes(msg) && !genericMessages.includes(msg)) {
+            // Separate generic validation messages from specific ones
+            if (msg.toLowerCase().includes('validation') || msg.toLowerCase().includes('failed')) {
+              genericMessages.push(msg);
+            } else {
+              messages.push(msg);
+            }
+          }
+        }
+      };
+      
+      collectMessages(data);
+      
+      // Return specific messages first, fall back to generic if needed
+      if (messages.length > 0) return messages.map(normalizeApiMessage).join(' ');
+      if (genericMessages.length > 0) return genericMessages.map(normalizeApiMessage).join(' ');
+    }
+    // Fall back to error message
+    if (error.message && !error.message.includes('Request failed')) return normalizeApiMessage(error.message);
+  }
+  if (error instanceof Error) return normalizeApiMessage(error.message);
+  if (typeof error === 'string') return normalizeApiMessage(error);
+  return defaultMessage;
 }
 
 type FetchJsonOpts = {
@@ -15,6 +82,7 @@ type FetchJsonOpts = {
   body?: unknown;
   credentials?: RequestCredentials;
   csrf?: boolean;
+  retryOn401?: boolean;
 };
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") || "";
@@ -59,7 +127,7 @@ export async function fetchJson<T>(
   });
 
   // Handle 401 Unauthorized – attempt token refresh once
-  if (res.status === 401 && !_isRetry) {
+  if (res.status === 401 && !_isRetry && opts.retryOn401 !== false) {
     try {
       // Call refresh endpoint (credentials: 'include' sends cookies automatically)
       const refreshRes = await fetch(`${API_BASE_URL}${REFRESH_ENDPOINT}`, {
@@ -71,19 +139,37 @@ export async function fetchJson<T>(
       });
 
       if (refreshRes.ok) {
-        // Retry the original request with a flag to prevent infinite loops
-        return fetchJson(path, opts, true);
+        // Retry the original request with a flag to prevent infinite loops.
+        // If the retry itself throws, propagate that error directly — the refresh
+        // succeeded so it's a different issue, not an auth expiry.
+        try {
+          return await fetchJson(path, opts, true);
+        } catch (retryError) {
+          // If retry fails after successful refresh, it's a different issue, not auth
+          throw retryError;
+        }
       } else {
-        // Refresh failed – redirect to login (or throw a special error)
-        // Option 1: Redirect (if you have access to router)
-        // window.location.href = '/auth/sign-in';
-        // Option 2: Throw a custom error that the caller can handle
-        throw new ApiError(401, null, 'Authentication failed. Please log in again.');
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('app:auth-expired'));
+        }
+        throw new ApiError(401, null, 'Session expired. Please log in again.');
       }
     } catch (error) {
-      // Network error or refresh failure
-      throw new ApiError(401, null, 'Unable to refresh authentication. Please log in again.');
-    }
+      // Re-throw ApiErrors directly
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      // For network errors reaching the refresh endpoint, try original request anyway
+      // Only dispatch auth-expired if fetch failed (not just server error)
+      if (error instanceof TypeError) {
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('app:auth-expired'));
+        }
+        throw new ApiError(401, null, 'Unable to refresh authentication. Please log in again.');
+      }
+      // Other errors (e.g., JSON parse) – rethrow as-is
+      throw error;
+    }  
   }
 
   const contentType = res.headers.get('content-type') || '';
@@ -91,6 +177,19 @@ export async function fetchJson<T>(
   const data = isJson ? await res.json().catch(() => null) : await res.text().catch(() => null);
 
   if (!res.ok) {
+    // Keep client console clean for expected validation failures (4xx),
+    // but still log unexpected server errors in the browser.
+    if (typeof window !== "undefined" && res.status >= 500) {
+      const headersObj: Record<string,string> = {};
+      res.headers.forEach((v,k) => (headersObj[k] = v));
+      console.error('[fetchJson] server error response', {
+        url,
+        status: res.status,
+        headers: headersObj,
+        data,
+        opts,
+      });
+    }
     throw new ApiError(res.status, data, `Request failed: ${res.status}`);
   }
 

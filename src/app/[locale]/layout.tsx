@@ -5,8 +5,6 @@ import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
 import { locales, type AppLocale } from "@/i18n/routing";
-import Providers from "@/components/Providers";
-import { ThemeProvider } from "@/components/theme-provider";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -56,16 +54,12 @@ export default async function LocaleLayout({
   const messages = await getMessages({ locale });
 
   return (
-    <ThemeProvider>
-      <NextIntlClientProvider locale={locale} messages={messages}>
-        <Providers>
-          <div className="min-h-dvh flex flex-col">
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
-        </Providers>
-      </NextIntlClientProvider>
-    </ThemeProvider>
+    <NextIntlClientProvider locale={locale} messages={messages}>
+      <div className="min-h-dvh flex flex-col">
+        <Header />
+        <main className="flex-1">{children}</main>
+        <Footer />
+      </div>
+    </NextIntlClientProvider>
   );
 }

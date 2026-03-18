@@ -16,9 +16,16 @@ export async function POST(request: Request) {
 
   // Forward the Set-Cookie headers from Django to the browser
   const response = NextResponse.json(data, { status: res.status });
-  const setCookie = res.headers.get('set-cookie');
-  if (setCookie) {
-    response.headers.set('set-cookie', setCookie);
+  const setCookies = (res.headers as Headers & { getSetCookie?: () => string[] }).getSetCookie?.() ?? [];
+  if (setCookies.length > 0) {
+    for (const cookie of setCookies) {
+      response.headers.append('set-cookie', cookie);
+    }
+  } else {
+    const setCookie = res.headers.get('set-cookie');
+    if (setCookie) {
+      response.headers.set('set-cookie', setCookie);
+    }
   }
 
   return response;

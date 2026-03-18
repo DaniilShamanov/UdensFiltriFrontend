@@ -9,7 +9,8 @@
     "orders": "Заказы",
     "signIn": "Войти",
     "signUp": "Регистрация",
-    "signOut": "Выйти"
+    "signOut": "Выйти",
+    "dismiss": "Закрыть"
   },
   "seo": {
     "siteName": "Plumbing",
@@ -49,21 +50,29 @@
   "forgotPassword": {
     "title": "Сброс пароля",
     "description": {
-      "before": "Введите email для получения ссылки для сброса пароля.",
-      "after": "Если аккаунт с таким email существует, вы получите ссылку для сброса пароля в ближайшее время."
+      "before": "Введите email, чтобы получить код для сброса пароля.",
+      "after": "Введите код из письма и задайте новый пароль."
     },
     "emailLabel": "Электронная почта",
     "emailPlaceholder": "you@example.com",
-    "submitButton": "Отправить ссылку",
+    "submitButton": "Отправить код",
     "backToSignIn": "Вернуться ко входу",
-    "returnToSignIn": "Вернуться ко входу",
-    "closeMessage": "Вы можете безопасно закрыть эту страницу.",
     "toast": {
-      "successTitle": "Письмо для сброса пароля отправлено",
-      "successDescription": "Проверьте ваш почтовый ящик для дальнейших инструкций.",
-      "errorTitle": "Не удалось отправить письмо",
-      "errorDescription": "Пожалуйста, попробуйте позже."
-    }
+      "codeSuccessTitle": "Код отправлен",
+      "codeSuccessDescription": "Проверьте почту и введите код подтверждения.",
+      "codeErrorTitle": "Не удалось отправить код",
+      "codeErrorDescription": "Пожалуйста, попробуйте позже.",
+      "resetSuccessTitle": "Пароль изменен",
+      "resetSuccessDescription": "Теперь вы можете войти с новым паролем.",
+      "resetErrorTitle": "Не удалось изменить пароль",
+      "resetErrorDescription": "Проверьте код и попробуйте снова."
+    },
+    "codeLabel": "Код",
+    "codePlaceholder": "Введите код",
+    "newPasswordLabel": "Новый пароль",
+    "newPasswordPlaceholder": "Введите новый пароль",
+    "confirmButton": "Подтвердить",
+    "confirming": "Подтверждение..."
   },
   "home": {
     "heroTitle": "Чистая вода для <highlight>здоровой жизни</highlight>",
@@ -127,6 +136,7 @@
   "orders": {
     "pageTitle": "История заказов",
     "pageDescription": "Просматривайте и отслеживайте все ваши заказы",
+    "loading": "Загрузка заказов...",
     "stats": {
       "totalOrders": "Всего заказов",
       "totalSpent": "Всего потрачено",
@@ -156,10 +166,11 @@
       "startShopping": "Начать покупки"
     },
     "orderCard": {
-      "itemsCount": "{count} товар | {count} товара | {count} товаров",
+      "itemsCount": "{count} товар(ов)",
       "orderItems": "Товары в заказе",
       "quantityLabel": "Количество: {quantity} × €{price}",
-      "shippingAddress": "Адрес доставки"
+      "shippingAddress": "Адрес доставки",
+      "deliveryMethod": "Метод доставки"
     }
   },
   "payment": {
@@ -189,7 +200,8 @@
     "orderDate": "Дата заказа",
     "orderTotal": "Сумма заказа",
     "shippingAddress": "Адрес доставки",
-    "orderItems": "{count} товар | {count} товара | {count} товаров",
+    "deliveryMethod": "Метод доставки",
+    "orderItems": "{count} товар(ов)",
     "quantityLabel": "Количество: {quantity}",
     "tryAgain": "Попробовать снова",
     "returnHome": "Вернуться на главную",
@@ -205,7 +217,8 @@
     "quantityLabel": "Количество",
     "addToCart": "Добавить в корзину",
     "wholesaleBadge": "Оптовая цена применена",
-    "ratingLabel": "{rating} ({count} отзыв | {count} отзыва | {count} отзывов)",
+    "ratingLabel": "{rating} ({count} отзыв(ов))",
+    "loading": "Загрузка деталей товара...",
     "toast": {
       "added": "Добавлено {count} шт. в корзину!"
     },
@@ -326,13 +339,14 @@
       }
     }
   },
-   "signIn": {
+  "signIn": {
     "title": "Вход",
-    "description": "Используйте свой номер телефона для входа в аккаунт",
-    "phoneLabel": "Номер телефона",
-    "phonePlaceholder": "+371 12345678",
+    "description": "Используйте свою электронную почту для входа в аккаунт",
+    "emailLabel": "Электронная почта",
+    "emailPlaceholder": "you@example.com",
     "passwordLabel": "Пароль",
     "passwordPlaceholder": "••••••••",
+    "forgotPasswordLink": "Забыли пароль?",
     "signInButton": "Войти",
     "signingIn": "Вход...",
     "noAccount": "Нет аккаунта?",
@@ -345,16 +359,15 @@
   },
   "signUp": {
     "title": "Создать аккаунт",
-    "descriptionForm": "Зарегистрируйтесь по номеру телефона",
-    "descriptionVerify": "Введите код, отправленный на {phone}",
+    "descriptionForm": "Заполните данные для создания аккаунта.",
     "firstNameLabel": "Имя",
     "firstNamePlaceholder": "Иван",
     "lastNameLabel": "Фамилия",
     "lastNamePlaceholder": "Иванов",
-    "phoneLabel": "Номер телефона",
+    "phoneLabel": "Номер телефона (необязательно)",
     "phonePlaceholder": "+37112345678",
     "phoneHint": "Используйте международный формат (например +371...).",
-    "emailLabel": "Электронная почта (необязательно)",
+    "emailLabel": "Электронная почта",
     "emailPlaceholder": "you@example.com",
     "emailHint": "Если укажете, мы будем присылать подтверждения оплаты на почту.",
     "passwordLabel": "Пароль",
@@ -362,25 +375,27 @@
     "confirmPasswordLabel": "Подтвердите пароль",
     "confirmPasswordPlaceholder": "••••••••",
     "agreeToTerms": "Я согласен с <termsLink>Условиями использования</termsLink>",
-    "sendCodeButton": "Отправить код",
     "alreadyHaveAccount": "Уже есть аккаунт?",
     "signInLink": "Войти",
-    "smsCodeLabel": "Код из SMS",
-    "verifyButton": "Подтвердить и создать",
-    "resendCode": "Отправить код повторно",
-    "editPhone": "Изменить номер",
-    "footerWithName": "Создание аккаунта для {fullName}.",
-    "footerWithoutName": "Вы сможете добавить имя позже в настройках.",
     "toast": {
       "passwordsMismatch": "Пароли не совпадают",
       "termsNotAgreed": "Пожалуйста, примите условия использования",
-      "codeSent": "Код отправлен",
-      "codeSentDescription": "Проверьте SMS с кодом подтверждения.",
-      "failedToSendCode": "Не удалось отправить код",
       "tryAgain": "Пожалуйста, попробуйте снова.",
       "accountCreated": "Аккаунт успешно создан!",
-      "signUpFailed": "Ошибка регистрации"
-    }
+      "signUpFailed": "Ошибка регистрации",
+      "passwordTooShort": "Пароль слишком короткий: вы ввели {current} символа(ов), минимум — {min}.",
+      "verificationCodeSent": "Код подтверждения отправлен на вашу почту",
+      "verifyEmailFirst": "Пожалуйста, подтвердите email",
+      "verificationCodeRequired": "Пожалуйста, введите код подтверждения",
+      "emailRequiredForVerification": "Для отправки кода необходим email"
+    },
+    "createAccountButton": "Создать аккаунт",
+    "verificationBanner": "Код подтверждения отправлен на вашу электронную почту.",
+    "verificationCodeLabel": "Код подтверждения",
+    "verificationCodePlaceholder": "Введите код из письма",
+    "confirmCodeButton": "Подтвердить код",
+    "verifyButton": "Подтвердить",
+    "resendButton": "Отправить снова"
   },
   "account": {
     "title": "Настройки аккаунта",
@@ -391,46 +406,63 @@
     },
     "profile": {
       "title": "Личная информация",
-      "description": "Имя можно изменить сразу. Для смены телефона/email требуется SMS-код.",
+      "description": "Обновляйте личные и контактные данные.",
       "firstName": "Имя",
       "lastName": "Фамилия",
       "saveName": "Сохранить имя",
-      "phone": "Телефон",
+      "phone": "Номер телефона (необязательно)",
       "sendCode": "Отправить код",
       "newPhone": "Новый телефон",
       "phonePlaceholder": "+37112345678",
       "smsCode": "SMS-код",
       "updatePhone": "Обновить телефон",
       "phoneHelp": "Код отправлен на ваш текущий номер телефона.",
-      "email": "Электронная почта (необязательно)",
+      "email": "Электронная почта",
       "notSet": "Не указан",
-      "emailPlaceholder": "(необязательно)",
+      "emailPlaceholder": "you@example.com",
       "updateEmail": "Обновить email",
-      "emailHelp": "Если email не указан, квитанции будут храниться только в вашем аккаунте."
+      "emailHelp": "Если email не указан, квитанции будут храниться только в вашем аккаунте.",
+      "emailCode": "Код подтверждения",
+      "codePlaceholder": "Введите код из письма",
+      "confirmCode": "Подтвердить код",
+      "codeBanner": "Код подтверждения отправлен на вашу электронную почту."
     },
     "security": {
       "title": "Пароль",
-      "description": "Смена пароля требует SMS-код.",
+      "description": "Вы можете изменить пароль в любое время.",
       "sendCode": "Отправить код",
       "newPassword": "Новый пароль",
       "smsCode": "SMS-код",
-      "updatePassword": "Обновить пароль"
+      "updatePassword": "Обновить пароль",
+      "emailCode": "Код подтверждения",
+      "codePlaceholder": "Введите код из письма",
+      "confirmCode": "Подтвердить код",
+      "codeBanner": "Код подтверждения отправлен на вашу электронную почту.",
+      "confirmNewPassword": "Подтвердите новый пароль",
+      "passwordsMismatch": "Пароли не совпадают"
     },
     "toast": {
       "codeSent": "Код отправлен",
       "codeSentDescription": "Код отправлен на {phone}",
       "codeFailed": "Не удалось отправить код",
       "profileUpdated": "Профиль обновлён",
+      "profileEqualsPrevious": "Новые имя и фамилия совпадают с текущими",
       "profileUpdateFailed": "Не удалось обновить профиль",
       "emailUpdated": "Email обновлён",
       "emailUpdateFailed": "Не удалось обновить email",
+      "emailEqualsPrevious": "Новый email совпадает с текущим",
       "phoneUpdated": "Телефон обновлён",
+      "phoneEqualsPrevious": "Новый номер телефона совпадает с текущим",
       "phoneUpdateFailed": "Не удалось обновить телефон",
       "passwordUpdated": "Пароль обновлён",
       "passwordUpdateFailed": "Не удалось обновить пароль",
       "signInAgain": "Пожалуйста, войдите снова.",
       "checkCode": "Проверьте код и попробуйте снова.",
-      "checkPhoneFormat": "Проверьте код и формат телефона (+371...)."
+      "checkPhoneFormat": "Проверьте код и формат телефона (+371...).",
+      "verificationCodeSent": "Код подтверждения отправлен на вашу почту",
+      "passwordTooShort": "Пароль слишком короткий: вы ввели {current} символа(ов), минимум — {min}.",
+      "emailRequired": "Email обязателен",
+      "passwordsMismatch": "Пароли не совпадают"
     }
   },
   "cart": {
@@ -445,7 +477,7 @@
     },
     "summary": {
       "title": "Итог заказа",
-      "subtotal": "Товары ({count} шт.)",
+      "subtotal": "Всего: {count} товар(ов)",
       "shipping": "Доставка",
       "free": "БЕСПЛАТНО",
       "freeShippingMessage": "Добавьте ещё €{amount} для бесплатной доставки!",
@@ -490,7 +522,7 @@
     "termsNote": "Оформляя заказ, вы соглашаетесь с нашими Условиями предоставления услуг",
     "paymentInitFailed": "Не удалось инициализировать платёж"
   },
-   "footer": {
+  "footer": {
     "brand": "WaterFilters",
     "description": "Современные сантехнические решения и системы фильтрации воды. Разработано с приоритетом мобильных устройств и готово к интеграции с Django.",
     "company": "Компания",
@@ -509,5 +541,8 @@
     "products": "Товары",
     "services": "Услуги",
     "contact": "Контакты"
+  },
+  "notification": {
+    "signedOut": "Вы вышли из системы. Пожалуйста, войдите снова, чтобы получить доступ к своему аккаунту"
   }
 }

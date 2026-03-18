@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Lock, Phone, LogIn } from "lucide-react";
+import { Lock, Phone, LogIn, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,12 +12,14 @@ import { Link, useRouter } from "@/navigation";
 import { toast } from "sonner";
 import { useApp } from "@/contexts/AppContext";
 import { useTranslations } from "next-intl";
+import { sanitizeNextPath } from "@/lib/safeRedirect";
+import { extractErrorMessage, ApiError } from "@/lib/api";
 
-const SignInPage: React.FC = () => {
+function SignInContent() {
   const { signIn } = useApp();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [form, setForm] = useState({ phone: "", password: "" });
+  const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
 
   const t = useTranslations('signIn');
@@ -26,13 +28,14 @@ const SignInPage: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await signIn({ phone: form.phone, password: form.password });
+      await signIn({ email: form.email, password: form.password });
       toast.success(t('toast.success'));
-      const next = searchParams.get("next") || "/";
+      const next = sanitizeNextPath(searchParams.get("next"), "/");
       router.replace(next);
     } catch (err: any) {
+      const errorMessage = extractErrorMessage(err, t('toast.errorDescription'));
       toast.error(t('toast.error'), {
-        description: err?.message || t('toast.errorDescription'),
+        description: errorMessage,
       });
     } finally {
       setLoading(false);
@@ -52,17 +55,17 @@ const SignInPage: React.FC = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="phone">{t('phoneLabel')}</Label>
+              <Label htmlFor="email">{t('emailLabel')}</Label>
               <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="phone"
-                  name="phone"
-                  type="tel"
+                  id="email"
+                  name="email"
+                  type="email"
                   required
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  placeholder={t('phonePlaceholder')}
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  placeholder={t('emailPlaceholder')}
                   className="pl-10"
                 />
               </div>
@@ -89,6 +92,12 @@ const SignInPage: React.FC = () => {
               {loading ? t('signingIn') : t('signInButton')}
             </Button>
 
+            <div className="text-center text-sm">
+              <Link href="/auth/forgot-password" className="text-primary hover:underline font-medium">
+                {t('forgotPasswordLink')}
+              </Link>
+            </div>
+
             <Separator />
 
             <div className="text-center text-sm">
@@ -101,6 +110,14 @@ const SignInPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+const SignInPage: React.FC = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SignInContent />
+    </Suspense>
   );
 };
 

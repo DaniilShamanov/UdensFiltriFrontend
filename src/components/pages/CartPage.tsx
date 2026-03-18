@@ -9,6 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { useApp } from '@/contexts/AppContext';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
 import { useTranslations } from 'next-intl';
+import { Input } from '@/components/ui/input';
 
 const CartPage: React.FC = () => {
   const router = useRouter();
@@ -53,8 +54,6 @@ const CartPage: React.FC = () => {
                 ? item.product.wholesalePrice
                 : item.product.price;
 
-              const cartImageUrl = `https://source.unsplash.com/200x200/?${encodeURIComponent(item.product.image)}`;
-
               return (
                 <Card key={item.product.id}>
                   <CardContent className="p-4 md:p-6">
@@ -64,7 +63,6 @@ const CartPage: React.FC = () => {
                         onClick={() => router.push(`/products/${encodeURIComponent(item.product.id)}`)}
                       >
                         <ImageWithFallback
-                          src={cartImageUrl}
                           alt={item.product.name}
                           className="w-full h-full object-cover"
                         />
@@ -99,9 +97,20 @@ const CartPage: React.FC = () => {
                             >
                               <Minus className="h-3 w-3" />
                             </Button>
-                            <span className="w-12 text-center font-medium text-sm">
-                              {item.quantity}
-                            </span>
+                            <Input
+                              type="number"
+                              min={1}
+                              value={item.quantity}
+                              onChange={(event) => {
+                                const value = parseInt(event.target.value, 10);
+                                if (Number.isNaN(value)) {
+                                  return;
+                                }
+
+                                updateCartQuantity(item.product.id, Math.max(1, value));
+                              }}
+                              className="h-8 w-14 rounded-none border-y-0 text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                            />
                             <Button
                               variant="ghost"
                               size="icon"
@@ -139,22 +148,7 @@ const CartPage: React.FC = () => {
                       {t('summary.subtotal', { count: cart.reduce((sum, item) => sum + item.quantity, 0) })}
                     </span>
                     <span className="font-medium">€{subtotal.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">{t('summary.shipping')}</span>
-                    <span className="font-medium">
-                      {shipping === 0 ? (
-                        <span className="text-green-600">{t('summary.free')}</span>
-                      ) : (
-                        `€${shipping.toFixed(2)}`
-                      )}
-                    </span>
-                  </div>
-                  {shipping > 0 && subtotal < 100 && (
-                    <div className="text-sm text-muted-foreground bg-muted/30 p-3 rounded-lg">
-                      {t('summary.freeShippingMessage', { amount: (100 - subtotal).toFixed(2) })}
-                    </div>
-                  )}
+                  </div>                 
                   <Separator />
                   <div className="flex justify-between text-lg font-bold">
                     <span>{t('summary.total')}</span>

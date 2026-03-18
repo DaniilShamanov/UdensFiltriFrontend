@@ -7,6 +7,7 @@ const nextConfig = {
   reactStrictMode: true,
   // Keep disabled until you explicitly want to opt-in
   typedRoutes: false,
+  output: 'standalone',
   // Useful when integrating with a Django API via a different domain
   images: {
     remotePatterns: [

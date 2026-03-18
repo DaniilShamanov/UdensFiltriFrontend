@@ -1,16 +1,15 @@
 export interface Product {
-  id: string;
+  id: number;
   name: string;
-  description: string;
+  description?: string;
   price: number;
   wholesalePrice?: number;
-  category: string;
-  subCategory: string;
-  image: string;
+  category?: string;
+  subCategory?: string;
+  image?: string;
   inStock: boolean;
   brand: string;
-  rating: number;
-  reviews: number;
+  rating?: number;
 }
 
 export interface CartItem {
@@ -18,13 +17,53 @@ export interface CartItem {
   quantity: number;
 }
 
+export interface CheckoutFormData {
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  street: string;
+  city: string;
+  postalCode: string;
+  country: string;
+  notes?: string;
+}
+
+export interface CheckoutOrderPayload {
+  email: string;
+  phone: string;
+  customer_name: string;
+  customer_address: string;
+  delivery_option_id: number;
+  items: Array<{
+    product_id: string | null;
+    title: string;
+    quantity: number;
+    unit_price: number;
+  }>;
+}
+
+export interface OrderItem {
+  product_id: number;
+  name: string;
+  quantity: number;
+  unit_price: number;
+}
+
 export interface Order {
   id: string;
-  date: string;
-  items: CartItem[];
-  total: number;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  shippingAddress: Address;
+  status: string;
+  total_price: number;
+  items: OrderItem[];
+  customer_address: string;
+  created_at: string;
+  email: string;
+  customer_name: string;
+  delivery_option: {
+    id: number;
+    name: string;
+    price_cents: number;
+  };
 }
 
 export interface Address {
@@ -36,10 +75,10 @@ export interface Address {
 
 export interface User {
   id: string | number;
-  phone: string;
-  email?: string | null;
-  first_name?: string;
-  last_name?: string;
+  phone?: string | null;
+  email: string;
+  first_name: string;
+  last_name: string;
   address: Address;
   is_company: boolean;
   is_superuser?: boolean;

@@ -1,5 +1,4 @@
-import { fetchJson } from "@/lib/api";
-import type { User } from "@/lib/types";
+import { User } from '@/lib/types';
 
 // Base URL for Django API – falls back to empty string (same origin) if not set
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || '';
@@ -10,7 +9,6 @@ const apiUrl = (path: string) => `${API_BASE}${path}`;
 export const AUTH_ENDPOINTS = {
   me: "/api/auth/me/",
   profile: "/api/auth/profile/",
-  requestSmsCode: "/api/auth/request-sms-code/",
   signIn: "/api/auth/login/",
   signUp: "/api/auth/register/",
   signOut: "/api/auth/logout/",
@@ -18,114 +16,142 @@ export const AUTH_ENDPOINTS = {
   changeEmail: "/api/auth/change-email/",
   changePhone: "/api/auth/change-phone/",
   changePassword: "/api/auth/change-password/",
+  resetPassword: "/api/auth/reset-password/",
+  sendCode: "/api/auth/send-code/",
+  resendCode: "/api/auth/resend-code/",
 } as const;
 
-export type SmsPurpose = "register" | "sensitive";
-
-type UserEnvelope = { user: User };
-type OkEnvelope = { ok: boolean };
+async function handleResponse<T>(res: Response): Promise<T> {
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.error?.message || error.message || 'Request failed');
+  }
+  return res.json();
+}
 
 export const authApi = {
-  async me(): Promise<User> {
-    const res = await fetchJson<UserEnvelope>(apiUrl(AUTH_ENDPOINTS.me), {
-      method: "GET",
-      credentials: "include",
-    });
-    return res.user;
-  },
-
-  async updateProfile(input: { first_name?: string; last_name?: string }): Promise<User> {
-    const res = await fetchJson<UserEnvelope>(apiUrl(AUTH_ENDPOINTS.profile), {
-      method: "PATCH",
-      body: input,
-      csrf: true,
-      credentials: "include",
-    });
-    return res.user;
-  },
-
-  async requestSmsCode(input: { purpose: SmsPurpose; phone?: string }): Promise<void> {
-    await fetchJson<OkEnvelope>(apiUrl(AUTH_ENDPOINTS.requestSmsCode), {
-      method: "POST",
-      body: input,
-      csrf: true,
-      credentials: "include",
-    });
-  },
-
-  async signIn(input: { phone: string; password: string }): Promise<void> {
-    await fetchJson<UserEnvelope>(apiUrl(AUTH_ENDPOINTS.signIn), {
-      method: "POST",
-      body: input,
-      csrf: true,
-      credentials: "include",
-    });
-  },
-
-  async signUp(input: {
-    phone: string;
-    password: string;
-    code: string;
-    email?: string;
-    first_name?: string;
-    last_name?: string;
-  }): Promise<void> {
-    await fetchJson<UserEnvelope>(apiUrl(AUTH_ENDPOINTS.signUp), {
-      method: "POST",
-      body: input,
-      csrf: true,
-      credentials: "include",
-    });
-  },
-
-  async signOut(): Promise<void> {
-    await fetchJson<OkEnvelope>(apiUrl(AUTH_ENDPOINTS.signOut), {
-      method: "POST",
-      body: {},
-      csrf: true,
-      credentials: "include",
-    });
-  },
-
-  async refresh(): Promise<void> {
-    await fetchJson<OkEnvelope>('/api/auth/refresh/', {
-      method: 'POST',
-      body: {},
-      csrf: true,
+  me: async (): Promise<User> => {
+    const res = await fetch(apiUrl(AUTH_ENDPOINTS.me), {
       credentials: 'include',
     });
+    const data = await handleResponse<{ user: User }>(res);
+    return data.user;
   },
 
-  async changeEmail(input: { email?: string; code: string }): Promise<User> {
-    const res = await fetchJson<UserEnvelope>(apiUrl(AUTH_ENDPOINTS.changeEmail), {
-      method: "POST",
-      body: input,
-      csrf: true,
-      credentials: "include",
+  signIn: async (input: { email: string; password: string }) => {
+    const res = await fetch(apiUrl(AUTH_ENDPOINTS.signIn), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+      credentials: 'include',
     });
-    return res.user;
+    const data = await handleResponse<{ user: User }>(res);
+    return data.user;
   },
 
-  async changePhone(input: { new_phone: string; code: string }): Promise<User> {
-    const res = await fetchJson<UserEnvelope>(apiUrl(AUTH_ENDPOINTS.changePhone), {
-      method: "POST",
-      body: input,
-      csrf: true,
-      credentials: "include",
+  signUp: async (input: {
+    first_name?: string;
+    last_name?: string;
+    email: string;
+    password: string;
+    code: string;
+    phone?: string;  // optional – backend may ignore it
+  }) => {
+    const res = await fetch(apiUrl(AUTH_ENDPOINTS.signUp), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+      credentials: 'include',
     });
-    return res.user;
+    const data = await handleResponse<{ user: User }>(res);
+    return data.user;
   },
 
-  async requestPasswordReset(input: { email: string }) {
-    // TODO: implement
-  },
-
-  async changePassword(input: { new_password: string; code: string }): Promise<OkEnvelope> {
-    return fetchJson<OkEnvelope>(apiUrl(AUTH_ENDPOINTS.changePassword), {
-      method: "POST",
-      body: input,
-      csrf: true,
-      credentials: "include",
+  signOut: async () => {
+    const res = await fetch(apiUrl(AUTH_ENDPOINTS.signOut), {
+      method: 'POST',
+      credentials: 'include',
     });
+    await handleResponse(res);
+  },
+
+  refresh: async () => {
+    const res = await fetch(apiUrl(AUTH_ENDPOINTS.refresh), {
+      method: 'POST',
+      credentials: 'include',
+    });
+    await handleResponse(res);
+  },
+
+  updateProfile: async (input: { first_name?: string; last_name?: string }) => {
+    const res = await fetch(apiUrl(AUTH_ENDPOINTS.profile), {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+      credentials: 'include',
+    });
+    const data = await handleResponse<{ user: User }>(res);
+    return data.user;
+  },
+
+  changeEmail: async (input: { new_email: string; code: string }) => {
+    const res = await fetch(apiUrl(AUTH_ENDPOINTS.changeEmail), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+      credentials: 'include',
+    });
+    const data = await handleResponse<{ user: User }>(res);
+    return data.user;
+  },
+
+  changePhone: async (input: { new_phone: string }) => {
+    const res = await fetch(apiUrl(AUTH_ENDPOINTS.changePhone), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+      credentials: 'include',
+    });
+    const data = await handleResponse<{ user: User }>(res);
+    return data.user;
+  },
+
+  changePassword: async (input: { new_password: string; code: string }) => {
+    const res = await fetch(apiUrl(AUTH_ENDPOINTS.changePassword), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+      credentials: 'include',
+    });
+    await handleResponse(res);
+  },
+  
+  resetPassword: async (input: { new_password: string; code: string; email: string }) => {
+    const res = await fetch(apiUrl(AUTH_ENDPOINTS.resetPassword), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input)
+    });
+    await handleResponse(res);
+  },
+
+  sendCode: async (input: { email: string; purpose: string }) => {
+    const res = await fetch(apiUrl(AUTH_ENDPOINTS.sendCode), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+      credentials: 'include',
+    });
+    await handleResponse(res);
+  },
+
+  resendCode: async (input: { email: string; purpose: string }) => {
+    const res = await fetch(apiUrl(AUTH_ENDPOINTS.resendCode), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+      credentials: 'include',
+    });
+    await handleResponse(res);
   },
 };

@@ -9,7 +9,8 @@
     "orders": "Orders",
     "signIn": "Sign in",
     "signUp": "Sign up",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "dismiss": "Dismiss"
   },
   "seo": {
     "siteName": "Plumbing",
@@ -49,21 +50,29 @@
   "forgotPassword": {
     "title": "Reset password",
     "description": {
-      "before": "Enter your email to receive a reset link.",
-      "after": "If an account exists for this email, you will receive a reset link shortly."
+      "before": "Enter your email to receive a reset code.",
+      "after": "Enter the reset code from your email and set a new password."
     },
     "emailLabel": "Email address",
     "emailPlaceholder": "you@example.com",
-    "submitButton": "Send reset link",
+    "submitButton": "Send code",
     "backToSignIn": "Back to sign in",
-    "returnToSignIn": "Return to sign in",
-    "closeMessage": "You can safely close this page.",
     "toast": {
-      "successTitle": "Password reset email sent",
-      "successDescription": "Check your inbox for further instructions.",
-      "errorTitle": "Could not send reset email",
-      "errorDescription": "Please try again later."
-    }
+      "codeSuccessTitle": "Reset code sent",
+      "codeSuccessDescription": "Check your inbox for the verification code.",
+      "codeErrorTitle": "Could not send code",
+      "codeErrorDescription": "Please try again later.",
+      "resetSuccessTitle": "Password changed",
+      "resetSuccessDescription": "You can now sign in with your new password.",
+      "resetErrorTitle": "Could not change password",
+      "resetErrorDescription": "Please verify your code and try again."
+    },
+    "codeLabel": "Code",
+    "codePlaceholder": "Enter code",
+    "newPasswordLabel": "New password",
+    "newPasswordPlaceholder": "Enter new password",
+    "confirmButton": "Confirm",
+    "confirming": "Confirming..."
   },
   "home": {
     "heroTitle": "Pure Water for <highlight>Healthy Living</highlight>",
@@ -127,6 +136,7 @@
   "orders": {
     "pageTitle": "Order History",
     "pageDescription": "View and track all your orders",
+    "loading": "Loading orders...",
     "stats": {
       "totalOrders": "Total Orders",
       "totalSpent": "Total Spent",
@@ -156,10 +166,11 @@
       "startShopping": "Start Shopping"
     },
     "orderCard": {
-      "itemsCount": "{count} item | {count} items",
+      "itemsCount": "{count} item(s)",
       "orderItems": "Order Items",
       "quantityLabel": "Quantity: {quantity} × €{price}",
-      "shippingAddress": "Shipping Address"
+      "shippingAddress": "Shipping Address",
+      "deliveryMethod": "Delivery Method"
     }
   },
   "payment": {
@@ -188,8 +199,9 @@
     "orderNumber": "Order Number",
     "orderDate": "Order Date",
     "orderTotal": "Order Total",
+    "deliveryMethod": "Delivery Method",
     "shippingAddress": "Shipping Address",
-    "orderItems": "{count} Order Item | {count} Order Items",
+    "orderItems": "{count} Order Item(s)",
     "quantityLabel": "Quantity: {quantity}",
     "tryAgain": "Try Again",
     "returnHome": "Return to Home",
@@ -205,7 +217,8 @@
     "quantityLabel": "Quantity",
     "addToCart": "Add to Cart",
     "wholesaleBadge": "Wholesale Price Applied",
-    "ratingLabel": "{rating} ({count} review | {count} reviews)",
+    "ratingLabel": "{rating} ({count} review(s))",
+    "loading": "Loading product details...",
     "toast": {
       "added": "Added {count} item(s) to cart!"
     },
@@ -328,11 +341,12 @@
   },
   "signIn": {
     "title": "Sign In",
-    "description": "Use your phone number to access your account",
-    "phoneLabel": "Phone Number",
-    "phonePlaceholder": "+371 12345678",
+    "description": "Use your email address to access your account",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "you@example.com",
     "passwordLabel": "Password",
     "passwordPlaceholder": "••••••••",
+    "forgotPasswordLink": "Forgot password?",
     "signInButton": "Sign In",
     "signingIn": "Signing in...",
     "noAccount": "Don't have an account?",
@@ -345,16 +359,15 @@
   },
   "signUp": {
     "title": "Create Account",
-    "descriptionForm": "Register with your phone number",
-    "descriptionVerify": "Enter the code we sent to {phone}",
+    "descriptionForm": "Create your account details.",
     "firstNameLabel": "First name",
     "firstNamePlaceholder": "Raksha",
     "lastNameLabel": "Last name",
     "lastNamePlaceholder": "",
-    "phoneLabel": "Phone number",
+    "phoneLabel": "Phone number (optional)",
     "phonePlaceholder": "+37112345678",
     "phoneHint": "Use international format (e.g. +371...).",
-    "emailLabel": "Email (optional)",
+    "emailLabel": "Email",
     "emailPlaceholder": "you@example.com",
     "emailHint": "If provided, we’ll email you payment confirmations.",
     "passwordLabel": "Password",
@@ -362,25 +375,27 @@
     "confirmPasswordLabel": "Confirm password",
     "confirmPasswordPlaceholder": "••••••••",
     "agreeToTerms": "I agree to the <termsLink>Terms and Conditions</termsLink>",
-    "sendCodeButton": "Send verification code",
     "alreadyHaveAccount": "Already have an account?",
     "signInLink": "Sign In",
-    "smsCodeLabel": "SMS code",
-    "verifyButton": "Verify & create account",
-    "resendCode": "Resend code",
-    "editPhone": "Edit phone",
-    "footerWithName": "Creating account for {fullName}.",
-    "footerWithoutName": "You can add your name later in account settings.",
     "toast": {
       "passwordsMismatch": "Passwords do not match",
       "termsNotAgreed": "Please agree to the terms and conditions",
-      "codeSent": "Code sent",
-      "codeSentDescription": "Check SMS for the verification code.",
-      "failedToSendCode": "Failed to send code",
       "tryAgain": "Please try again.",
       "accountCreated": "Account created successfully!",
-      "signUpFailed": "Sign up failed"
-    }
+      "signUpFailed": "Sign up failed",
+      "passwordTooShort": "Password is too short: you entered {current} characters, minimum is {min}.",
+      "verificationCodeSent": "Verification code sent to your email",
+      "verifyEmailFirst": "Please verify email",
+      "verificationCodeRequired": "Please enter verification code",
+      "emailRequiredForVerification": "Email is required to send verification code"
+    },
+    "createAccountButton": "Create account",
+    "verificationBanner": "Verification code has been sent to your email.",
+    "verificationCodeLabel": "Verification code",
+    "verificationCodePlaceholder": "Enter code from email",
+    "confirmCodeButton": "Confirm code",
+    "verifyButton": "Verify",
+    "resendButton": "Resend"
   },
   "account": {
     "title": "Account Settings",
@@ -391,46 +406,63 @@
     },
     "profile": {
       "title": "Personal information",
-      "description": "Name can be changed instantly. Phone/email require SMS code.",
+      "description": "Update your personal details and contact information.",
       "firstName": "First name",
       "lastName": "Last name",
       "saveName": "Save name",
-      "phone": "Phone",
+      "phone": "Phone number (optional)",
       "sendCode": "Send code",
       "newPhone": "New phone",
       "phonePlaceholder": "+37112345678",
       "smsCode": "SMS code",
       "updatePhone": "Update phone",
       "phoneHelp": "Code is sent to your current phone number.",
-      "email": "Email (optional)",
+      "email": "Email",
       "notSet": "Not set",
-      "emailPlaceholder": "(optional)",
+      "emailPlaceholder": "you@example.com",
       "updateEmail": "Update email",
-      "emailHelp": "If email is empty, receipts will only be stored in your account."
+      "emailHelp": "If email is empty, receipts will only be stored in your account.",
+      "emailCode": "Verification code",
+      "codePlaceholder": "Enter code from email",
+      "confirmCode": "Confirm code",
+      "codeBanner": "Verification code has been sent to your email."
     },
     "security": {
       "title": "Password",
-      "description": "Changing password requires an SMS code.",
+      "description": "Change your password anytime.",
       "sendCode": "Send code",
       "newPassword": "New password",
       "smsCode": "SMS code",
-      "updatePassword": "Update password"
+      "updatePassword": "Update password",
+      "emailCode": "Verification code",
+      "codePlaceholder": "Enter code from email",
+      "confirmCode": "Confirm code",
+      "codeBanner": "Verification code has been sent to your email.",
+      "confirmNewPassword": "Confirm new password",
+      "passwordsMismatch": "Passwords do not match"
     },
     "toast": {
       "codeSent": "Code sent",
       "codeSentDescription": "We sent a code to {phone}",
       "codeFailed": "Could not send code",
       "profileUpdated": "Profile updated",
+      "profileEqualsPrevious": "New user first and last name are the same as current ones",
       "profileUpdateFailed": "Could not update profile",
       "emailUpdated": "Email updated",
+      "emailEqualsPrevious": "New email is the same as current email",
       "emailUpdateFailed": "Could not update email",
       "phoneUpdated": "Phone updated",
+      "phoneEqualsPrevious": "New phone number is the same as current one",
       "phoneUpdateFailed": "Could not update phone",
       "passwordUpdated": "Password updated",
       "passwordUpdateFailed": "Could not update password",
       "signInAgain": "Please sign in again.",
       "checkCode": "Check the code and try again.",
-      "checkPhoneFormat": "Check the code and phone format (+371...)."
+      "checkPhoneFormat": "Check the code and phone format (+371...).",
+      "verificationCodeSent": "Verification code sent to your email",
+      "passwordTooShort": "Password is too short: you entered {current} characters, minimum is {min}.",
+      "emailRequired": "Email is required",
+      "passwordsMismatch": "Passwords do not match"
     }
   },
   "cart": {
@@ -445,7 +477,7 @@
     },
     "summary": {
       "title": "Order Summary",
-      "subtotal": "Subtotal ({count} item | {count} items)",
+      "subtotal": "Subtotal: {count} item(s)",
       "shipping": "Shipping",
       "free": "FREE",
       "freeShippingMessage": "Add €{amount} more for free shipping!",
@@ -509,5 +541,8 @@
     "products": "Products",
     "services": "Services",
     "contact": "Contact"
+  },
+  "notification": {
+    "signedOut": "You've signed out. Please sign in again to access your account"
   }
 }
